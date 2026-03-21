@@ -3,127 +3,323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>云同步听写助手 - 终极修复版</title>
+    <title>言叶之庭 - 云同步听写</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
     <style>
-        :root { --bg: #f0f2f5; --primary: #3ecf8e; --dark: #1c1c1c; }
-        body { font-family: system-ui; background: var(--bg); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 600px; background: #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
-        .header { padding: 15px 20px; background: var(--dark); color: #fff; display: flex; justify-content: space-between; font-size: 13px; }
-        .quiz-box { padding: 40px 20px; text-align: center; }
-        #q-text { font-size: 1.8rem; font-weight: bold; margin-top: 10px; min-height: 2.5rem; }
-        .canvas-wrap { position: relative; width: 100%; height: 320px; background: #fff; touch-action: none; border-top: 1px solid #eee; }
-        #board { width: 100%; height: 100%; cursor: crosshair; position: relative; z-index: 2; }
-        .mizige { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.1; background-image: linear-gradient(#4a6cf7 1px, transparent 1px), linear-gradient(90deg, #4a6cf7 1px, transparent 1px); background-size: 50% 50%; }
-        #ans-box { display: none; padding: 20px; text-align: center; background: #f6fffa; border-top: 2px solid var(--primary); }
-        #ans-text { font-size: 2.5rem; font-family: "KaiTi", "楷体", serif; color: #2c3e50; font-weight: bold; }
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr 1fr; background: #ddd; gap: 1px; }
-        button { border: none; padding: 20px; font-size: 1rem; cursor: pointer; background: #fff; font-weight: bold; }
-        .btn-show { background: var(--primary); color: white; }
-        /* 强制警告框样式 */
-        #fatal-error { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); color:red; z-index:9999; padding:50px; box-sizing:border-box; font-family:monospace; }
+        /* --- MUJI 极简风格 CSS --- */
+        :root {
+            --bg-color: #f6f5f1;    /* 柔和麦芽色背景 */
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;   /* 藏青色文字 */
+            --text-sub: #7f8c8d;
+            --accent: #d35400;      /* 柔和朱红色（用于答案） */
+            --border: #e0e0e0;
+            --grid-color: rgba(44, 62, 80, 0.06); /* 淡藏青色田字格 */
+        }
+
+        body {
+            font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 主容器 */
+        .app-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.05); /* 柔和阴影 */
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶部状态栏 */
+        .header {
+            padding: 12px 20px;
+            background-color: #fafafa;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+        /* 题目展示区 */
+        .quiz-section {
+            padding: 35px 20px;
+            text-align: center;
+            border-bottom: 1px solid #f9f9f9;
+        }
+        #q-cat {
+            font-size: 12px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        #q-text {
+            font-size: 1.7rem;
+            font-weight: 600;
+            color: var(--text-main);
+            line-height: 1.3;
+            min-height: 2.2rem;
+        }
+
+        /* 手写板区域 - 精致田字格 */
+        .canvas-wrap {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            background-color: #fff;
+            touch-action: none;
+            /* 内凹陷效果 */
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.03); 
+        }
+        #board {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+            position: relative;
+            z-index: 2;
+        }
+        /* 田字格辅助线 */
+        .tianzige {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px), 
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50% 50%; /* 田字格 */
+            background-position: center;
+            border: 1px solid var(--grid-color);
+        }
+
+        /* 答案区 - 动画滑出 */
+        #ans-box {
+            display: none;
+            padding: 25px;
+            text-align: center;
+            background-color: #fbfcfc;
+            border-top: 1px solid #f0f0f0;
+            animation: slideInUp 0.3s ease-out;
+        }
+        @keyframes slideInUp {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        #ans-text {
+            font-size: 2.8rem;
+            font-family: "KaiTi", "楷体", serif; /* 强制楷体 */
+            color: var(--accent);
+            letter-spacing: 6px;
+            font-weight: bold;
+        }
+
+        /* 底部操作按钮 */
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr; /* 中间按钮稍宽 */
+            gap: 1px;
+            background-color: var(--border);
+        }
+        button {
+            border: none;
+            padding: 20px;
+            font-size: 15px;
+            cursor: pointer;
+            background-color: #fff;
+            color: var(--text-main);
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        button:active {
+            background-color: #f5f5f5;
+            transform: translateY(1px);
+        }
+        /* “看答案”按钮突出显示 */
+        .btn-show {
+            background-color: var(--accent);
+            color: white;
+        }
+        .btn-show:active {
+            background-color: #bd4100;
+        }
+
+        /* 管理面板 - 极简折叠 */
+        .admin-panel {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 25px;
+            font-size: 13px;
+        }
+        details {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        summary {
+            cursor: pointer;
+            color: var(--text-sub);
+            font-weight: bold;
+            outline: none;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin: 15px 0 10px 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            box-sizing: border-box;
+            font-family: monospace;
+            font-size: 12px;
+            background-color: #fafafa;
+        }
+        .admin-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--text-main);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* 错误提示 */
+        #sync-status.error { color: #c0392b; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="fatal-error">
-    <h1>⚠️ 系统自检失败</h1>
-    <p id="error-msg">代码运行被中断或库未加载</p>
-    <button onclick="location.reload()" style="padding:10px; background:white; border:none;">尝试刷新页面</button>
-</div>
-
-<div class="container">
+<div class="app-container">
     <div class="header">
-        <span id="sync-status">📡 初始化中...</span>
+        <span id="sync-status">📡 同步中...</span>
         <span id="count-info">0 题</span>
     </div>
-    <div class="quiz-box">
-        <div id="q-cat" style="color:var(--primary)">BOOTING...</div>
-        <div id="q-text">正在检查数据库状态...</div>
+    
+    <div class="quiz-box quiz-section">
+        <div id="q-cat">YANYE</div>
+        <div id="q-text">正在准备题目...</div>
     </div>
+    
     <div class="canvas-wrap">
-        <div class="mizige"></div>
+        <div class="tianzige"></div>
         <canvas id="board"></canvas>
     </div>
+    
     <div id="ans-box">
+        <div style="font-size: 11px; color: var(--accent); margin-bottom: 8px; opacity: 0.8;">核对</div>
         <div id="ans-text">--</div>
     </div>
+    
     <div class="btn-group">
-        <button onclick="clearBoard()">重写</button>
+        <button onclick="clearBoard()" style="color:var(--text-sub);">清空</button>
         <button class="btn-show" onclick="showAns()">看答案</button>
         <button onclick="nextQ()">下一题</button>
     </div>
 </div>
 
-<div style="width:100%; max-width:600px; margin-top:20px;">
-    <details style="background:#fff; border-radius:10px; padding:10px; border:1px solid #ddd;">
-        <summary>⚙️ 导入 JSON 数据</summary>
-        <textarea id="jsonInput" style="width:100%; height:80px; margin:10px 0;" placeholder='粘贴 JSON...'></textarea>
-        <button onclick="uploadToCloud()" style="width:100%; padding:10px; background:#1c1c1c; color:white; border:none; border-radius:5px;">存入云端</button>
+<div class="admin-panel">
+    <details>
+        <summary>☁️ 数据管理 (粘贴 JSON)</summary>
+        <textarea id="jsonInput" placeholder='粘贴另一个 AI 生成的 JSON 代码...'></textarea>
+        <button class="admin-btn" onclick="uploadToCloud()">存入云端数据库</button>
     </details>
 </div>
 
 <script>
+    // --- 已配置你的 Supabase 密钥 ---
     const SUPABASE_URL = 'https://ltnlmgtoqecvctyeetma.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0bmxtZ3RvcWVjdmN0eWVldG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjM4MTAsImV4cCI6MjA4OTYzOTgxMH0.OB5An1HAkEiASsE_cV1KoFCWBcyYQGUPa6BKsM6LwaI';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let supabase;
     let questions = [];
+    const canvas = document.getElementById('board');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
 
-    // --- 强制自检逻辑 ---
-    async function startApp() {
+    // --- 逻辑：拉取数据 ---
+    async function fetchQuestions() {
         const statusEl = document.getElementById('sync-status');
-        const qTextEl = document.getElementById('q-text');
-
-        // 检测 SDK
-        if (typeof window.supabase === 'undefined') {
-            showFatalError("Supabase SDK 加载失败！请检查你的网络是否能访问 cdn.jsdelivr.net。");
-            return;
-        }
-
         try {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            statusEl.innerText = "⏳ 正在尝试读取表...";
-            
-            // 尝试读取数据
             const { data, error } = await supabase.from('dictation_items').select('*');
+            if (error) throw error;
             
-            if (error) {
-                statusEl.innerText = "❌ 数据库报错";
-                qTextEl.innerText = "错误详情: " + error.message;
-                return;
-            }
-
             questions = data || [];
-            statusEl.innerText = "✅ 同步完成";
+            statusEl.innerText = "✅ 已同步";
             document.getElementById('count-info').innerText = `${questions.length} 题`;
             
             if (questions.length > 0) {
                 nextQ();
             } else {
-                qTextEl.innerText = "题库空空如也，请点下方展开导入";
+                document.getElementById('q-text').innerText = "题库空，请导入JSON";
                 document.getElementById('q-cat').innerText = "EMPTY";
             }
-
         } catch (e) {
-            showFatalError("连接过程中发生异常: " + e.message);
+            statusEl.innerText = "❌ 同步失败";
+            statusEl.classList.add('error');
+            document.getElementById('q-text').innerText = "连接数据库出错";
+            console.error(e);
         }
     }
 
-    function showFatalError(msg) {
-        document.getElementById('fatal-error').style.display = 'block';
-        document.getElementById('error-msg').innerText = msg;
+    // --- 逻辑：上传数据 ---
+    async function uploadToCloud() {
+        const val = document.getElementById('jsonInput').value;
+        if(!val) return alert("输入为空！");
+        try {
+            const json = JSON.parse(val);
+            document.getElementById('sync-status').innerText = "⏳ 更新中...";
+            // 先全删
+            await supabase.from('dictation_items').delete().neq('cat', '_none_');
+            // 再插入
+            const { error } = await supabase.from('dictation_items').insert(json);
+            if (error) throw error;
+            alert("上传成功！正在刷新...");
+            location.reload();
+        } catch (e) {
+            alert("上传失败：" + e.message);
+            document.getElementById('sync-status').innerText = "❌ 更新失败";
+        }
     }
 
-    // --- 画布及练习逻辑 (保持高度精简且兼容) ---
-    const canvas = document.getElementById('board');
-    const ctx = canvas.getContext('2d');
-    let drawing = false;
+    // --- 逻辑：练习流程 ---
+    function nextQ() {
+        if (questions.length === 0) return;
+        document.getElementById('ans-box').style.display = 'none';
+        clearBoard();
+        const item = questions[Math.floor(Math.random() * questions.length)];
+        document.getElementById('q-cat').innerText = item.cat || '言叶';
+        document.getElementById('q-text').innerText = item.q || '无题目';
+        document.getElementById('ans-text').innerText = item.a || '无';
+    }
 
+    function showAns() { 
+        if(questions.length > 0) {
+            document.getElementById('ans-box').style.display = 'block'; 
+        }
+    }
+
+    // --- 逻辑：画布手写 (MUJI 调色版) ---
     function initCanvas() {
         const rect = canvas.parentNode.getBoundingClientRect();
         canvas.width = rect.width; canvas.height = rect.height;
-        ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#333';
+        ctx.lineWidth = 4; // 笔触粗细
+        ctx.lineCap = 'round'; 
+        ctx.strokeStyle = '#2c3e50'; // 墨蓝色笔迹
     }
 
     const getPos = (e) => {
@@ -140,41 +336,9 @@
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
 
     function clearBoard() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-    function showAns() { document.getElementById('ans-box').style.display = 'block'; }
-    
-    function nextQ() {
-        if (questions.length === 0) return;
-        document.getElementById('ans-box').style.display = 'none';
-        clearBoard();
-        const item = questions[Math.floor(Math.random() * questions.length)];
-        document.getElementById('q-cat').innerText = item.cat || '无分类';
-        document.getElementById('q-text').innerText = item.q || '无题目';
-        document.getElementById('ans-text').innerText = item.a || '无答案';
-    }
 
-    async function uploadToCloud() {
-        const val = document.getElementById('jsonInput').value;
-        if(!val) return;
-        try {
-            const json = JSON.parse(val);
-            document.getElementById('sync-status').innerText = "⏳ 上传中...";
-            // 先清空
-            await supabase.from('dictation_items').delete().neq('cat', '___');
-            // 再插入
-            const { error } = await supabase.from('dictation_items').insert(json);
-            if (error) throw error;
-            alert("上传成功！正在刷新...");
-            location.reload();
-        } catch (e) {
-            alert("上传失败：" + e.message);
-        }
-    }
-
-    // 启动！
-    window.onload = () => {
-        initCanvas();
-        startApp();
-    };
+    // 启动
+    window.onload = () => { initCanvas(); fetchQuestions(); };
     window.onresize = initCanvas;
 </script>
 </body>
