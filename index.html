@@ -3,72 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>言叶之庭 - 灵动交互版</title>
+    <title>言叶之庭 - 匠心交互版</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
     <style>
         :root {
-            --bg: #f5f4ef; --card: #ffffff; --text: #34495e; 
-            --sub: #95a5a6; --accent: #d35400; --border: #eceae2;
-            --green: #a8bcac; --red: #d9a7a7;
+            --bg: #f6f5f1; /* 柔和麦芽色背景 */
+            --card: #ffffff;
+            --text: #2d3436; /* 深青灰文字 */
+            --sub: #b2bec3;
+            --border: #e0ded0;
+            
+            /* 日式传统色系 */
+            --color-correct: #8ca393; /* 若竹色 (Wakatake) - 柔和绿 */
+            --color-wrong: #d9b8b8;   /* 赤朽叶 (Akakuchiba) - 灰枯粉 */
+            
+            /* 精致阴影 */
+            --shadow-card: 0 20px 60px rgba(0,0,0,0.05);
+            --shadow-pop: 0 15px 40px rgba(0,0,0,0.08);
         }
 
-        * { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-sizing: border-box; }
-        body { font-family: "PingFang SC", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; }
+        /* 基础样式复位 */
+        * { box-sizing: border-box; transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); /* 丝滑缓动 */ }
+        body { font-family: "PingFang SC", "Hiragino Sans GB", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; }
 
         /* --- 侧边错题本 --- */
         #wrong-sidebar { 
             position: fixed; left: 0; top: 0; width: 260px; height: 100%;
-            background: rgba(255,255,255,0.85); backdrop-filter: blur(15px);
+            background: rgba(255,255,255,0.9); backdrop-filter: blur(15px);
             border-right: 1px solid var(--border); z-index: 1000;
-            transform: translateX(-100%); padding: 25px; display: flex; flex-direction: column;
+            transform: translateX(-100%); padding: 30px; display: flex; flex-direction: column;
         }
-        #wrong-sidebar.active { transform: translateX(0); box-shadow: 10px 0 30px rgba(0,0,0,0.03); }
+        #wrong-sidebar.active { transform: translateX(0); box-shadow: 10px 0 30px rgba(0,0,0,0.02); }
 
         /* --- 主布局 --- */
-        .stage { display: flex; justify-content: center; align-items: center; height: 100vh; padding: 20px; gap: 20px; }
+        .stage { 
+            display: flex; justify-content: center; align-items: center; /* 完全垂直居中 */
+            height: 100vh; padding: 20px; gap: 40px; 
+            overflow: hidden; /* 确保不出现多余滚动条 */
+        }
         
+        /* 放大主面板 */
         .main-card { 
-            width: 100%; max-width: 500px; background: var(--card); border-radius: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.06); overflow: hidden;
+            width: 100%; max-width: 650px; /* 增加宽度 */
+            background: var(--card); border-radius: 30px;
+            box-shadow: var(--shadow-card); overflow: hidden;
             display: flex; flex-direction: column; z-index: 10;
         }
 
-        /* --- 题目与书写 --- */
-        .nav { padding: 15px 25px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--sub); }
-        .quiz-box { padding: 35px 25px; text-align: center; }
-        #q-text { font-size: 1.8rem; font-weight: 600; min-height: 2.5rem; }
-        .canvas-area { position: relative; width: 100%; height: 350px; background: #fff; border-bottom: 1px solid var(--border); }
+        /* --- 导航栏 --- */
+        .nav { padding: 18px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--sub); letter-spacing: 1px; }
+        .nav span { cursor: pointer; }
+        .nav span:hover { color: var(--text); }
+
+        /* --- 题目与书写区 --- */
+        .quiz-box { padding: 40px 30px; text-align: center; }
+        #q-text { font-size: 2rem; font-weight: 600; min-height: 2.8rem; line-height: 1.3; }
+        
+        .canvas-area { position: relative; width: 100%; height: 380px; background: #fff; border-bottom: 1px solid var(--border); }
         .grid-bg { position: absolute; inset: 0; opacity: 0.1; background-image: linear-gradient(var(--text) 1px, transparent 1px), linear-gradient(90deg, var(--text) 1px, transparent 1px); background-size: 50% 50%; background-position: center; }
         #board { position: relative; z-index: 5; }
 
         /* --- 右侧悬浮判定卡片 --- */
         #ans-pop { 
-            position: fixed; right: -300px; top: 50%; transform: translateY(-50%) scale(0.5);
-            width: 240px; background: var(--card); padding: 30px; border-radius: 25px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.1); text-align: center; 
+            position: fixed; 
+            right: 10%; /* 宽屏时位于右侧 */
+            top: 50%; 
+            width: 280px; background: var(--card); padding: 40px; border-radius: 25px;
+            box-shadow: var(--shadow-pop); text-align: center; 
+            
+            /* 智能弹窗动画核心 */
             opacity: 0; pointer-events: none; z-index: 100;
+            transform: translateY(-40%) scale(0.6) rotate(2deg); /* 初始隐藏：偏小、微偏、下移 */
         }
-        #ans-pop.active { right: 40px; transform: translateY(-50%) scale(1); opacity: 1; pointer-events: auto; }
-        #ans-text { font-size: 3rem; font-family: "KaiTi", serif; margin-bottom: 25px; display: block; color: var(--text); }
         
-        .judge-btn { 
-            width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 15px; border: none;
-            font-size: 14px; cursor: pointer; font-weight: bold; color: white;
+        /* 弹出时的状态 */
+        #ans-pop.active { 
+            opacity: 1; pointer-events: auto; 
+            transform: translateY(-50%) scale(1) rotate(0deg); /* 弹出：居中、放大、摆正 */
+            /* 弹簧回弹动画 */
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); 
         }
-        .btn-yes { background: var(--green); }
-        .btn-no { background: var(--red); }
 
-        /* --- 底部按钮 --- */
+        /* 长句适配机制 */
+        #ans-text-wrap { margin-bottom: 30px; display: flex; align-items: center; justify-content: center; min-height: 5rem; }
+        #ans-text { 
+            font-size: 3.5rem; /* 默认超大 */
+            font-family: "KaiTi", "楷体", serif; 
+            color: var(--text); 
+            font-weight: bold; 
+            letter-spacing: 4px; 
+            word-break: break-all;
+            line-height: 1.2;
+        }
+        /* 当文字过长时，CSS 会自动缩小字体 (通过 JS 检测添加 class) */
+        #ans-text.long { font-size: 2rem; letter-spacing: 2px; }
+        #ans-text.extra-long { font-size: 1.6rem; letter-spacing: 1px; line-height: 1.4; }
+        
+        /* 判定按钮 */
+        .judge-btn { 
+            width: 100%; padding: 15px; margin-bottom: 12px; border-radius: 15px; border: none;
+            font-size: 14px; cursor: pointer; font-weight: bold; color: white;
+            transition: 0.3s;
+        }
+        .judge-btn:active { transform: scale(0.96); }
+        .btn-yes { background: var(--color-correct); }
+        .btn-yes:hover { background: #7c9281; }
+        .btn-no { background: var(--color-wrong); }
+        .btn-no:hover { background: #c8a3a3; }
+
+        /* --- 底部控制 --- */
         .footer { display: grid; grid-template-columns: 1fr 1.5fr 1fr; background: var(--border); gap: 1px; }
-        .footer button { padding: 22px; border: none; background: #fff; font-size: 15px; cursor: pointer; color: var(--text); font-weight: 500; }
-        .btn-main { background: var(--text) !important; color: #fff !important; }
+        .footer button { padding: 24px; border: none; background: #fff; font-size: 16px; cursor: pointer; color: var(--text); font-weight: 500; }
+        .footer button:active { background: #fafafa; }
+        .btn-main { background: var(--text) !important; color: #fff !important; font-weight: bold; }
 
         /* --- 设置页面 --- */
-        #settings { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; padding: 40px; }
-        .set-box { background: #fff; border-radius: 25px; padding: 30px; max-width: 500px; margin: 20px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        #settings { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; padding: 40px; overflow-y: auto; animation: fadeIn 0.4s; }
+        .set-box { background: #fff; border-radius: 25px; padding: 30px; max-width: 550px; margin: 30px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
+        select, textarea { width: 100%; padding: 16px; border-radius: 15px; border: 1px solid var(--border); font-size: 14px; margin-bottom: 20px; outline: none; background: #fafafa; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* 手机端适配：判定卡居中弹出 */
+        /* 手机端适配 */
         @media (max-width: 900px) {
+            .stage { padding: 15px; }
+            .main-card { max-width: 100%; }
             #ans-pop.active { right: 50%; transform: translate(50%, -50%) scale(1); width: 85%; }
         }
     </style>
@@ -76,21 +134,24 @@
 <body>
 
 <div id="wrong-sidebar">
-    <h3 style="margin-top:0">错题本</h3>
-    <div id="wrong-list" style="flex:1; overflow-y:auto; margin-bottom:20px; font-size:14px;"></div>
-    <button onclick="clearWrongs()" style="width:100%; padding:12px; border:none; background:#eee; border-radius:12px; cursor:pointer">清空错题</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h3 style="margin:0">错题本</h3>
+        <button onclick="toggleSidebar()" style="background:none; border:none; color:var(--sub); font-size:20px; cursor:pointer">×</button>
+    </div>
+    <div id="wrong-list" style="flex:1; overflow-y:auto; margin-bottom:20px; font-size:14px; color:var(--text)"></div>
+    <button onclick="clearWrongs()" style="width:100%; padding:12px; border:none; background:#eee; border-radius:12px; cursor:pointer; color:var(--text); font-weight:bold;">清空错题</button>
 </div>
 
 <div class="stage">
     <div class="main-card">
         <div class="nav">
-            <span style="cursor:pointer" onclick="toggleSidebar()">📓 记录</span>
-            <span id="count-info">0 ITEMS</span>
-            <span style="cursor:pointer" onclick="toggleSettings(true)">⚙️ 设置</span>
+            <span onclick="toggleSidebar()">📓 记录本</span>
+            <span id="count-info">SYNCING...</span>
+            <span onclick="toggleSettings(true)">⚙️ 系统设置</span>
         </div>
 
         <div class="quiz-box">
-            <div id="q-cat" style="font-size:11px; color:var(--accent); letter-spacing:2px; margin-bottom:10px;">LOADING</div>
+            <div id="q-cat" style="font-size:11px; color:var(--accent); letter-spacing:2px; margin-bottom:12px; font-weight:bold;">LOADING</div>
             <div id="q-text">准备中...</div>
         </div>
 
@@ -100,41 +161,43 @@
         </div>
 
         <div class="footer">
-            <button onclick="clearBoard()">重写</button>
+            <button onclick="clearBoard()" style="color:var(--sub);">清空重写</button>
             <button class="btn-main" onclick="showAns(true)">检查答案</button>
-            <button onclick="nextQ()">跳过</button>
+            <button onclick="nextQ()">跳过此题</button>
         </div>
     </div>
 
     <div id="ans-pop">
         <span style="font-size:12px; color:var(--sub); display:block; margin-bottom:10px;">核对答案</span>
-        <div id="ans-text">--</div>
-        <button class="judge-btn btn-yes" onclick="mark(true)">正确☑️です</button>
-        <button class="judge-btn btn-no" onclick="mark(false)">不正确！🔘</button>
+        <div id="ans-text-wrap">
+            <div id="ans-text">--</div>
+        </div>
+        <button class="judge-btn btn-yes" onclick="mark(true)">正确 ☑️</button>
+        <button class="judge-btn btn-no" onclick="mark(false)">不正确 🔘</button>
     </div>
 </div>
 
 <div id="settings">
-    <div style="max-width:500px; margin:0 auto; display:flex; justify-content:space-between; align-items:center;">
-        <h2>系统设置</h2>
+    <div style="max-width:550px; margin:0 auto; display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="margin:0">系统设置</h2>
         <button onclick="toggleSettings(false)" style="background:none; border:none; font-size:24px; cursor:pointer">×</button>
     </div>
     <div class="set-box">
-        <label style="display:block; margin-bottom:10px; font-weight:bold;">出题模式</label>
-        <select id="mode" onchange="applyRule()" style="width:100%; padding:15px; border-radius:15px; border:1px solid var(--border); margin-bottom:20px;">
-            <option value="all">测试全部</option>
-            <option value="wrong">只练错题</option>
-            <option value="word">字词练习</option>
-            <option value="poem">古诗练习</option>
+        <label style="display:block; margin-bottom:10px; font-weight:bold;">出题模式选择</label>
+        <select id="mode" onchange="applyRule()">
+            <option value="all">测试全部题目</option>
+            <option value="wrong">只练本地错题</option>
+            <option value="word">仅限字词分类</option>
+            <option value="poem">仅限古诗分类</option>
         </select>
 
-        <label style="display:block; margin-bottom:10px; font-weight:bold;">数据管理</label>
-        <textarea id="jsonInput" rows="4" placeholder="粘贴 JSON..." style="width:100%; padding:15px; border-radius:15px; border:1px solid var(--border); margin-bottom:15px;"></textarea>
+        <label style="display:block; margin-bottom:10px; font-weight:bold;">云端数据库管理</label>
+        <textarea id="jsonInput" rows="5" placeholder="粘贴另一个 AI 生成的符合格式的 JSON 代码数组..."></textarea>
         <div style="display:flex; gap:10px;">
-            <button onclick="upload('cover')" style="flex:1; padding:12px; background:var(--text); color:white; border:none; border-radius:12px; cursor:pointer">覆盖</button>
-            <button onclick="upload('merge')" style="flex:1; background:white; border:1px solid var(--border); border-radius:12px; cursor:pointer">合并</button>
+            <button onclick="upload('cover')" style="flex:1; padding:14px; background:var(--text); color:white; border:none; border-radius:12px; cursor:pointer; font-weight:bold;">覆盖云端数据</button>
+            <button onclick="upload('merge')" style="flex:1; background:white; border:1px solid var(--border); border-radius:12px; cursor:pointer; color:var(--text);">增量合并数据</button>
         </div>
-        <button onclick="delCloud()" style="width:100%; margin-top:20px; color:var(--red); border:none; background:none; font-size:12px; cursor:pointer">⚠️ 清空云端数据库</button>
+        <button onclick="delCloud()" style="width:100%; margin-top:25px; color:var(--red); border:none; background:none; font-size:12px; cursor:pointer">⚠️ 危险区域：清空云端数据库</button>
     </div>
 </div>
 
@@ -143,7 +206,7 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0bmxtZ3RvcWVjdmN0eWVldG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjM4MTAsImV4cCI6MjA4OTYzOTgxMH0.OB5An1HAkEiASsE_cV1KoFCWBcyYQGUPa6BKsM6LwaI';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let all = [], filtered = [], wrongs = JSON.parse(localStorage.getItem('wrongs_v2') || '[]'), current = null;
+    let all = [], filtered = [], wrongs = JSON.parse(localStorage.getItem('wrongs_v3') || '[]'), current = null;
 
     window.onload = () => { initCanvas(); sync(); renderWrongs(); };
 
@@ -157,8 +220,8 @@
         const m = document.getElementById('mode').value;
         if(m==='all') filtered = all;
         else if(m==='wrong') filtered = wrongs;
-        else if(m==='word') filtered = all.filter(i => i.cat.match(/字|词/));
-        else if(m==='poem') filtered = all.filter(i => i.cat.match(/诗/));
+        else if(m==='word') filtered = all.filter(i => (i.cat||'').match(/字|词/));
+        else if(m==='poem') filtered = all.filter(i => (i.cat||'').match(/诗/));
         document.getElementById('count-info').innerText = `${filtered.length} ITEMS`;
         nextQ();
     }
@@ -166,50 +229,59 @@
     function mark(isOk) {
         if(!isOk && !wrongs.find(i => i.q === current.q)) {
             wrongs.push(current);
-            localStorage.setItem('wrongs_v2', JSON.stringify(wrongs));
+            localStorage.setItem('wrongs_v3', JSON.stringify(wrongs));
             renderWrongs();
         }
-        showAns(false); // 隐藏弹窗
-        setTimeout(nextQ, 300); // 丝滑过渡到下一题
+        showAns(false); // 先隐藏
+        setTimeout(nextQ, 400); // 丝滑过渡
     }
 
     function renderWrongs() {
-        document.getElementById('wrong-list').innerHTML = wrongs.map(i => `<div style="padding:10px 0; border-bottom:1px solid #eee"><b>${i.a}</b> <span style="color:#95a5a6; font-size:12px">${i.q}</span></div>`).join('');
+        document.getElementById('wrong-list').innerHTML = wrongs.map(i => `<div style="padding:12px 0; border-bottom:1px solid #eee"><b>${i.a}</b> <span style="color:#95a5a6; font-size:12px; letter-spacing:0">${i.q}</span></div>`).join('');
     }
 
     function nextQ() {
-        if(!filtered.length) { document.getElementById('q-text').innerText = "无题目"; return; }
+        if(!filtered.length) { document.getElementById('q-text').innerText = "该模式下暂无内容"; return; }
         clearBoard();
         current = filtered[Math.floor(Math.random() * filtered.length)];
         document.getElementById('q-cat').innerText = (current.cat || '言叶').toUpperCase();
         document.getElementById('q-text').innerText = current.q;
-        document.getElementById('ans-text').innerText = current.a;
+        
+        // --- 核心：答案文字智能适配机制 ---
+        const ansEl = document.getElementById('ans-text');
+        const text = current.a || '无答案';
+        ansEl.innerText = text;
+        ansEl.className = ''; // 重置 class
+
+        // 根据长度自动调整字号
+        if(text.length > 3 && text.length <= 6) { ansEl.classList.add('long'); }
+        else if(text.length > 6) { ansEl.classList.add('extra-long'); }
     }
 
     function showAns(show) { document.getElementById('ans-pop').classList.toggle('active', show); }
     function toggleSidebar() { document.getElementById('wrong-sidebar').classList.toggle('active'); }
     function toggleSettings(s) { document.getElementById('settings').style.display = s ? 'block' : 'none'; }
-    function clearWrongs() { if(confirm("清空？")) { wrongs=[]; localStorage.setItem('wrongs_v2','[]'); renderWrongs(); applyRule(); } }
+    function clearWrongs() { if(confirm("确定永久清空本地错题记录？")) { wrongs=[]; localStorage.setItem('wrongs_v3','[]'); renderWrongs(); applyRule(); } }
 
     async function upload(m) {
         try {
             const j = JSON.parse(document.getElementById('jsonInput').value);
             if(m==='cover') await supabase.from('dictation_items').delete().neq('cat','_');
             await supabase.from('dictation_items').insert(j);
-            alert("成功"); location.reload();
-        } catch(e) { alert("格式错误"); }
+            alert("同步成功"); location.reload();
+        } catch(e) { alert("JSON 格式错误"); }
     }
 
     async function delCloud() { if(confirm("彻底清空？")) { await supabase.from('dictation_items').delete().neq('cat','_'); location.reload(); } }
 
-    // 画布逻辑
+    // --- 精致手写逻辑 (MUJI 抹茶蓝) ---
     const canvas = document.getElementById('board');
     const ctx = canvas.getContext('2d');
     let drawing = false;
     function initCanvas() {
         const rect = canvas.parentNode.getBoundingClientRect();
         canvas.width = rect.width; canvas.height = rect.height;
-        ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#34495e';
+        ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#2d3436';
     }
     const getPos = (e) => {
         const rect = canvas.getBoundingClientRect();
