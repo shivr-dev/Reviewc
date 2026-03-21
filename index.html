@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>全能语文听写复习助手</title>
+    <style>
+        :root { --primary: #2c3e50; --accent: #3498db; --success: #27ae60; --bg: #f5f6fa; }
+        body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        .app-container { width: 100%; max-width: 700px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
+        
+        /* 状态栏 */
+        .status-bar { padding: 10px 20px; background: var(--primary); color: white; display: flex; justify-content: space-between; font-size: 14px; }
+        
+        /* 题目显示区 */
+        .question-box { padding: 30px 20px; text-align: center; border-bottom: 1px solid #eee; }
+        .q-cat { color: #7f8c8d; font-size: 0.9rem; margin-bottom: 10px; }
+        .q-text { font-size: 1.6rem; font-weight: bold; color: #e67e22; line-height: 1.4; }
+
+        /* 手写板区域 */
+        #canvas-wrapper { position: relative; width: 100%; height: 300px; background: #fff; touch-action: none; overflow: hidden; }
+        #drawCanvas { width: 100%; height: 100%; cursor: crosshair; }
+        .canvas-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; 
+            background-image: linear-gradient(#f0dada 1px, transparent 1px), linear-gradient(90deg, #f0dada 1px, transparent 1px);
+            background-size: 50px 50px; opacity: 0.5; }
+
+        /* 答案区 */
+        #answer-box { display: none; padding: 20px; background: #f9fff9; text-align: center; border-top: 2px solid var(--success); }
+        .ans-title { font-size: 0.8rem; color: var(--success); margin-bottom: 5px; }
+        .ans-text { font-size: 2.2rem; color: #333; font-family: "KaiTi", "楷体", serif; letter-spacing: 2px; }
+
+        /* 按钮区 */
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px; background: #eee; }
+        button { border: none; padding: 15px; font-size: 1rem; cursor: pointer; transition: 0.2s; background: white; }
+        button:active { background: #f0f0f0; }
+        .btn-clear { color: #7f8c8d; }
+        .btn-show { background: var(--accent); color: white; font-weight: bold; }
+        .btn-next { background: var(--success); color: white; font-weight: bold; }
+
+        /* 数据管理区 */
+        .admin-section { width: 100%; max-width: 700px; margin-top: 20px; }
+        #dataInput { width: 100%; height: 150px; padding: 10px; box-sizing: border-box; border-radius: 8px; border: 1px solid #ccc; font-size: 12px; }
+        .tips { font-size: 12px; color: #666; margin: 10px 0; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="status-bar">
+        <span id="progress-info">准备就绪</span>
+        <span>模式: 随机练习</span>
+    </div>
+
+    <div class="question-box">
+        <div id="q-cat" class="q-cat">分类加载中...</div>
+        <div id="q-text" class="q-text">点击下方“下一题”开始</div>
+    </div>
+
+    <div id="canvas-wrapper">
+        <div class="canvas-grid"></div>
+        <canvas id="drawCanvas"></canvas>
+    </div>
+
+    <div id="answer-box">
+        <div class="ans-title">标准答案</div>
+        <div id="ans-text" class="ans-text">--</div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-clear" onclick="clearBoard()">清空重写</button>
+        <button class="btn-show" onclick="toggleAnswer()">查看答案</button>
+        <button class="btn-next" onclick="nextQuestion()">下一题</button>
+    </div>
+</div>
+
+<div class="admin-section">
+    <details>
+        <summary>⚙️ 数据管理 (点击展开/导入新题目)</summary>
+        <div class="tips">格式：分类|问题|答案（每行一个）。你可以直接修改下方文本后点击“保存并重启”</div>
+        <textarea id="dataInput"></textarea>
+        <button onclick="saveData()" style="width: 100%; margin-top: 10px; background: var(--primary); color: white; border-radius: 5px;">保存数据并重启</button>
+    </details>
+</div>
+
+<script>
+    // 初始内置数据 (完整涵盖用户提供的内容)
+    const defaultData = `《邓稼先》|diàn jī|奠基
+《邓稼先》|yuán xūn|元勋
+《邓稼先》|xuǎn pìn|选聘
+《邓稼先》|yáo yán|谣言
+《邓稼先》|bèi sòng|背诵
+《邓稼先》|zhòu yè|昼夜
+《邓稼先》|kūn lún|昆仑
+《邓稼先》|zhì yǒu|挚友
+《邓稼先》|形容极其悲壮，令人感动得流泪|可歌可泣
+《邓稼先》|很少有人知道|鲜为人知
+《邓稼先》|到死也不松懈|至死不懈
+《邓稼先》|下定决心冒险（多指铤而走险）|铤而走险
+《邓稼先》|完全当得起，没有愧色|当之无愧
+《邓稼先》|家家户户都知道|家喻户晓
+《邓稼先》|锋芒全部显露出来。比喻锐气和才华显露在外|锋芒毕露
+《邓稼先》|连妇女和儿童都知道，形容知名度极高|妇孺皆知
+《邓稼先》|用马皮把尸体包裹起来。指军人战死沙场|马革裹尸
+《邓稼先》|勤勤恳恳，竭尽心力，到死为止|鞠躬尽瘁
+《说和做》|shū tóu|梳头
+《说和做》|bào qiàn|抱歉
+《说和做》|zhì xù|秩序
+《说和做》|shēn xiāo|深宵
+《说和做》|bàn lǚ|伴侣
+《说和做》|xiǎo kǎi|小楷
+《说和做》|shuò guǒ|硕果
+《说和做》|zhuó yuè|卓越
+《说和做》|dié qǐ|迭起
+《说和做》|péng pài|澎湃
+《说和做》|dà wú wèi|大无畏
+《说和做》|锲而不舍(拼音)|qiè ér bù shě
+《说和做》|读书十分专心，连园子都不去看一眼|目不窥园
+《说和做》|lì jìn xīn xuè|沥尽心血
+《说和做》|xīn bù zài yān|心不在焉
+《说和做》|形容情绪激昂，语意畅快|慷慨淋漓
+《说和做》|形容气势极盛。斗、牛：星宿名|气冲斗牛
+《黄河颂》|diān|巅
+《黄河颂》|pī / pǐ|劈
+《黄河颂》|qì pò|气魄
+《黄河颂》|kuáng lán|狂澜
+《黄河颂》|zhuó liú|浊流
+《黄河颂》|wǎn zhuǎn|宛转
+《黄河颂》|píng zhàng|屏障
+《黄河颂》|bǔ yù|哺育
+《黄河颂》|bàng yàng|榜样
+《黄河颂》|hào hào dàng dàng|浩浩荡荡
+《木兰诗》|万里赴戎机，________。|关山度若飞
+《木兰诗》|将军百战死，________。|壮士十年归
+《竹里馆》|深林人不知，________。|明月来相照
+《春夜洛城闻笛》|此夜曲中闻折柳，________。|何人不起故园情
+《逢入京使》|马上相逢无纸笔，________。|凭君传语报平安
+《晚春》|草树知春不久归，________。|百般红紫斗芳菲
+《孙权劝学》注释|卿(qīng)|古代君对臣、长辈对晚辈的爱称
+《孙权劝学》注释|当涂|当权，掌权
+《孙权劝学》注释|辞|推托
+《孙权劝学》注释|务|事务
+《孙权劝学》注释|孤|古时王侯的自称
+《孙权劝学》注释|治经|研究儒家经典
+《孙权劝学》注释|邪(yé)|语气词，同“耶”
+《孙权劝学》注释|但|只，只是
+《孙权劝学》注释|涉猎|粗略地阅读
+《孙权劝学》注释|见往事|了解历史。见，了解。往事，指历史
+《孙权劝学》注释|寻阳|古县名，治所在今湖北黄梅西南
+《孙权劝学》注释|才略|才干和谋略
+《孙权劝学》注释|非复|不再是
+《孙权劝学》注释|刮目相待|拭目相看，指用新的眼光看待
+《孙权劝学》注释|见事|明白事理、事势`;
+
+    let quizData = [];
+    let currentIndex = -1;
+
+    // --- 初始化 ---
+    const canvas = document.getElementById('drawCanvas');
+    const ctx = canvas.getContext('2d');
+    const dataInput = document.getElementById('dataInput');
+    
+    function init() {
+        const saved = localStorage.getItem('myDictationData');
+        dataInput.value = saved || defaultData;
+        loadQuizArray();
+        resizeCanvas();
+        nextQuestion();
+    }
+
+    function loadQuizArray() {
+        quizData = dataInput.value.split('\n')
+            .filter(line => line.trim() !== '' && line.includes('|'))
+            .map(line => {
+                const [cat, q, a] = line.split('|');
+                return { cat: cat.trim(), q: q.trim(), a: a.trim() };
+            });
+    }
+
+    function saveData() {
+        localStorage.setItem('myDictationData', dataInput.value);
+        location.reload();
+    }
+
+    // --- 画布逻辑 ---
+    let drawing = false;
+    function resizeCanvas() {
+        const rect = canvas.parentNode.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#2c3e50';
+    }
+
+    function startDraw(e) {
+        drawing = true;
+        ctx.beginPath();
+        const pos = getPos(e);
+        ctx.moveTo(pos.x, pos.y);
+    }
+    function draw(e) {
+        if (!drawing) return;
+        const pos = getPos(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+    }
+    function stopDraw() { drawing = false; }
+    function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    // --- 业务逻辑 ---
+    function clearBoard() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function nextQuestion() {
+        if (quizData.length === 0) return alert("题库为空！");
+        clearBoard();
+        document.getElementById('answer-box').style.display = 'none';
+        
+        currentIndex = Math.floor(Math.random() * quizData.length);
+        const item = quizData[currentIndex];
+        
+        document.getElementById('q-cat').innerText = item.cat;
+        document.getElementById('q-text').innerText = item.q;
+        document.getElementById('ans-text').innerText = item.a;
+        document.getElementById('progress-info').innerText = `随机模式: 1 / ${quizData.length}`;
+    }
+
+    function toggleAnswer() {
+        const box = document.getElementById('answer-box');
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // 绑定事件
+    window.addEventListener('resize', resizeCanvas);
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', draw);
+    window.addEventListener('mouseup', stopDraw);
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e); });
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
+    canvas.addEventListener('touchend', stopDraw);
+
+    window.onload = init;
+</script>
+</body>
+</html>
