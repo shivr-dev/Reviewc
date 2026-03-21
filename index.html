@@ -13,66 +13,59 @@
         * { box-sizing: border-box; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         body { font-family: "PingFang SC", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
 
-        /* 侧边栏 */
-        #wrong-sidebar { position: fixed; left: 0; top: 0; width: 260px; height: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-right: 1px solid var(--border); z-index: 1000; transform: translateX(-100%); padding: 30px; display: flex; flex-direction: column; }
-        #wrong-sidebar.active { transform: translateX(0); box-shadow: 5px 0 20px rgba(0,0,0,0.02); }
-
-        /* 主卡片 */
-        .main-card { width: 90%; max-width: 460px; background: var(--card); border-radius: 24px; box-shadow: var(--shadow); overflow: hidden; position: relative; z-index: 10; display: flex; flex-direction: column; }
+        .main-card { width: 95%; max-width: 460px; background: var(--card); border-radius: 24px; box-shadow: var(--shadow); overflow: hidden; position: relative; z-index: 10; display: flex; flex-direction: column; }
         
-        /* 创新：顶部极简进度条 */
         .progress-wrap { width: 100%; height: 4px; background: var(--border); }
         #progress-bar { height: 100%; width: 0%; background: var(--color-green); transition: width 0.4s ease; }
 
         .nav { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); font-size: 11px; color: var(--sub); letter-spacing: 1px; }
         
-        /* 窥探按钮的禁用状态 */
-        #hint-btn { cursor: pointer; transition: color 0.3s; }
+        #hint-btn { cursor: pointer; }
         #hint-btn.disabled { color: #dcdde1; pointer-events: none; }
 
-        /* 结算图层 */
-        #finish-overlay { position: absolute; inset: 0; background: #fff; z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; animation: fadeIn 0.8s; }
-        .huge-symbol { font-size: 8rem; color: var(--color-red); margin: 0; line-height: 1; text-shadow: 0 10px 30px rgba(209, 81, 71, 0.2); }
-        .congrats { font-size: 1.8rem; font-weight: bold; margin: 15px 0 5px 0; }
-        .stats { font-size: 0.9rem; color: var(--sub); margin-bottom: 20px; }
-        .zen-quote { font-family: "KaiTi", serif; font-size: 1.1rem; color: #7f8c8d; margin-bottom: 30px; padding: 0 30px; letter-spacing: 2px; line-height: 1.5; }
+        /* 题目区域适配长文 */
+        .quiz-box { padding: 30px 20px; text-align: center; min-height: 120px; display: flex; flex-direction: column; justify-content: center; }
+        #q-text { font-size: 1.6rem; font-weight: 600; line-height: 1.4; word-break: break-all; }
+        #q-text.long { font-size: 1.2rem; }
 
-        .quiz-box { padding: 35px 20px; text-align: center; }
-        #q-text { font-size: 1.6rem; font-weight: 600; min-height: 2.2rem; }
-        
-        /* 书写区与幽灵提示 */
         .canvas-area { position: relative; width: 100%; height: 320px; background: #fff; border-bottom: 1px solid var(--border); overflow: hidden; }
         .grid-bg { position: absolute; inset: 0; opacity: 0.05; background-image: linear-gradient(var(--text) 1px, transparent 1px), linear-gradient(90deg, var(--text) 1px, transparent 1px); background-size: 50% 50%; background-position: center; pointer-events: none; }
         #board { position: relative; z-index: 5; touch-action: none; }
         
-        /* 幽灵提示动画调整为更短 */
-        #ghost-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 6rem; font-family: "KaiTi", serif; color: var(--text); opacity: 0; pointer-events: none; z-index: 2; transition: opacity 0.5s ease-out; white-space: nowrap; }
-        #ghost-hint.show { opacity: 0.08; transition: opacity 0.1s ease-in; }
+        #ghost-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: "KaiTi", serif; color: var(--text); opacity: 0; pointer-events: none; z-index: 2; transition: opacity 0.5s ease-out; padding: 20px; text-align: center; }
+        #ghost-hint.show { opacity: 0.1; transition: opacity 0.1s ease-in; }
 
-        /* 判定卡 */
-        #ans-pop { position: fixed; right: calc(50% - 480px); top: 50%; transform: translateY(-50%) scale(0.8); width: 220px; background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 15px 45px rgba(0,0,0,0.1); text-align: center; opacity: 0; pointer-events: none; z-index: 100; }
-        #ans-pop.active { opacity: 1; pointer-events: auto; transform: translateY(-50%) scale(1); right: calc(50% - 500px); }
-        #ans-text { font-size: 2.8rem; font-family: "KaiTi", serif; color: var(--text); display: block; margin-bottom: 20px; word-break: break-all; line-height: 1.2; }
-        #ans-text.long { font-size: 1.8rem; }
-        #ans-text.extra-long { font-size: 1.4rem; }
+        /* 结算图层 */
+        #finish-overlay { position: absolute; inset: 0; background: #fff; z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; animation: fadeIn 0.8s; }
+        .huge-symbol { font-size: 8rem; color: var(--color-red); margin: 0; }
+        .congrats { font-size: 1.8rem; font-weight: bold; margin: 10px 0; }
+        .zen-quote { font-family: "KaiTi", serif; font-size: 1rem; color: #7f8c8d; margin-top: 20px; padding: 0 40px; line-height: 1.6; }
+
+        /* 判定弹出卡 */
+        #ans-pop { position: fixed; right: calc(50% - 480px); top: 50%; transform: translateY(-50%) scale(0.8); width: 240px; background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 15px 45px rgba(0,0,0,0.1); text-align: center; opacity: 0; pointer-events: none; z-index: 100; }
+        #ans-pop.active { opacity: 1; pointer-events: auto; transform: translateY(-50%) scale(1); right: calc(50% - 510px); }
+        #ans-text { font-size: 2.4rem; font-family: "KaiTi", serif; color: var(--text); display: block; margin-bottom: 20px; word-break: break-all; line-height: 1.3; }
+        #ans-text.long { font-size: 1.4rem; }
+        #ans-text.extra-long { font-size: 1.1rem; }
 
         .judge-btn { width: 100%; padding: 12px; margin-bottom: 8px; border-radius: 12px; border: none; font-size: 13px; cursor: pointer; color: white; font-weight: bold; }
         .btn-yes { background: var(--color-green); }
         .btn-no { background: var(--color-red); }
 
         .footer { display: grid; grid-template-columns: 1fr 1.5fr 1fr; background: var(--border); gap: 1px; }
-        .footer button { padding: 20px; border: none; background: #fff; font-size: 14px; cursor: pointer; color: var(--text); }
+        .footer button { padding: 20px; border: none; background: #fff; font-size: 14px; cursor: pointer; }
         .btn-main { background: var(--text) !important; color: #fff !important; }
 
-        /* 设置页 */
+        /* 侧边栏与设置 */
+        #wrong-sidebar { position: fixed; left: 0; top: 0; width: 260px; height: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-right: 1px solid var(--border); z-index: 1000; transform: translateX(-100%); padding: 30px; display: flex; flex-direction: column; }
+        #wrong-sidebar.active { transform: translateX(0); }
         #settings { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; padding: 30px; overflow-y: auto; }
-        .set-box { background: #fff; border-radius: 20px; padding: 25px; max-width: 400px; margin: 0 auto; box-shadow: var(--shadow); }
-        select, textarea { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 15px; outline: none; }
+        .set-box { background: #fff; border-radius: 20px; padding: 25px; max-width: 400px; margin: 0 auto; }
+        textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 15px; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @media (max-width: 1000px) {
-            #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(0.8) !important; width: 80%; }
+            #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(0.8) !important; width: 85%; }
             #ans-pop.active { transform: translate(50%, -50%) scale(1) !important; }
         }
     </style>
@@ -85,30 +78,28 @@
         <span onclick="toggleSidebar()" style="cursor:pointer">×</span>
     </div>
     <div id="wrong-list" style="flex:1; overflow-y:auto; font-size:13px;"></div>
-    <button onclick="clearWrongs()" style="width:100%; padding:10px; border:none; background:#eee; border-radius:8px; margin-top:10px;">清空错题本</button>
+    <button onclick="clearWrongs()" style="width:100%; padding:10px; border:none; background:#eee; border-radius:8px;">清空错题</button>
 </div>
 
 <div class="main-card">
-    <div class="progress-wrap">
-        <div id="progress-bar"></div>
-    </div>
-
+    <div class="progress-wrap"><div id="progress-bar"></div></div>
+    
     <div id="finish-overlay">
         <p class="huge-symbol">🉑</p>
         <p class="congrats">恭喜。</p>
-        <p id="session-stats" class="stats">正确 0 | 错误 0</p>
+        <p id="session-stats" style="color:var(--sub); font-size: 0.9rem;">正确 0 | 错误 0</p>
         <p id="zen-quote-text" class="zen-quote">--</p>
-        <button onclick="restartSession()" style="padding:12px 30px; border-radius:20px; border:1px solid var(--text); background:none; cursor:pointer; font-weight:bold;">再来一轮</button>
+        <button onclick="restartSession()" style="margin-top:20px; padding:10px 30px; border-radius:20px; border:1px solid var(--text); background:none; cursor:pointer;">再来一轮</button>
     </div>
 
     <div class="nav">
         <span onclick="toggleSidebar()">📓 记录</span>
         <span id="count-info">0 ITEMS</span>
-        <span id="hint-btn" onclick="peekHint()" title="偷看一眼答案">💡 窥探</span>
+        <span id="hint-btn" onclick="peekHint()">💡 窥探</span>
         <span onclick="toggleSettings(true)">⚙️ 设置</span>
     </div>
     <div class="quiz-box">
-        <div id="q-cat" style="font-size:10px; color:var(--color-red); letter-spacing:1px; margin-bottom:8px; font-weight:bold;">LOAD</div>
+        <div id="q-cat" style="font-size:10px; color:var(--color-red); margin-bottom:5px; font-weight:bold;">LOAD</div>
         <div id="q-text">载入中...</div>
     </div>
     <div class="canvas-area">
@@ -124,14 +115,14 @@
 </div>
 
 <div id="ans-pop">
-    <span style="font-size:11px; color:var(--sub); display:block; margin-bottom:12px;">核对</span>
+    <span style="font-size:11px; color:var(--sub); display:block; margin-bottom:10px;">核对</span>
     <div id="ans-text">--</div>
-    <button class="judge-btn btn-yes" onclick="mark(true)">正确 ☑️ です</button>
+    <button class="judge-btn btn-yes" onclick="mark(true)">正确 ☑️</button>
     <button class="judge-btn btn-no" onclick="mark(false)">不正确 🔘</button>
 </div>
 
 <div id="settings">
-    <div style="max-width:400px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <div style="max-width:400px; margin:0 auto; display:flex; justify-content:space-between; margin-bottom:20px;">
         <h3 style="margin:0">设置</h3>
         <button onclick="toggleSettings(false)" style="border:none; background:none; font-size:20px;">×</button>
     </div>
@@ -140,16 +131,17 @@
         <select id="mode" onchange="applyRule()">
             <option value="all">随机全部题目</option>
             <option value="wrong">仅本地错题</option>
-            <option value="word">仅字词类题目</option>
-            <option value="poem">仅古诗类题目</option>
+            <option value="word">仅单纯字词</option>
+            <option value="note">仅文言注释</option>
+            <option value="poem">仅古诗长句</option>
         </select>
         <label style="font-size:12px; font-weight:bold;">数据管理</label>
         <textarea id="jsonInput" rows="4" placeholder="粘贴 JSON 数组..."></textarea>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <button onclick="upload('cover')" style="padding:12px; background:var(--text); color:white; border:none; border-radius:10px;">覆盖导入</button>
-            <button onclick="upload('merge')" style="padding:12px; background:#fff; border:1px solid var(--border); border-radius:10px; color:var(--text);">增量合并</button>
+            <button onclick="upload('cover')" style="background:var(--text); color:white; border:none; padding:12px; border-radius:10px;">覆盖导入</button>
+            <button onclick="upload('merge')" style="border:1px solid var(--border); background:#fff; padding:12px; border-radius:10px;">增量合并</button>
         </div>
-        <button onclick="delCloud()" style="width:100%; color:var(--color-red); background:none; border:none; font-size:11px; margin-top:15px; cursor:pointer;">⚠️ 清空云端所有数据</button>
+        <button onclick="delCloud()" style="width:100%; color:var(--color-red); background:none; border:none; margin-top:15px; font-size:11px;">⚠️ 清空云端数据</button>
     </div>
 </div>
 
@@ -158,15 +150,9 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0bmxtZ3RvcWVjdmN0eWVldG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjM4MTAsImV4cCI6MjA4OTYzOTgxMH0.OB5An1HAkEiASsE_cV1KoFCWBcyYQGUPa6BKsM6LwaI';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let all = [], filtered = [], wrongs = JSON.parse(localStorage.getItem('wrongs_v8') || '[]'), current = null;
-    let pool = []; 
-    let sCorrect = 0, sWrong = 0; 
-    
-    const zenQuotes = [
-        "行到水穷处，坐看云起时。", "千里之行，始于足下。", "锲而不舍，金石可镂。",
-        "一期一会，世当珍惜。", "心如止水，鉴常明。", "博观而约取，厚积而薄发。",
-        "日日是好日。", "花落水流红，闲愁万种。"
-    ];
+    let all = [], filtered = [], wrongs = JSON.parse(localStorage.getItem('wrongs_v9') || '[]'), current = null;
+    let pool = [], sCorrect = 0, sWrong = 0;
+    const zenQuotes = ["行到水穷处，坐看云起时。", "一期一会，世当珍惜。", "日日是好日。", "锲而不舍，金石可镂。"];
 
     window.onload = () => { initCanvas(); sync(); renderWrongs(); };
 
@@ -180,9 +166,9 @@
         const m = document.getElementById('mode').value;
         if(m==='all') filtered = all;
         else if(m==='wrong') filtered = wrongs;
-        // 修复：只要不包含"诗"或"句"，全部归于"字词"，大幅提高兼容性
-        else if(m==='word') filtered = all.filter(i => !/(诗|句)/.test(i.cat || ''));
-        else if(m==='poem') filtered = all.filter(i => (i.cat||'').match(/诗/));
+        else if(m==='poem') filtered = all.filter(i => /(诗|句)/.test(i.cat || ''));
+        else if(m==='note') filtered = all.filter(i => /(注|释|文)/.test(i.cat || ''));
+        else if(m==='word') filtered = all.filter(i => !/(诗|句|注|释|文)/.test(i.cat || '')); // 排除法，保证字词有内容
         
         document.getElementById('count-info').innerText = `${filtered.length} ITEMS`;
         restartSession();
@@ -190,154 +176,114 @@
 
     function restartSession() {
         document.getElementById('finish-overlay').style.display = 'none';
-        pool = [...filtered]; 
-        sCorrect = 0; sWrong = 0;
+        pool = [...filtered]; sCorrect = 0; sWrong = 0;
         updateProgress();
         if (pool.length > 0) nextQ();
-        else {
-            document.getElementById('q-text').innerText = "暂无内容";
-            document.getElementById('q-cat').innerText = "--";
-        }
+        else document.getElementById('q-text').innerText = "暂无内容";
     }
 
     function updateProgress() {
         const total = filtered.length;
-        if (total === 0) {
-            document.getElementById('progress-bar').style.width = '0%';
-            return;
-        }
-        const done = total - pool.length;
-        const percent = (done / total) * 100;
+        const percent = total === 0 ? 0 : ((total - pool.length) / total) * 100;
         document.getElementById('progress-bar').style.width = percent + '%';
     }
 
-    function mark(isOk) {
-        if (navigator.vibrate) {
-            if (isOk) navigator.vibrate(30); 
-            else navigator.vibrate([40, 50, 40]); 
-        }
+    function nextQ() {
+        if(!pool.length) return;
+        clearBoard();
+        document.getElementById('hint-btn').classList.remove('disabled');
+        current = pool[Math.floor(Math.random() * pool.length)];
+        
+        // 题目字数适配
+        const qEl = document.getElementById('q-text');
+        qEl.innerText = current.q;
+        qEl.className = current.q.length > 12 ? 'long' : '';
+        
+        document.getElementById('q-cat').innerText = (current.cat || '言叶').toUpperCase();
+        
+        // 答案字数适配
+        const ansEl = document.getElementById('ans-text');
+        ansEl.innerText = current.a || '';
+        ansEl.className = '';
+        if(ansEl.innerText.length > 5 && ansEl.innerText.length <= 12) ansEl.classList.add('long');
+        else if(ansEl.innerText.length > 12) ansEl.classList.add('extra-long');
+    }
 
+    function mark(isOk) {
         if(isOk) sCorrect++;
         else {
             sWrong++;
             if(!wrongs.find(i => i.q === current.q)) {
                 wrongs.push(current);
-                localStorage.setItem('wrongs_v8', JSON.stringify(wrongs));
+                localStorage.setItem('wrongs_v9', JSON.stringify(wrongs));
                 renderWrongs();
             }
         }
-        
         pool = pool.filter(i => i !== current);
-        updateProgress(); // 更新进度条
-        
+        updateProgress();
         showAns(false);
         if (pool.length === 0) setTimeout(showFinishScreen, 400);
         else setTimeout(nextQ, 400);
     }
 
-    function skipQ() { if (pool.length > 1) nextQ(); }
+    function peekHint() {
+        if(!current) return;
+        const btn = document.getElementById('hint-btn');
+        if(btn.classList.contains('disabled')) return;
+        const hintEl = document.getElementById('ghost-hint');
+        hintEl.innerText = current.a;
+        hintEl.style.fontSize = current.a.length > 10 ? '1.5rem' : '4rem';
+        hintEl.classList.add('show');
+        btn.classList.add('disabled');
+        setTimeout(() => hintEl.classList.remove('show'), 500);
+    }
 
     function showFinishScreen() {
         document.getElementById('session-stats').innerText = `正确 ${sCorrect} | 错误 ${sWrong}`;
-        const quote = zenQuotes[Math.floor(Math.random() * zenQuotes.length)];
-        document.getElementById('zen-quote-text').innerText = `「 ${quote} 」`;
+        document.getElementById('zen-quote-text').innerText = `「 ${zenQuotes[Math.floor(Math.random()*zenQuotes.length)]} 」`;
         document.getElementById('finish-overlay').style.display = 'flex';
-        // 进度条满格
-        document.getElementById('progress-bar').style.width = '100%';
-    }
-
-    function renderWrongs() { document.getElementById('wrong-list').innerHTML = wrongs.map(i => `<div style="padding:8px 0; border-bottom:1px solid #eee"><b>${i.a}</b> <span style="color:#bdc3c7">${i.q}</span></div>`).join(''); }
-
-    function nextQ() {
-        if(!pool.length) return;
-        clearBoard();
-        
-        // 恢复窥探按钮状态
-        document.getElementById('hint-btn').classList.remove('disabled');
-
-        current = pool[Math.floor(Math.random() * pool.length)];
-        document.getElementById('q-cat').innerText = (current.cat || '言叶').toUpperCase();
-        document.getElementById('q-text').innerText = current.q;
-        
-        const ansEl = document.getElementById('ans-text');
-        ansEl.innerText = current.a || '';
-        ansEl.className = '';
-        if(ansEl.innerText.length > 3 && ansEl.innerText.length <= 6) ansEl.classList.add('long');
-        else if(ansEl.innerText.length > 6) ansEl.classList.add('extra-long');
-    }
-
-    // 0.5s 窥探 & 变灰逻辑
-    function peekHint() {
-        if(!current || !current.a) return;
-        const hintBtn = document.getElementById('hint-btn');
-        if(hintBtn.classList.contains('disabled')) return; // 防止重复点击
-        
-        const hintEl = document.getElementById('ghost-hint');
-        hintEl.innerText = current.a;
-        hintEl.style.fontSize = current.a.length > 4 ? '3rem' : '6rem';
-        hintEl.classList.add('show');
-        
-        // 立即禁用按钮，变灰
-        hintBtn.classList.add('disabled');
-        
-        // 0.5秒后消失
-        setTimeout(() => hintEl.classList.remove('show'), 500);
     }
 
     function showAns(s) { document.getElementById('ans-pop').classList.toggle('active', s); }
     function toggleSidebar() { document.getElementById('wrong-sidebar').classList.toggle('active'); }
     function toggleSettings(s) { document.getElementById('settings').style.display = s ? 'block' : 'none'; }
-    function clearWrongs() { if(confirm("清空本地错题？")) { wrongs=[]; localStorage.setItem('wrongs_v8','[]'); renderWrongs(); applyRule(); } }
+    function clearWrongs() { if(confirm("清空？")) { wrongs=[]; localStorage.setItem('wrongs_v9','[]'); renderWrongs(); applyRule(); } }
+    function renderWrongs() { document.getElementById('wrong-list').innerHTML = wrongs.map(i => `<div style="padding:8px 0; border-bottom:1px solid #eee"><b>${i.a}</b> <small>${i.q}</small></div>`).join(''); }
+    function skipQ() { if(pool.length > 1) nextQ(); }
 
     async function upload(mode) {
         const input = document.getElementById('jsonInput').value;
-        if(!input) return alert("请粘贴 JSON 数据");
+        if(!input) return alert("空");
         try {
-            const newData = JSON.parse(input);
-            if(mode === 'cover') {
-                if(!confirm("确定全量覆盖？")) return;
-                await supabase.from('dictation_items').delete().neq('id', '000...00');
-            }
-            await supabase.from('dictation_items').insert(newData);
-            alert("同步成功");
-            document.getElementById('jsonInput').value = "";
-            sync();
-        } catch(e) { alert("失败：" + e.message); }
+            const data = JSON.parse(input);
+            if(mode==='cover') await supabase.from('dictation_items').delete().neq('id','000...00');
+            await supabase.from('dictation_items').insert(data);
+            alert("成功"); sync();
+        } catch(e) { alert(e.message); }
     }
-    async function delCloud() { if(confirm("确定清空云端？")) { await supabase.from('dictation_items').delete().neq('id', '000...00'); sync(); } }
+    async function delCloud() { if(confirm("确定？")) { await supabase.from('dictation_items').delete().neq('id','000...00'); sync(); } }
 
-    // ---------------------------------------------
-    // 回归纯粹的常规 Canvas 线条
-    // ---------------------------------------------
+    // Canvas
     const canvas = document.getElementById('board');
     const ctx = canvas.getContext('2d');
     let drawing = false;
-
     function initCanvas() {
         const rect = canvas.parentNode.getBoundingClientRect();
         canvas.width = rect.width; canvas.height = rect.height;
-        ctx.lineWidth = 4;        // 固定粗细
-        ctx.lineCap = 'round'; 
-        ctx.lineJoin = 'round';
-        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#2c3e50';
     }
-
     const getPos = (e) => {
         const rect = canvas.getBoundingClientRect();
         const cx = e.touches ? e.touches[0].clientX : e.clientX;
         const cy = e.touches ? e.touches[0].clientY : e.clientY;
         return { x: cx - rect.left, y: cy - rect.top };
     };
-
     canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
-    canvas.addEventListener('mousemove', (e) => { if (drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
+    canvas.addEventListener('mousemove', (e) => { if(drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
     window.addEventListener('mouseup', () => drawing = false);
-    
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); }, {passive: false});
-    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } }, {passive: false});
-    canvas.addEventListener('touchend', () => drawing = false);
-
-    function clearBoard() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); }, {passive:false});
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if(drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } }, {passive:false});
+    function clearBoard() { ctx.clearRect(0,0,canvas.width,canvas.height); }
     window.onresize = initCanvas;
 </script>
 </body>
