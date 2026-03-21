@@ -3,133 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>言叶之庭 - 专业听写版</title>
+    <title>言叶之庭 - 匠心版</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
     <style>
         :root {
-            --bg: #f6f5f1; --card: #ffffff; --text: #2c3e50; 
-            --sub: #7f8c8d; --accent: #d35400; --border: #e0e0e0;
-            --green: #27ae60; --red: #e74c3c;
+            --bg: #f2f0eb; --card: #ffffff; --text: #34495e; 
+            --sub: #95a5a6; --accent: #d35400; --border: #eceae2;
+            --green: #a8bcac; --red: #d9a7a7; --shadow: rgba(0,0,0,0.05);
         }
-        body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; }
-        
-        /* 布局控制 */
-        .main-layout { display: flex; height: 100vh; width: 100vw; transition: 0.3s; }
-        
-        /* 左侧错题列 */
-        #wrong-sidebar { width: 250px; background: #fff; border-right: 1px solid var(--border); display: flex; flex-direction: column; transform: translateX(-250px); transition: 0.3s; position: absolute; height: 100%; z-index: 100; }
-        #wrong-sidebar.active { transform: translateX(0); position: relative; }
-        .sidebar-header { padding: 15px; background: #fafafa; font-weight: bold; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
-        .wrong-list { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; }
-        .wrong-item { padding: 8px; border-bottom: 1px solid #eee; }
 
-        /* 主容器 */
-        .app-container { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; position: relative; }
-        .content-card { width: 100%; max-width: 500px; background: var(--card); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden; display: flex; flex-direction: column; }
+        * { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-sizing: border-box; }
         
+        body { 
+            font-family: "PingFang SC", "STHeiti", sans-serif; 
+            background: var(--bg); color: var(--text); 
+            margin: 0; min-height: 100vh;
+            display: flex; justify-content: center;
+            overflow-x: hidden;
+        }
+
+        /* --- 侧边错题本 --- */
+        #wrong-sidebar { 
+            position: fixed; left: 0; top: 0; width: 280px; height: 100%;
+            background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border); z-index: 1000;
+            transform: translateX(-100%); padding: 20px;
+            display: flex; flex-direction: column;
+        }
+        #wrong-sidebar.active { transform: translateX(0); box-shadow: 20px 0 50px rgba(0,0,0,0.05); }
+        .wrong-list { flex: 1; overflow-y: auto; margin-top: 20px; }
+        .wrong-item { font-size: 14px; padding: 12px; border-bottom: 1px solid var(--border); color: var(--sub); }
+        .wrong-item b { color: var(--text); font-size: 16px; margin-right: 8px; }
+
+        /* --- 主容器 --- */
+        .viewport { 
+            width: 100%; max-width: 550px; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .main-card { 
+            width: 100%; background: var(--card); border-radius: 24px;
+            box-shadow: 0 15px 45px var(--shadow); overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
         /* 顶部导航 */
-        .nav-bar { padding: 12px 20px; background: #fafafa; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
-        .icon-btn { cursor: pointer; font-size: 18px; padding: 5px; }
+        .nav { padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .btn-icon { cursor: pointer; font-size: 20px; opacity: 0.6; }
+        .btn-icon:hover { opacity: 1; }
+        #count-info { font-size: 12px; color: var(--sub); letter-spacing: 1px; }
 
-        /* 题目区 */
-        .quiz-section { padding: 30px 20px; text-align: center; border-bottom: 1px solid #f9f9f9; }
-        #q-cat { font-size: 11px; color: var(--accent); font-weight: bold; margin-bottom: 5px; }
-        #q-text { font-size: 1.5rem; font-weight: 600; min-height: 2rem; }
+        /* 题目展示 */
+        .quiz-box { padding: 40px 30px; text-align: center; }
+        #q-cat { font-size: 11px; color: var(--accent); font-weight: bold; margin-bottom: 10px; letter-spacing: 2px; }
+        #q-text { font-size: 1.8rem; font-weight: 500; min-height: 2.5rem; animation: fadeIn 0.5s; }
 
-        /* 手写板 */
-        .canvas-wrap { position: relative; width: 100%; height: 300px; background: #fff; touch-action: none; }
-        #board { width: 100%; height: 100%; cursor: crosshair; position: relative; z-index: 2; }
-        .tianzige { position: absolute; inset: 0; z-index: 1; opacity: 0.05; background-image: linear-gradient(var(--text) 1px, transparent 1px), linear-gradient(90deg, var(--text) 1px, transparent 1px); background-size: 50% 50%; background-position: center; border: 1px solid var(--text); }
+        /* 手写区域 */
+        .canvas-area { position: relative; width: 100%; height: 350px; background: #fff; }
+        #board { position: relative; z-index: 5; cursor: crosshair; }
+        .grid-bg { position: absolute; inset: 0; z-index: 1; opacity: 0.15; 
+            background-image: linear-gradient(var(--text) 1px, transparent 1px), linear-gradient(90deg, var(--text) 1px, transparent 1px);
+            background-size: 50% 50%; background-position: center;
+        }
 
-        /* 答案及判定区 */
-        #ans-area { display: none; padding: 20px; text-align: center; background: #fbfcfc; border-top: 1px solid #f0f0f0; }
-        #ans-text { font-size: 2.4rem; font-family: "KaiTi", serif; color: var(--accent); font-weight: bold; margin-bottom: 15px; }
-        .judge-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-j { padding: 10px; border-radius: 8px; border: none; color: white; cursor: pointer; font-weight: bold; }
+        /* 答案与判定区域 */
+        #ans-panel { display: none; padding: 30px; background: #fafafa; border-top: 1px solid var(--border); text-align: center; }
+        #ans-text { font-size: 3rem; font-family: "KaiTi", serif; color: var(--text); margin-bottom: 25px; font-weight: bold; }
+        
+        .judge-row { display: flex; gap: 15px; justify-content: center; }
+        .btn-j { 
+            flex: 1; padding: 14px; border-radius: 12px; border: 1px solid transparent;
+            font-size: 14px; cursor: pointer; font-weight: 500;
+        }
+        .btn-wrong { border-color: var(--red); color: #b07a7a; background: transparent; }
+        .btn-correct { background: var(--green); color: white; border: none; }
+        .btn-wrong:hover { background: var(--red); color: white; }
 
-        /* 底部主按钮 */
-        .main-btns { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 1px; background: var(--border); }
-        .main-btns button { border: none; padding: 18px; background: #fff; cursor: pointer; font-weight: 500; }
-        .btn-primary { background: var(--accent) !important; color: white !important; }
+        /* 底部控制 */
+        .footer-btns { display: grid; grid-template-columns: 1fr 1.5fr 1fr; background: var(--border); gap: 1px; }
+        .footer-btns button { padding: 22px; border: none; background: #fff; font-size: 15px; cursor: pointer; color: var(--text); }
+        .btn-main { background: var(--text) !important; color: white !important; font-weight: bold; }
 
-        /* 设置页面（全屏覆盖） */
-        #settings-page { display: none; position: fixed; inset: 0; background: #fff; z-index: 200; padding: 20px; overflow-y: auto; }
-        .setting-item { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-        .setting-item label { display: block; font-weight: bold; margin-bottom: 10px; }
-        select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+        /* 设置页面 */
+        #settings { 
+            position: fixed; inset: 0; background: var(--bg); z-index: 2000; 
+            padding: 40px 25px; display: none; overflow-y: auto;
+        }
+        .set-card { background: #fff; border-radius: 20px; padding: 25px; margin-top: 20px; box-shadow: 0 5px 20px var(--shadow); }
+        .set-label { display: block; margin-bottom: 12px; font-weight: bold; font-size: 14px; }
+        select, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); font-size: 14px; margin-bottom: 20px; outline: none; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div class="main-layout">
-    <div id="wrong-sidebar">
-        <div class="sidebar-header">
-            <span>错题本 (Local)</span>
-            <span style="cursor:pointer" onclick="clearWrongs()">🗑️</span>
-        </div>
-        <div id="wrong-list" class="wrong-list"></div>
-        <button onclick="toggleSidebar()" style="padding:10px; border:none; background:var(--text); color:white;">关闭</button>
+<div id="wrong-sidebar">
+    <h3 style="margin-top:0">错题本</h3>
+    <div id="wrong-list" class="wrong-list"></div>
+    <div style="display:flex; gap:10px;">
+        <button onclick="clearWrongs()" style="flex:1; padding:12px; border:none; background:#eee; border-radius:10px;">清空</button>
+        <button onclick="toggleSidebar()" style="flex:1; padding:12px; border:none; background:var(--text); color:white; border-radius:10px;">收起</button>
     </div>
+</div>
 
-    <div class="app-container">
-        <div class="content-card">
-            <div class="nav-bar">
-                <span class="icon-btn" onclick="toggleSidebar()">☰</span>
-                <span id="count-info">加载中...</span>
-                <span class="icon-btn" onclick="toggleSettings(true)">⚙️</span>
-            </div>
-            
-            <div class="quiz-section">
-                <div id="q-cat">---</div>
-                <div id="q-text">数据加载中...</div>
-            </div>
+<div class="viewport">
+    <div class="main-card">
+        <div class="nav">
+            <span class="btn-icon" onclick="toggleSidebar()">📓</span>
+            <span id="count-info">SYNCING...</span>
+            <span class="btn-icon" onclick="toggleSettings(true)">⚙️</span>
+        </div>
 
-            <div class="canvas-wrap">
-                <div class="tianzige"></div>
-                <canvas id="board"></canvas>
-            </div>
+        <div class="quiz-box">
+            <div id="q-cat">---</div>
+            <div id="q-text">数据载入中</div>
+        </div>
 
-            <div id="ans-area">
-                <div id="ans-text">--</div>
-                <div class="judge-btns">
-                    <button class="btn-j" style="background:var(--red)" onclick="markResult(false)">不正确！🔘</button>
-                    <button class="btn-j" style="background:var(--green)" onclick="markResult(true)">正确☑️です</button>
-                </div>
-            </div>
+        <div class="canvas-area">
+            <div class="grid-bg"></div>
+            <canvas id="board"></canvas>
+        </div>
 
-            <div class="main-btns">
-                <button onclick="clearBoard()">重写</button>
-                <button class="btn-primary" onclick="showAns()">看答案</button>
-                <button onclick="nextQ()">下一题</button>
+        <div id="ans-panel">
+            <div id="ans-text">--</div>
+            <div class="judge-row">
+                <button class="btn-j btn-wrong" onclick="mark(false)">不正确！🔘</button>
+                <button class="btn-j btn-correct" onclick="mark(true)">正确☑️です</button>
             </div>
+        </div>
+
+        <div class="footer-btns">
+            <button onclick="clearBoard()">清空</button>
+            <button class="btn-main" onclick="showAns()">检查答案</button>
+            <button onclick="nextQ()">下一题</button>
         </div>
     </div>
 </div>
 
-<div id="settings-page">
-    <div style="display:flex; justify-content: space-between; align-items: center;">
-        <h2>⚙️ 设置与管理</h2>
-        <button onclick="toggleSettings(false)" style="padding:10px 20px; border-radius:20px; border:1px solid #ddd;">返回主页</button>
+<div id="settings">
+    <div style="display:flex; justify-content:space-between; align-items:center">
+        <h2 style="margin:0">设置</h2>
+        <button onclick="toggleSettings(false)" style="border:none; background:none; font-size:24px;">×</button>
     </div>
-
-    <div class="setting-item">
-        <label>🎯 答题模式选择</label>
-        <select id="rule-select" onchange="applyRule()">
-            <option value="all">全部题目 (随机)</option>
-            <option value="wrong">只练习错题</option>
-            <option value="word">只练习字词 (分类包含"字"或"词")</option>
-            <option value="poem">只练习古诗 (分类包含"诗")</option>
+    
+    <div class="set-card">
+        <label class="set-label">出题逻辑</label>
+        <select id="mode" onchange="applyRule()">
+            <option value="all">随机测试全部</option>
+            <option value="wrong">专注错题练习</option>
+            <option value="word">仅限字词分类</option>
+            <option value="poem">仅限古诗分类</option>
         </select>
-    </div>
 
-    <div class="setting-item">
-        <label>📦 数据库管理 (JSON 导入)</label>
-        <textarea id="jsonInput" placeholder="在此粘贴 JSON 数组代码..."></textarea>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-            <button onclick="uploadData('cover')" style="background:#2c3e50; color:white; padding:12px; border:none; border-radius:8px;">全量覆盖</button>
-            <button onclick="uploadData('merge')" style="background:#34495e; color:white; padding:12px; border:none; border-radius:8px;">增量合并</button>
+        <label class="set-label">数据同步</label>
+        <textarea id="jsonInput" rows="4" placeholder="粘贴 JSON 数组..."></textarea>
+        <div style="display:flex; gap:10px;">
+            <button onclick="upload('cover')" style="flex:1; padding:12px; background:var(--text); color:white; border:none; border-radius:10px;">覆盖导入</button>
+            <button onclick="upload('merge')" style="flex:1; padding:12px; background:#fff; border:1px solid var(--border); border-radius:10px;">增量合并</button>
         </div>
-        <button onclick="deleteAllData()" style="width:100%; background:var(--red); color:white; padding:10px; border:none; border-radius:8px; margin-top:10px;">清空云端所有题库</button>
+        <button onclick="delCloud()" style="width:100%; margin-top:15px; color:var(--red); background:none; border:none; font-size:12px;">清空云端数据库</button>
     </div>
 </div>
 
@@ -138,112 +171,74 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0bmxtZ3RvcWVjdmN0eWVldG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjM4MTAsImV4cCI6MjA4OTYzOTgxMH0.OB5An1HAkEiASsE_cV1KoFCWBcyYQGUPa6BKsM6LwaI';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let allQuestions = []; // 云端原始数据
-    let filteredQuestions = []; // 过滤后的当前题库
-    let wrongQuestions = JSON.parse(localStorage.getItem('wrong_db') || '[]');
-    let currentItem = null;
+    let all = [], filtered = [], wrongs = JSON.parse(localStorage.getItem('wrongs') || '[]'), current = null;
 
-    // --- 初始化 ---
-    window.onload = () => { initCanvas(); sync(); renderWrongList(); };
+    window.onload = () => { initCanvas(); sync(); renderWrongs(); };
 
     async function sync() {
-        const { data, error } = await supabase.from('dictation_items').select('*');
-        if (!error) {
-            allQuestions = data || [];
-            applyRule(); // 同步后立即应用过滤规则
-        }
+        const { data } = await supabase.from('dictation_items').select('*');
+        all = data || [];
+        applyRule();
     }
 
-    // --- 答题规则过滤 ---
     function applyRule() {
-        const rule = document.getElementById('rule-select').value;
-        if (rule === 'all') {
-            filteredQuestions = allQuestions;
-        } else if (rule === 'wrong') {
-            filteredQuestions = wrongQuestions;
-        } else if (rule === 'word') {
-            filteredQuestions = allQuestions.filter(i => i.cat.includes('字') || i.cat.includes('词'));
-        } else if (rule === 'poem') {
-            filteredQuestions = allQuestions.filter(i => i.cat.includes('诗'));
-        }
+        const m = document.getElementById('mode').value;
+        if(m==='all') filtered = all;
+        else if(m==='wrong') filtered = wrongs;
+        else if(m==='word') filtered = all.filter(i => i.cat.match(/字|词/));
+        else if(m==='poem') filtered = all.filter(i => i.cat.match(/诗/));
         
-        document.getElementById('count-info').innerText = `${filteredQuestions.length} 题`;
-        if (filteredQuestions.length > 0) nextQ();
-        else document.getElementById('q-text').innerText = "该模式下没有题目";
+        document.getElementById('count-info').innerText = `${filtered.length} ITEMS`;
+        nextQ();
     }
 
-    // --- 错题判定逻辑 ---
-    function markResult(isCorrect) {
-        if (!isCorrect) {
-            // 如果不在错题本里，则加入
-            if (!wrongQuestions.find(i => i.q === currentItem.q)) {
-                wrongQuestions.push(currentItem);
-                localStorage.setItem('wrong_db', JSON.stringify(wrongQuestions));
-                renderWrongList();
-            }
+    function mark(isOk) {
+        if(!isOk && !wrongs.find(i => i.q === current.q)) {
+            wrongs.push(current);
+            localStorage.setItem('wrongs', JSON.stringify(wrongs));
+            renderWrongs();
         }
         nextQ();
     }
 
-    function renderWrongList() {
-        const list = document.getElementById('wrong-list');
-        list.innerHTML = wrongQuestions.map(i => `<div class="wrong-item"><b>${i.a}</b> <small>(${i.q})</small></div>`).join('');
+    function renderWrongs() {
+        document.getElementById('wrong-list').innerHTML = wrongs.map(i => `<div class="wrong-item"><b>${i.a}</b> ${i.q}</div>`).join('');
     }
 
-    function clearWrongs() {
-        if(confirm("确定清空错题本？")) {
-            wrongQuestions = [];
-            localStorage.setItem('wrong_db', '[]');
-            renderWrongList();
-            applyRule();
-        }
-    }
-
-    // --- 基础练习逻辑 ---
     function nextQ() {
-        if (filteredQuestions.length === 0) return;
-        document.getElementById('ans-area').style.display = 'none';
+        if(!filtered.length) { document.getElementById('q-text').innerText = "当前模式无内容"; return; }
+        document.getElementById('ans-panel').style.display = 'none';
         clearBoard();
-        currentItem = filteredQuestions[Math.floor(Math.random() * filteredQuestions.length)];
-        document.getElementById('q-cat').innerText = currentItem.cat;
-        document.getElementById('q-text').innerText = currentItem.q;
-        document.getElementById('ans-text').innerText = currentItem.a;
+        current = filtered[Math.floor(Math.random() * filtered.length)];
+        document.getElementById('q-cat').innerText = current.cat || '言叶';
+        document.getElementById('q-text').innerText = current.q;
+        document.getElementById('ans-text').innerText = current.a;
     }
 
-    function showAns() { document.getElementById('ans-area').style.display = 'block'; }
-
-    // --- UI 控制 ---
+    function showAns() { document.getElementById('ans-panel').style.display = 'block'; }
     function toggleSidebar() { document.getElementById('wrong-sidebar').classList.toggle('active'); }
-    function toggleSettings(show) { document.getElementById('settings-page').style.display = show ? 'block' : 'none'; }
+    function toggleSettings(s) { document.getElementById('settings').style.display = s ? 'block' : 'none'; }
+    function clearWrongs() { if(confirm("清除本地错题？")) { wrongs=[]; localStorage.setItem('wrongs','[]'); renderWrongs(); applyRule(); } }
 
-    // --- 数据库操作 (存放在设置页) ---
-    async function uploadData(mode) {
-        const val = document.getElementById('jsonInput').value;
-        if(!val) return alert("空");
+    async function upload(m) {
         try {
-            const json = JSON.parse(val);
-            if (mode === 'cover') await supabase.from('dictation_items').delete().neq('id', '000...00');
-            await supabase.from('dictation_items').insert(json);
-            alert("上传成功");
-            sync();
-        } catch (e) { alert(e.message); }
+            const j = JSON.parse(document.getElementById('jsonInput').value);
+            if(m==='cover') await supabase.from('dictation_items').delete().neq('id','000...00');
+            await supabase.from('dictation_items').insert(j);
+            alert("同步成功"); location.reload();
+        } catch(e) { alert(e.message); }
     }
 
-    async function deleteAllData() {
-        if(confirm("确定全删？")) {
-            await supabase.from('dictation_items').delete().neq('id', '000...00');
-            sync();
-        }
-    }
+    async function delCloud() { if(confirm("彻底清空？")) { await supabase.from('dictation_items').delete().neq('id','000...00'); location.reload(); } }
 
-    // --- 画布逻辑 (已适配缩放) ---
+    // 画布逻辑
     const canvas = document.getElementById('board');
     const ctx = canvas.getContext('2d');
     let drawing = false;
     function initCanvas() {
         const rect = canvas.parentNode.getBoundingClientRect();
         canvas.width = rect.width; canvas.height = rect.height;
-        ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#34495e';
     }
     const getPos = (e) => {
         const rect = canvas.getBoundingClientRect();
