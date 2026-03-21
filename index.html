@@ -3,82 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>言叶之庭 - 精致日和版</title>
+    <title>言叶之庭 - 匠心完整版</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
     <style>
         :root {
-            --bg: #f7f6f2; 
-            --card: #ffffff;
-            --text: #2c3e50;
-            --sub: #95a5a6;
-            --border: #eceae2;
-            /* 严格定义的日式传统色 */
-            --color-red: #d15147;    /* 洗朱 (Araigushu) - 典雅朱红 */
-            --color-green: #6b8e6b;  /* 若竹色 (Wakatake) - 沉稳青绿 */
-            --shadow: 0 10px 40px rgba(0,0,0,0.05);
+            --bg: #f7f6f2; --card: #ffffff; --text: #2c3e50; --sub: #95a5a6; --border: #eceae2;
+            --color-red: #d15147; --color-green: #6b8e6b; --shadow: 0 10px 40px rgba(0,0,0,0.05);
         }
-
         * { box-sizing: border-box; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        body { font-family: "PingFang SC", "Hiragino Sans GB", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        body { font-family: "PingFang SC", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
 
-        /* --- 侧边错题本 --- */
-        #wrong-sidebar { 
-            position: fixed; left: 0; top: 0; width: 260px; height: 100%;
-            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
-            border-right: 1px solid var(--border); z-index: 1000;
-            transform: translateX(-100%); padding: 30px; display: flex; flex-direction: column;
-        }
+        /* 侧边栏 */
+        #wrong-sidebar { position: fixed; left: 0; top: 0; width: 260px; height: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-right: 1px solid var(--border); z-index: 1000; transform: translateX(-100%); padding: 30px; display: flex; flex-direction: column; }
         #wrong-sidebar.active { transform: translateX(0); box-shadow: 5px 0 20px rgba(0,0,0,0.02); }
 
-        /* --- 主卡片：自适应居中 --- */
-        .main-card { 
-            width: 90%; 
-            max-width: 460px; /* 恢复精致尺寸 */
-            background: var(--card); border-radius: 24px;
-            box-shadow: var(--shadow); overflow: hidden;
-            display: flex; flex-direction: column; 
-            position: relative; z-index: 10;
-        }
-
-        /* 顶部导航 */
+        /* 主卡片 */
+        .main-card { width: 90%; max-width: 460px; background: var(--card); border-radius: 24px; box-shadow: var(--shadow); overflow: hidden; position: relative; z-index: 10; }
         .nav { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); font-size: 11px; color: var(--sub); letter-spacing: 1px; }
-        .nav span { cursor: pointer; }
-
-        /* 题目区 */
         .quiz-box { padding: 35px 20px; text-align: center; }
         #q-text { font-size: 1.6rem; font-weight: 600; min-height: 2.2rem; }
-
-        /* 书写区 */
         .canvas-area { position: relative; width: 100%; height: 320px; background: #fff; border-bottom: 1px solid var(--border); }
         .grid-bg { position: absolute; inset: 0; opacity: 0.05; background-image: linear-gradient(var(--text) 1px, transparent 1px), linear-gradient(90deg, var(--text) 1px, transparent 1px); background-size: 50% 50%; background-position: center; }
         #board { position: relative; z-index: 5; }
 
-        /* --- 灵动判定卡 (右侧弹出) --- */
-        #ans-pop { 
-            position: fixed; 
-            /* 宽屏时相对于主卡片右侧，手机端居中 */
-            right: calc(50% - 480px); 
-            top: 50%; transform: translateY(-50%) scale(0.8);
-            width: 220px; background: var(--card); padding: 25px; border-radius: 20px;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.1); text-align: center; 
-            opacity: 0; pointer-events: none; z-index: 100;
-        }
+        /* 判定弹出卡 */
+        #ans-pop { position: fixed; right: calc(50% - 480px); top: 50%; transform: translateY(-50%) scale(0.8); width: 220px; background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 15px 45px rgba(0,0,0,0.1); text-align: center; opacity: 0; pointer-events: none; z-index: 100; }
         #ans-pop.active { opacity: 1; pointer-events: auto; transform: translateY(-50%) scale(1); right: calc(50% - 500px); }
-
-        /* 答案文字缩放 */
-        #ans-text { 
-            font-size: 2.8rem; font-family: "KaiTi", serif; color: var(--text); 
-            display: block; margin-bottom: 20px; word-break: break-all; line-height: 1.2;
-        }
+        #ans-text { font-size: 2.8rem; font-family: "KaiTi", serif; color: var(--text); display: block; margin-bottom: 20px; word-break: break-all; line-height: 1.2; }
         #ans-text.long { font-size: 1.8rem; }
         #ans-text.extra-long { font-size: 1.4rem; }
 
-        /* 判定按钮：日式传统色 */
         .judge-btn { width: 100%; padding: 12px; margin-bottom: 8px; border-radius: 12px; border: none; font-size: 13px; cursor: pointer; color: white; font-weight: bold; }
         .btn-yes { background: var(--color-green); }
         .btn-no { background: var(--color-red); }
 
-        /* 底部按钮 */
         .footer { display: grid; grid-template-columns: 1fr 1.5fr 1fr; background: var(--border); gap: 1px; }
         .footer button { padding: 20px; border: none; background: #fff; font-size: 14px; cursor: pointer; color: var(--text); }
         .btn-main { background: var(--text) !important; color: #fff !important; }
@@ -88,7 +46,6 @@
         .set-box { background: #fff; border-radius: 20px; padding: 25px; max-width: 400px; margin: 0 auto; box-shadow: var(--shadow); }
         select, textarea { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 15px; outline: none; }
 
-        /* 手机适配 */
         @media (max-width: 1000px) {
             #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(0.8) !important; width: 80%; }
             #ans-pop.active { transform: translate(50%, -50%) scale(1) !important; }
@@ -103,7 +60,7 @@
         <span onclick="toggleSidebar()" style="cursor:pointer">×</span>
     </div>
     <div id="wrong-list" style="flex:1; overflow-y:auto; font-size:13px;"></div>
-    <button onclick="clearWrongs()" style="width:100%; padding:10px; border:none; background:#eee; border-radius:8px; margin-top:10px;">清空</button>
+    <button onclick="clearWrongs()" style="width:100%; padding:10px; border:none; background:#eee; border-radius:8px; margin-top:10px;">清空错题</button>
 </div>
 
 <div class="main-card">
@@ -147,10 +104,16 @@
             <option value="word">仅字词</option>
             <option value="poem">仅古诗</option>
         </select>
-        <label style="font-size:12px; font-weight:bold;">数据 JSON</label>
-        <textarea id="jsonInput" rows="4"></textarea>
-        <button onclick="upload('cover')" style="width:100%; padding:12px; background:var(--text); color:white; border:none; border-radius:10px; margin-bottom:10px;">覆盖导入</button>
-        <button onclick="delCloud()" style="width:100%; color:var(--color-red); background:none; border:none; font-size:11px;">⚠️ 清空云端</button>
+        <label style="font-size:12px; font-weight:bold;">数据 JSON 导入</label>
+        <textarea id="jsonInput" rows="4" placeholder="在此粘贴 JSON 数组..."></textarea>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button onclick="upload('cover')" style="padding:12px; background:var(--text); color:white; border:none; border-radius:10px;">全量覆盖</button>
+            <button onclick="upload('merge')" style="padding:12px; background:#fff; border:1px solid var(--border); border-radius:10px; color:var(--text);">增量合并</button>
+        </div>
+        
+        <button onclick="delCloud()" style="width:100%; color:var(--color-red); background:none; border:none; font-size:11px; margin-top:15px; cursor:pointer;">⚠️ 清空云端所有数据</button>
+        <p style="font-size:10px; color:var(--sub); margin-top:10px; text-align:center;">合并模式将保留原来文件并添加新数据</p>
     </div>
 </div>
 
@@ -159,7 +122,7 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0bmxtZ3RvcWVjdmN0eWVldG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjM4MTAsImV4cCI6MjA4OTYzOTgxMH0.OB5An1HAkEiASsE_cV1KoFCWBcyYQGUPa6BKsM6LwaI';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let all = [], filtered = [], wrongs = JSON.parse(localStorage.getItem('wrongs_v4') || '[]'), current = null;
+    let all = [], filtered = [], wrongs = JSON.parse(localStorage.getItem('wrongs_v5') || '[]'), current = null;
 
     window.onload = () => { initCanvas(); sync(); renderWrongs(); };
 
@@ -176,13 +139,14 @@
         else if(m==='word') filtered = all.filter(i => (i.cat||'').match(/字|词/));
         else if(m==='poem') filtered = all.filter(i => (i.cat||'').match(/诗/));
         document.getElementById('count-info').innerText = `${filtered.length} ITEMS`;
-        nextQ();
+        if (filtered.length > 0) nextQ();
+        else document.getElementById('q-text').innerText = "暂无内容";
     }
 
     function mark(isOk) {
         if(!isOk && !wrongs.find(i => i.q === current.q)) {
             wrongs.push(current);
-            localStorage.setItem('wrongs_v4', JSON.stringify(wrongs));
+            localStorage.setItem('wrongs_v5', JSON.stringify(wrongs));
             renderWrongs();
         }
         showAns(false);
@@ -194,35 +158,43 @@
     }
 
     function nextQ() {
-        if(!filtered.length) { document.getElementById('q-text').innerText = "无内容"; return; }
+        if(!filtered.length) return;
         clearBoard();
         current = filtered[Math.floor(Math.random() * filtered.length)];
         document.getElementById('q-cat').innerText = (current.cat || '言叶').toUpperCase();
         document.getElementById('q-text').innerText = current.q;
-        
         const ansEl = document.getElementById('ans-text');
-        const txt = current.a || '';
-        ansEl.innerText = txt;
+        ansEl.innerText = current.a || '';
         ansEl.className = '';
-        if(txt.length > 3 && txt.length <= 6) ansEl.classList.add('long');
-        else if(txt.length > 6) ansEl.classList.add('extra-long');
+        if(ansEl.innerText.length > 3 && ansEl.innerText.length <= 6) ansEl.classList.add('long');
+        else if(ansEl.innerText.length > 6) ansEl.classList.add('extra-long');
     }
 
     function showAns(s) { document.getElementById('ans-pop').classList.toggle('active', s); }
     function toggleSidebar() { document.getElementById('wrong-sidebar').classList.toggle('active'); }
     function toggleSettings(s) { document.getElementById('settings').style.display = s ? 'block' : 'none'; }
-    function clearWrongs() { if(confirm("清空本地？")) { wrongs=[]; localStorage.setItem('wrongs_v4','[]'); renderWrongs(); applyRule(); } }
+    function clearWrongs() { if(confirm("清空本地错题？")) { wrongs=[]; localStorage.setItem('wrongs_v5','[]'); renderWrongs(); applyRule(); } }
 
-    async function upload(m) {
+    // --- 修复的核心导入逻辑 ---
+    async function upload(mode) {
+        const input = document.getElementById('jsonInput').value;
+        if(!input) return alert("请粘贴数据");
         try {
-            const j = JSON.parse(document.getElementById('jsonInput').value);
-            if(m==='cover') await supabase.from('dictation_items').delete().neq('cat','_');
-            await supabase.from('dictation_items').insert(j);
-            location.reload();
-        } catch(e) { alert("格式错误"); }
+            const newData = JSON.parse(input);
+            if(mode === 'cover') {
+                if(!confirm("确定要删除云端所有旧数据并覆盖吗？")) return;
+                await supabase.from('dictation_items').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            }
+            // 增量合并模式下，直接 insert 即可（Supabase 会自动添加新行）
+            const { error } = await supabase.from('dictation_items').insert(newData);
+            if(error) throw error;
+            alert(mode === 'cover' ? "覆盖成功" : "合并成功");
+            document.getElementById('jsonInput').value = "";
+            sync(); // 刷新题库
+        } catch(e) { alert("操作失败：" + e.message); }
     }
 
-    async function delCloud() { if(confirm("彻底清空？")) { await supabase.from('dictation_items').delete().neq('cat','_'); location.reload(); } }
+    async function delCloud() { if(confirm("确定永久清空云端数据库？")) { await supabase.from('dictation_items').delete().neq('id', '000...00'); sync(); } }
 
     const canvas = document.getElementById('board');
     const ctx = canvas.getContext('2d');
