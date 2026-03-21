@@ -3,69 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>云同步听写助手 - 完整日志版</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>云同步听写助手 - 终极修复版</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
     <style>
-        :root { --bg: #f0f2f5; --primary: #3ecf8e; --dark: #1c1c1c; --danger: #e74c3c; }
+        :root { --bg: #f0f2f5; --primary: #3ecf8e; --dark: #1c1c1c; }
         body { font-family: system-ui; background: var(--bg); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 600px; background: #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
-        
-        /* 顶部状态栏 */
-        .header { padding: 15px 20px; background: var(--dark); color: #fff; display: flex; justify-content: space-between; font-size: 13px; flex-wrap: wrap; gap: 5px; }
-        #sync-status { word-break: break-all; } /* 防止长错误信息撑破布局 */
-        
-        /* 题目展示区 */
+        .header { padding: 15px 20px; background: var(--dark); color: #fff; display: flex; justify-content: space-between; font-size: 13px; }
         .quiz-box { padding: 40px 20px; text-align: center; }
         #q-text { font-size: 1.8rem; font-weight: bold; margin-top: 10px; min-height: 2.5rem; }
-        
-        /* 手写板 - 墨水蓝田字格风格 */
         .canvas-wrap { position: relative; width: 100%; height: 320px; background: #fff; touch-action: none; border-top: 1px solid #eee; }
         #board { width: 100%; height: 100%; cursor: crosshair; position: relative; z-index: 2; }
-        .mizige { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.1;
-            background-image: linear-gradient(#4a6cf7 1px, transparent 1px), linear-gradient(90deg, #4a6cf7 1px, transparent 1px);
-            background-size: 50% 50%; border: 1px solid #4a6cf7;
-        }
-
-        /* 答案区 */
+        .mizige { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.1; background-image: linear-gradient(#4a6cf7 1px, transparent 1px), linear-gradient(90deg, #4a6cf7 1px, transparent 1px); background-size: 50% 50%; }
         #ans-box { display: none; padding: 20px; text-align: center; background: #f6fffa; border-top: 2px solid var(--primary); }
         #ans-text { font-size: 2.5rem; font-family: "KaiTi", "楷体", serif; color: #2c3e50; font-weight: bold; }
-
-        /* 操作按钮 */
         .btn-group { display: grid; grid-template-columns: 1fr 1fr 1fr; background: #ddd; gap: 1px; }
-        button { border: none; padding: 20px; font-size: 1rem; cursor: pointer; background: #fff; font-weight: bold; transition: background 0.2s; }
-        button:active { background: #f0f0f0; }
+        button { border: none; padding: 20px; font-size: 1rem; cursor: pointer; background: #fff; font-weight: bold; }
         .btn-show { background: var(--primary); color: white; }
-
-        /* 云端管理区 */
-        .admin { width: 100%; max-width: 600px; margin-top: 20px; font-size: 12px; }
-        details { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
-        summary { cursor: pointer; font-size: 14px; font-weight: bold; color: #333; }
-        textarea { width: 100%; height: 120px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; padding: 10px; box-sizing: border-box; font-family: monospace; }
-        .admin-btn { width: 100%; padding: 12px; background: var(--dark); color: white; border-radius: 8px; font-size: 14px; border: none; cursor: pointer; }
+        /* 强制警告框样式 */
+        #fatal-error { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); color:red; z-index:9999; padding:50px; box-sizing:border-box; font-family:monospace; }
     </style>
 </head>
 <body>
 
+<div id="fatal-error">
+    <h1>⚠️ 系统自检失败</h1>
+    <p id="error-msg">代码运行被中断或库未加载</p>
+    <button onclick="location.reload()" style="padding:10px; background:white; border:none;">尝试刷新页面</button>
+</div>
+
 <div class="container">
     <div class="header">
-        <span id="sync-status">📡 正在初始化并连接云端...</span>
+        <span id="sync-status">📡 初始化中...</span>
         <span id="count-info">0 题</span>
     </div>
-    
     <div class="quiz-box">
-        <div id="q-cat" style="color:var(--primary)">初始化中</div>
-        <div id="q-text">等待数据载入...</div>
+        <div id="q-cat" style="color:var(--primary)">BOOTING...</div>
+        <div id="q-text">正在检查数据库状态...</div>
     </div>
-    
     <div class="canvas-wrap">
         <div class="mizige"></div>
         <canvas id="board"></canvas>
     </div>
-    
     <div id="ans-box">
         <div id="ans-text">--</div>
     </div>
-    
     <div class="btn-group">
         <button onclick="clearBoard()">重写</button>
         <button class="btn-show" onclick="showAns()">看答案</button>
@@ -73,168 +55,126 @@
     </div>
 </div>
 
-<div class="admin">
-    <details>
-        <summary>☁️ 云端题库管理 (JSON 导入 / 错误排查)</summary>
-        <div style="margin-top:10px; color:#666;">如果卡在“连接云端”，请按 <b>F12</b> 打开浏览器控制台查看红色报错。</div>
-        <textarea id="jsonInput" placeholder='在此粘贴 AI 生成的 JSON 代码...'></textarea>
-        <button class="admin-btn" onclick="uploadToCloud()">覆盖云端数据并刷新</button>
+<div style="width:100%; max-width:600px; margin-top:20px;">
+    <details style="background:#fff; border-radius:10px; padding:10px; border:1px solid #ddd;">
+        <summary>⚙️ 导入 JSON 数据</summary>
+        <textarea id="jsonInput" style="width:100%; height:80px; margin:10px 0;" placeholder='粘贴 JSON...'></textarea>
+        <button onclick="uploadToCloud()" style="width:100%; padding:10px; background:#1c1c1c; color:white; border:none; border-radius:5px;">存入云端</button>
     </details>
 </div>
 
 <script>
-    // --- 1. 初始化 Supabase ---
     const SUPABASE_URL = 'https://ltnlmgtoqecvctyeetma.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0bmxtZ3RvcWVjdmN0eWVldG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjM4MTAsImV4cCI6MjA4OTYzOTgxMH0.OB5An1HAkEiASsE_cV1KoFCWBcyYQGUPa6BKsM6LwaI';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    let supabase;
     let questions = [];
+
+    // --- 强制自检逻辑 ---
+    async function startApp() {
+        const statusEl = document.getElementById('sync-status');
+        const qTextEl = document.getElementById('q-text');
+
+        // 检测 SDK
+        if (typeof window.supabase === 'undefined') {
+            showFatalError("Supabase SDK 加载失败！请检查你的网络是否能访问 cdn.jsdelivr.net。");
+            return;
+        }
+
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            statusEl.innerText = "⏳ 正在尝试读取表...";
+            
+            // 尝试读取数据
+            const { data, error } = await supabase.from('dictation_items').select('*');
+            
+            if (error) {
+                statusEl.innerText = "❌ 数据库报错";
+                qTextEl.innerText = "错误详情: " + error.message;
+                return;
+            }
+
+            questions = data || [];
+            statusEl.innerText = "✅ 同步完成";
+            document.getElementById('count-info').innerText = `${questions.length} 题`;
+            
+            if (questions.length > 0) {
+                nextQ();
+            } else {
+                qTextEl.innerText = "题库空空如也，请点下方展开导入";
+                document.getElementById('q-cat').innerText = "EMPTY";
+            }
+
+        } catch (e) {
+            showFatalError("连接过程中发生异常: " + e.message);
+        }
+    }
+
+    function showFatalError(msg) {
+        document.getElementById('fatal-error').style.display = 'block';
+        document.getElementById('error-msg').innerText = msg;
+    }
+
+    // --- 画布及练习逻辑 (保持高度精简且兼容) ---
     const canvas = document.getElementById('board');
     const ctx = canvas.getContext('2d');
     let drawing = false;
 
-    // --- 2. 云端拉取逻辑 (增强日志版) ---
-    async function fetchQuestions() {
-        const statusEl = document.getElementById('sync-status');
-        statusEl.innerText = "🔄 正在请求 Supabase...";
-        
-        try {
-            console.log("开始请求数据...");
-            const { data, error } = await supabase.from('dictation_items').select('*');
-            
-            if (error) {
-                console.error("❌ Supabase API 返回错误:", error);
-                statusEl.innerText = "❌ 读取失败: " + error.message;
-                document.getElementById('q-text').innerText = "读取失败，请查看F12控制台";
-                return;
-            }
-            
-            console.log("✅ 成功拉取数据，数量:", data ? data.length : 0);
-            
-            if (data) {
-                questions = data;
-                statusEl.innerText = "✅ 云端已同步";
-                document.getElementById('count-info').innerText = `${questions.length} 题`;
-                
-                if(questions.length > 0) {
-                    nextQ();
-                } else {
-                    document.getElementById('q-text').innerText = "云端题库为空，请在下方导入JSON";
-                    document.getElementById('q-cat').innerText = "无数据";
-                }
-            }
-        } catch (err) {
-            console.error("❌ JavaScript 执行严重错误:", err);
-            statusEl.innerText = "❌ 执行异常: " + err.message;
-            document.getElementById('q-text').innerText = "代码执行异常";
-        }
-    }
-
-    // --- 3. 云端上传逻辑 (增强日志版) ---
-    async function uploadToCloud() {
-        const input = document.getElementById('jsonInput').value;
-        if(!input.trim()) return alert("输入为空！请粘贴 JSON。");
-        
-        try {
-            const json = JSON.parse(input);
-            if (!Array.isArray(json)) throw new Error("输入格式错误：必须是以 [...] 包裹的 JSON 数组。");
-            
-            if (!confirm(`确定要清空云端并重新上传这 ${json.length} 道题吗？`)) return;
-
-            document.getElementById('sync-status').innerText = "⏳ 正在清空旧数据...";
-            console.log("开始上传流程...");
-            
-            // 步骤 A: 删除旧数据 (用一种不会因为全空而报错的方法)
-            const { error: delError } = await supabase
-                .from('dictation_items')
-                .delete()
-                .neq('cat', 'SOME_IMPOSSIBLE_STRING_123'); // 删除所有分类不等于这串乱码的行（等同于全删）
-                
-            if (delError) {
-                console.warn("⚠️ 清空旧数据时出现警告 (可能表本身是空的，继续执行插入):", delError);
-            }
-
-            document.getElementById('sync-status').innerText = "⏳ 正在插入新数据...";
-            
-            // 步骤 B: 插入新数据
-            const { error: insError } = await supabase
-                .from('dictation_items')
-                .insert(json.map(item => ({ 
-                    cat: item.cat || '未分类', 
-                    q: item.q || '空题目', 
-                    a: item.a || '空答案' 
-                })));
-
-            if (insError) {
-                console.error("❌ 插入新数据失败:", insError);
-                throw insError;
-            }
-
-            console.log("✅ 上传成功！");
-            alert("同步成功！点击确定刷新页面。");
-            location.reload();
-            
-        } catch (e) {
-            console.error("❌ 上传全流程被中断:", e);
-            alert("上传错误: " + e.message + "\n(按 F12 查看详细日志)");
-            document.getElementById('sync-status').innerText = "❌ 上传失败";
-        }
-    }
-
-    // --- 4. 练习切换逻辑 ---
-    function nextQ() {
-        if (questions.length === 0) return;
-        document.getElementById('ans-box').style.display = 'none';
-        clearBoard();
-        
-        // 随机抽取一题
-        const item = questions[Math.floor(Math.random() * questions.length)];
-        document.getElementById('q-cat').innerText = item.cat || '无分类';
-        document.getElementById('q-text').innerText = item.q || '无题目';
-        document.getElementById('ans-text').innerText = item.a || '无答案';
-    }
-
-    function showAns() { 
-        if(questions.length > 0) {
-            document.getElementById('ans-box').style.display = 'block'; 
-        }
-    }
-
-    // --- 5. 手写板画布逻辑 ---
     function initCanvas() {
         const rect = canvas.parentNode.getBoundingClientRect();
-        canvas.width = rect.width; 
-        canvas.height = rect.height;
-        ctx.lineWidth = 4; 
-        ctx.lineCap = 'round'; 
-        ctx.strokeStyle = '#2d3436';
+        canvas.width = rect.width; canvas.height = rect.height;
+        ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#333';
     }
-    
+
     const getPos = (e) => {
         const rect = canvas.getBoundingClientRect();
         const cx = e.touches ? e.touches[0].clientX : e.clientX;
         const cy = e.touches ? e.touches[0].clientY : e.clientY;
         return { x: cx - rect.left, y: cy - rect.top };
     };
-    
+
     canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
     canvas.addEventListener('mousemove', (e) => { if (drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
     window.addEventListener('mouseup', () => drawing = false);
-    
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
+
+    function clearBoard() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    function showAns() { document.getElementById('ans-box').style.display = 'block'; }
     
-    function clearBoard() { 
-        ctx.clearRect(0, 0, canvas.width, canvas.height); 
+    function nextQ() {
+        if (questions.length === 0) return;
+        document.getElementById('ans-box').style.display = 'none';
+        clearBoard();
+        const item = questions[Math.floor(Math.random() * questions.length)];
+        document.getElementById('q-cat').innerText = item.cat || '无分类';
+        document.getElementById('q-text').innerText = item.q || '无题目';
+        document.getElementById('ans-text').innerText = item.a || '无答案';
     }
 
-    // --- 6. 页面加载完毕执行 ---
-    window.onload = () => { 
-        initCanvas(); 
-        fetchQuestions(); 
+    async function uploadToCloud() {
+        const val = document.getElementById('jsonInput').value;
+        if(!val) return;
+        try {
+            const json = JSON.parse(val);
+            document.getElementById('sync-status').innerText = "⏳ 上传中...";
+            // 先清空
+            await supabase.from('dictation_items').delete().neq('cat', '___');
+            // 再插入
+            const { error } = await supabase.from('dictation_items').insert(json);
+            if (error) throw error;
+            alert("上传成功！正在刷新...");
+            location.reload();
+        } catch (e) {
+            alert("上传失败：" + e.message);
+        }
+    }
+
+    // 启动！
+    window.onload = () => {
+        initCanvas();
+        startApp();
     };
-    
-    // 窗口大小变化时重设画布
     window.onresize = initCanvas;
 </script>
 </body>
