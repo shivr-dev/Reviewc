@@ -3,54 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>云同步听写助手 - Supabase 版</title>
+    <title>云同步听写助手 - 完整日志版</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --bg: #f0f2f5; --primary: #3ecf8e; --dark: #1c1c1c; }
+        :root { --bg: #f0f2f5; --primary: #3ecf8e; --dark: #1c1c1c; --danger: #e74c3c; }
         body { font-family: system-ui; background: var(--bg); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 600px; background: #fff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
-        .header { padding: 15px 20px; background: var(--dark); color: #fff; display: flex; justify-content: space-between; font-size: 13px; }
+        
+        /* 顶部状态栏 */
+        .header { padding: 15px 20px; background: var(--dark); color: #fff; display: flex; justify-content: space-between; font-size: 13px; flex-wrap: wrap; gap: 5px; }
+        #sync-status { word-break: break-all; } /* 防止长错误信息撑破布局 */
+        
+        /* 题目展示区 */
         .quiz-box { padding: 40px 20px; text-align: center; }
         #q-text { font-size: 1.8rem; font-weight: bold; margin-top: 10px; min-height: 2.5rem; }
         
-        /* 手写板 - 墨水蓝风格 */
+        /* 手写板 - 墨水蓝田字格风格 */
         .canvas-wrap { position: relative; width: 100%; height: 320px; background: #fff; touch-action: none; border-top: 1px solid #eee; }
-        #board { width: 100%; height: 100%; cursor: crosshair; }
-        .mizige { position: absolute; inset: 0; pointer-events: none; opacity: 0.1;
+        #board { width: 100%; height: 100%; cursor: crosshair; position: relative; z-index: 2; }
+        .mizige { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0.1;
             background-image: linear-gradient(#4a6cf7 1px, transparent 1px), linear-gradient(90deg, #4a6cf7 1px, transparent 1px);
             background-size: 50% 50%; border: 1px solid #4a6cf7;
         }
 
+        /* 答案区 */
         #ans-box { display: none; padding: 20px; text-align: center; background: #f6fffa; border-top: 2px solid var(--primary); }
         #ans-text { font-size: 2.5rem; font-family: "KaiTi", "楷体", serif; color: #2c3e50; font-weight: bold; }
 
+        /* 操作按钮 */
         .btn-group { display: grid; grid-template-columns: 1fr 1fr 1fr; background: #ddd; gap: 1px; }
-        button { border: none; padding: 20px; font-size: 1rem; cursor: pointer; background: #fff; font-weight: bold; }
+        button { border: none; padding: 20px; font-size: 1rem; cursor: pointer; background: #fff; font-weight: bold; transition: background 0.2s; }
         button:active { background: #f0f0f0; }
         .btn-show { background: var(--primary); color: white; }
 
+        /* 云端管理区 */
         .admin { width: 100%; max-width: 600px; margin-top: 20px; font-size: 12px; }
-        textarea { width: 100%; height: 100px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; padding: 10px; box-sizing: border-box; }
+        details { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
+        summary { cursor: pointer; font-size: 14px; font-weight: bold; color: #333; }
+        textarea { width: 100%; height: 120px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; padding: 10px; box-sizing: border-box; font-family: monospace; }
+        .admin-btn { width: 100%; padding: 12px; background: var(--dark); color: white; border-radius: 8px; font-size: 14px; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <span id="sync-status">📡 正在连接云端...</span>
+        <span id="sync-status">📡 正在初始化并连接云端...</span>
         <span id="count-info">0 题</span>
     </div>
+    
     <div class="quiz-box">
-        <div id="q-cat" style="color:var(--primary)">CATEGORY</div>
+        <div id="q-cat" style="color:var(--primary)">初始化中</div>
         <div id="q-text">等待数据载入...</div>
     </div>
+    
     <div class="canvas-wrap">
         <div class="mizige"></div>
         <canvas id="board"></canvas>
     </div>
+    
     <div id="ans-box">
         <div id="ans-text">--</div>
     </div>
+    
     <div class="btn-group">
         <button onclick="clearBoard()">重写</button>
         <button class="btn-show" onclick="showAns()">看答案</button>
@@ -60,14 +75,15 @@
 
 <div class="admin">
     <details>
-        <summary>☁️ 云端题库管理 (JSON 导入)</summary>
-        <textarea id="jsonInput" placeholder='粘贴 AI 生成的 JSON...'></textarea>
-        <button onclick="uploadToCloud()" style="width:100%; padding:10px; background:var(--dark); color:white; border-radius:5px;">覆盖云端数据并刷新</button>
+        <summary>☁️ 云端题库管理 (JSON 导入 / 错误排查)</summary>
+        <div style="margin-top:10px; color:#666;">如果卡在“连接云端”，请按 <b>F12</b> 打开浏览器控制台查看红色报错。</div>
+        <textarea id="jsonInput" placeholder='在此粘贴 AI 生成的 JSON 代码...'></textarea>
+        <button class="admin-btn" onclick="uploadToCloud()">覆盖云端数据并刷新</button>
     </details>
 </div>
 
 <script>
-    // --- 已配置你的 Supabase URL 和 Key ---
+    // --- 1. 初始化 Supabase ---
     const SUPABASE_URL = 'https://ltnlmgtoqecvctyeetma.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0bmxtZ3RvcWVjdmN0eWVldG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjM4MTAsImV4cCI6MjA4OTYzOTgxMH0.OB5An1HAkEiASsE_cV1KoFCWBcyYQGUPa6BKsM6LwaI';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -77,88 +93,148 @@
     const ctx = canvas.getContext('2d');
     let drawing = false;
 
-    // --- 云端交互逻辑 ---
+    // --- 2. 云端拉取逻辑 (增强日志版) ---
     async function fetchQuestions() {
-        document.getElementById('sync-status').innerText = "🔄 同步中...";
-        const { data, error } = await supabase.from('dictation_items').select('*');
+        const statusEl = document.getElementById('sync-status');
+        statusEl.innerText = "🔄 正在请求 Supabase...";
         
-        if (error) {
-            document.getElementById('sync-status').innerText = "❌ 连接失败，请检查数据库配置";
-            console.error(error);
-            return;
-        }
-        
-        if (data) {
-            questions = data;
-            document.getElementById('sync-status').innerText = "✅ 云端已同步";
-            document.getElementById('count-info').innerText = `${questions.length} 题`;
-            if(questions.length > 0) nextQ();
-            else {
-                document.getElementById('q-text').innerText = "题库为空，请导入JSON";
-                document.getElementById('q-cat').innerText = "无数据";
+        try {
+            console.log("开始请求数据...");
+            const { data, error } = await supabase.from('dictation_items').select('*');
+            
+            if (error) {
+                console.error("❌ Supabase API 返回错误:", error);
+                statusEl.innerText = "❌ 读取失败: " + error.message;
+                document.getElementById('q-text').innerText = "读取失败，请查看F12控制台";
+                return;
             }
+            
+            console.log("✅ 成功拉取数据，数量:", data ? data.length : 0);
+            
+            if (data) {
+                questions = data;
+                statusEl.innerText = "✅ 云端已同步";
+                document.getElementById('count-info').innerText = `${questions.length} 题`;
+                
+                if(questions.length > 0) {
+                    nextQ();
+                } else {
+                    document.getElementById('q-text').innerText = "云端题库为空，请在下方导入JSON";
+                    document.getElementById('q-cat').innerText = "无数据";
+                }
+            }
+        } catch (err) {
+            console.error("❌ JavaScript 执行严重错误:", err);
+            statusEl.innerText = "❌ 执行异常: " + err.message;
+            document.getElementById('q-text').innerText = "代码执行异常";
         }
     }
 
+    // --- 3. 云端上传逻辑 (增强日志版) ---
     async function uploadToCloud() {
         const input = document.getElementById('jsonInput').value;
-        if(!input.trim()) return alert("输入为空！");
+        if(!input.trim()) return alert("输入为空！请粘贴 JSON。");
         
         try {
             const json = JSON.parse(input);
-            if (!confirm(`确定要清空云端并重新上传 ${json.length} 道题吗？`)) return;
-
-            document.getElementById('sync-status').innerText = "⏳ 正在上传...";
+            if (!Array.isArray(json)) throw new Error("输入格式错误：必须是以 [...] 包裹的 JSON 数组。");
             
-            // 1. 清空旧数据
-            await supabase.from('dictation_items').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-            
-            // 2. 插入新数据
-            const { error } = await supabase.from('dictation_items').insert(
-                json.map(item => ({ cat: item.cat, q: item.q, a: item.a }))
-            );
+            if (!confirm(`确定要清空云端并重新上传这 ${json.length} 道题吗？`)) return;
 
-            if (error) throw error;
-            alert("同步成功！");
+            document.getElementById('sync-status').innerText = "⏳ 正在清空旧数据...";
+            console.log("开始上传流程...");
+            
+            // 步骤 A: 删除旧数据 (用一种不会因为全空而报错的方法)
+            const { error: delError } = await supabase
+                .from('dictation_items')
+                .delete()
+                .neq('cat', 'SOME_IMPOSSIBLE_STRING_123'); // 删除所有分类不等于这串乱码的行（等同于全删）
+                
+            if (delError) {
+                console.warn("⚠️ 清空旧数据时出现警告 (可能表本身是空的，继续执行插入):", delError);
+            }
+
+            document.getElementById('sync-status').innerText = "⏳ 正在插入新数据...";
+            
+            // 步骤 B: 插入新数据
+            const { error: insError } = await supabase
+                .from('dictation_items')
+                .insert(json.map(item => ({ 
+                    cat: item.cat || '未分类', 
+                    q: item.q || '空题目', 
+                    a: item.a || '空答案' 
+                })));
+
+            if (insError) {
+                console.error("❌ 插入新数据失败:", insError);
+                throw insError;
+            }
+
+            console.log("✅ 上传成功！");
+            alert("同步成功！点击确定刷新页面。");
             location.reload();
+            
         } catch (e) {
-            alert("错误: " + e.message);
+            console.error("❌ 上传全流程被中断:", e);
+            alert("上传错误: " + e.message + "\n(按 F12 查看详细日志)");
+            document.getElementById('sync-status').innerText = "❌ 上传失败";
         }
     }
 
-    // --- 练习逻辑 ---
+    // --- 4. 练习切换逻辑 ---
     function nextQ() {
         if (questions.length === 0) return;
         document.getElementById('ans-box').style.display = 'none';
         clearBoard();
+        
+        // 随机抽取一题
         const item = questions[Math.floor(Math.random() * questions.length)];
-        document.getElementById('q-cat').innerText = item.cat;
-        document.getElementById('q-text').innerText = item.q;
-        document.getElementById('ans-text').innerText = item.a;
+        document.getElementById('q-cat').innerText = item.cat || '无分类';
+        document.getElementById('q-text').innerText = item.q || '无题目';
+        document.getElementById('ans-text').innerText = item.a || '无答案';
     }
 
-    function showAns() { document.getElementById('ans-box').style.display = 'block'; }
+    function showAns() { 
+        if(questions.length > 0) {
+            document.getElementById('ans-box').style.display = 'block'; 
+        }
+    }
 
-    // --- 手写板逻辑 ---
+    // --- 5. 手写板画布逻辑 ---
     function initCanvas() {
         const rect = canvas.parentNode.getBoundingClientRect();
-        canvas.width = rect.width; canvas.height = rect.height;
-        ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#333';
+        canvas.width = rect.width; 
+        canvas.height = rect.height;
+        ctx.lineWidth = 4; 
+        ctx.lineCap = 'round'; 
+        ctx.strokeStyle = '#2d3436';
     }
+    
     const getPos = (e) => {
         const rect = canvas.getBoundingClientRect();
         const cx = e.touches ? e.touches[0].clientX : e.clientX;
         const cy = e.touches ? e.touches[0].clientY : e.clientY;
         return { x: cx - rect.left, y: cy - rect.top };
     };
+    
     canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
     canvas.addEventListener('mousemove', (e) => { if (drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
     window.addEventListener('mouseup', () => drawing = false);
+    
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
-    function clearBoard() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    
+    function clearBoard() { 
+        ctx.clearRect(0, 0, canvas.width, canvas.height); 
+    }
 
-    window.onload = () => { initCanvas(); fetchQuestions(); };
+    // --- 6. 页面加载完毕执行 ---
+    window.onload = () => { 
+        initCanvas(); 
+        fetchQuestions(); 
+    };
+    
+    // 窗口大小变化时重设画布
     window.onresize = initCanvas;
 </script>
 </body>
