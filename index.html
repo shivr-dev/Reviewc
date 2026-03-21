@@ -19,8 +19,17 @@
 
         /* 主卡片 */
         .main-card { width: 90%; max-width: 460px; background: var(--card); border-radius: 24px; box-shadow: var(--shadow); overflow: hidden; position: relative; z-index: 10; display: flex; flex-direction: column; }
+        
+        /* 创新：顶部极简进度条 */
+        .progress-wrap { width: 100%; height: 4px; background: var(--border); }
+        #progress-bar { height: 100%; width: 0%; background: var(--color-green); transition: width 0.4s ease; }
+
         .nav { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); font-size: 11px; color: var(--sub); letter-spacing: 1px; }
         
+        /* 窥探按钮的禁用状态 */
+        #hint-btn { cursor: pointer; transition: color 0.3s; }
+        #hint-btn.disabled { color: #dcdde1; pointer-events: none; }
+
         /* 结算图层 */
         #finish-overlay { position: absolute; inset: 0; background: #fff; z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; animation: fadeIn 0.8s; }
         .huge-symbol { font-size: 8rem; color: var(--color-red); margin: 0; line-height: 1; text-shadow: 0 10px 30px rgba(209, 81, 71, 0.2); }
@@ -35,8 +44,10 @@
         .canvas-area { position: relative; width: 100%; height: 320px; background: #fff; border-bottom: 1px solid var(--border); overflow: hidden; }
         .grid-bg { position: absolute; inset: 0; opacity: 0.05; background-image: linear-gradient(var(--text) 1px, transparent 1px), linear-gradient(90deg, var(--text) 1px, transparent 1px); background-size: 50% 50%; background-position: center; pointer-events: none; }
         #board { position: relative; z-index: 5; touch-action: none; }
-        #ghost-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 6rem; font-family: "KaiTi", serif; color: var(--text); opacity: 0; pointer-events: none; z-index: 2; transition: opacity 0.8s ease-out; white-space: nowrap; }
-        #ghost-hint.show { opacity: 0.08; transition: opacity 0.3s ease-in; }
+        
+        /* 幽灵提示动画调整为更短 */
+        #ghost-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 6rem; font-family: "KaiTi", serif; color: var(--text); opacity: 0; pointer-events: none; z-index: 2; transition: opacity 0.5s ease-out; white-space: nowrap; }
+        #ghost-hint.show { opacity: 0.08; transition: opacity 0.1s ease-in; }
 
         /* 判定卡 */
         #ans-pop { position: fixed; right: calc(50% - 480px); top: 50%; transform: translateY(-50%) scale(0.8); width: 220px; background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 15px 45px rgba(0,0,0,0.1); text-align: center; opacity: 0; pointer-events: none; z-index: 100; }
@@ -78,6 +89,10 @@
 </div>
 
 <div class="main-card">
+    <div class="progress-wrap">
+        <div id="progress-bar"></div>
+    </div>
+
     <div id="finish-overlay">
         <p class="huge-symbol">🉑</p>
         <p class="congrats">恭喜。</p>
@@ -89,7 +104,7 @@
     <div class="nav">
         <span onclick="toggleSidebar()">📓 记录</span>
         <span id="count-info">0 ITEMS</span>
-        <span onclick="peekHint()" title="偷看一眼答案">💡 窥探</span>
+        <span id="hint-btn" onclick="peekHint()" title="偷看一眼答案">💡 窥探</span>
         <span onclick="toggleSettings(true)">⚙️ 设置</span>
     </div>
     <div class="quiz-box">
@@ -143,11 +158,10 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0bmxtZ3RvcWVjdmN0eWVldG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjM4MTAsImV4cCI6MjA4OTYzOTgxMH0.OB5An1HAkEiASsE_cV1KoFCWBcyYQGUPa6BKsM6LwaI';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let all = [], filtered = [], wrongs = JSON.parse(localStorage.getItem('wrongs_v7') || '[]'), current = null;
+    let all = [], filtered = [], wrongs = JSON.parse(localStorage.getItem('wrongs_v8') || '[]'), current = null;
     let pool = []; 
     let sCorrect = 0, sWrong = 0; 
     
-    // 禅意语录库
     const zenQuotes = [
         "行到水穷处，坐看云起时。", "千里之行，始于足下。", "锲而不舍，金石可镂。",
         "一期一会，世当珍惜。", "心如止水，鉴常明。", "博观而约取，厚积而薄发。",
@@ -166,8 +180,10 @@
         const m = document.getElementById('mode').value;
         if(m==='all') filtered = all;
         else if(m==='wrong') filtered = wrongs;
-        else if(m==='word') filtered = all.filter(i => (i.cat||'').match(/字|词/));
+        // 修复：只要不包含"诗"或"句"，全部归于"字词"，大幅提高兼容性
+        else if(m==='word') filtered = all.filter(i => !/(诗|句)/.test(i.cat || ''));
         else if(m==='poem') filtered = all.filter(i => (i.cat||'').match(/诗/));
+        
         document.getElementById('count-info').innerText = `${filtered.length} ITEMS`;
         restartSession();
     }
@@ -176,16 +192,29 @@
         document.getElementById('finish-overlay').style.display = 'none';
         pool = [...filtered]; 
         sCorrect = 0; sWrong = 0;
+        updateProgress();
         if (pool.length > 0) nextQ();
-        else document.getElementById('q-text').innerText = "暂无内容";
+        else {
+            document.getElementById('q-text').innerText = "暂无内容";
+            document.getElementById('q-cat').innerText = "--";
+        }
     }
 
-    // 创新：触觉回馈 + 判定逻辑
+    function updateProgress() {
+        const total = filtered.length;
+        if (total === 0) {
+            document.getElementById('progress-bar').style.width = '0%';
+            return;
+        }
+        const done = total - pool.length;
+        const percent = (done / total) * 100;
+        document.getElementById('progress-bar').style.width = percent + '%';
+    }
+
     function mark(isOk) {
-        // Haptic Feedback (如果手机支持)
         if (navigator.vibrate) {
-            if (isOk) navigator.vibrate(30); // 答对：沉稳单次短震
-            else navigator.vibrate([40, 50, 40]); // 答错：警示双震
+            if (isOk) navigator.vibrate(30); 
+            else navigator.vibrate([40, 50, 40]); 
         }
 
         if(isOk) sCorrect++;
@@ -193,12 +222,14 @@
             sWrong++;
             if(!wrongs.find(i => i.q === current.q)) {
                 wrongs.push(current);
-                localStorage.setItem('wrongs_v7', JSON.stringify(wrongs));
+                localStorage.setItem('wrongs_v8', JSON.stringify(wrongs));
                 renderWrongs();
             }
         }
         
         pool = pool.filter(i => i !== current);
+        updateProgress(); // 更新进度条
+        
         showAns(false);
         if (pool.length === 0) setTimeout(showFinishScreen, 400);
         else setTimeout(nextQ, 400);
@@ -208,10 +239,11 @@
 
     function showFinishScreen() {
         document.getElementById('session-stats').innerText = `正确 ${sCorrect} | 错误 ${sWrong}`;
-        // 随机抽取一句禅语
         const quote = zenQuotes[Math.floor(Math.random() * zenQuotes.length)];
         document.getElementById('zen-quote-text').innerText = `「 ${quote} 」`;
         document.getElementById('finish-overlay').style.display = 'flex';
+        // 进度条满格
+        document.getElementById('progress-bar').style.width = '100%';
     }
 
     function renderWrongs() { document.getElementById('wrong-list').innerHTML = wrongs.map(i => `<div style="padding:8px 0; border-bottom:1px solid #eee"><b>${i.a}</b> <span style="color:#bdc3c7">${i.q}</span></div>`).join(''); }
@@ -219,6 +251,10 @@
     function nextQ() {
         if(!pool.length) return;
         clearBoard();
+        
+        // 恢复窥探按钮状态
+        document.getElementById('hint-btn').classList.remove('disabled');
+
         current = pool[Math.floor(Math.random() * pool.length)];
         document.getElementById('q-cat').innerText = (current.cat || '言叶').toUpperCase();
         document.getElementById('q-text').innerText = current.q;
@@ -230,21 +266,28 @@
         else if(ansEl.innerText.length > 6) ansEl.classList.add('extra-long');
     }
 
-    // 创新：浮光掠影 (半透提示)
+    // 0.5s 窥探 & 变灰逻辑
     function peekHint() {
         if(!current || !current.a) return;
+        const hintBtn = document.getElementById('hint-btn');
+        if(hintBtn.classList.contains('disabled')) return; // 防止重复点击
+        
         const hintEl = document.getElementById('ghost-hint');
         hintEl.innerText = current.a;
-        // 动态调整提示字号避免溢出
         hintEl.style.fontSize = current.a.length > 4 ? '3rem' : '6rem';
         hintEl.classList.add('show');
-        setTimeout(() => hintEl.classList.remove('show'), 1500);
+        
+        // 立即禁用按钮，变灰
+        hintBtn.classList.add('disabled');
+        
+        // 0.5秒后消失
+        setTimeout(() => hintEl.classList.remove('show'), 500);
     }
 
     function showAns(s) { document.getElementById('ans-pop').classList.toggle('active', s); }
     function toggleSidebar() { document.getElementById('wrong-sidebar').classList.toggle('active'); }
     function toggleSettings(s) { document.getElementById('settings').style.display = s ? 'block' : 'none'; }
-    function clearWrongs() { if(confirm("清空本地错题？")) { wrongs=[]; localStorage.setItem('wrongs_v7','[]'); renderWrongs(); applyRule(); } }
+    function clearWrongs() { if(confirm("清空本地错题？")) { wrongs=[]; localStorage.setItem('wrongs_v8','[]'); renderWrongs(); applyRule(); } }
 
     async function upload(mode) {
         const input = document.getElementById('jsonInput').value;
@@ -264,18 +307,16 @@
     async function delCloud() { if(confirm("确定清空云端？")) { await supabase.from('dictation_items').delete().neq('id', '000...00'); sync(); } }
 
     // ---------------------------------------------
-    // 创新：墨韵笔锋 (动态毛笔字迹模拟引擎)
+    // 回归纯粹的常规 Canvas 线条
     // ---------------------------------------------
     const canvas = document.getElementById('board');
     const ctx = canvas.getContext('2d');
     let drawing = false;
-    let lastPos = null;
-    let lastTime = 0;
-    let currentLineWidth = 4;
 
     function initCanvas() {
         const rect = canvas.parentNode.getBoundingClientRect();
         canvas.width = rect.width; canvas.height = rect.height;
+        ctx.lineWidth = 4;        // 固定粗细
         ctx.lineCap = 'round'; 
         ctx.lineJoin = 'round';
         ctx.strokeStyle = '#2c3e50';
@@ -288,51 +329,13 @@
         return { x: cx - rect.left, y: cy - rect.top };
     };
 
-    canvas.addEventListener('mousedown', (e) => startDraw(e));
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e); }, {passive: false});
-    
-    canvas.addEventListener('mousemove', (e) => draw(e));
-    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false});
-    
+    canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener('mousemove', (e) => { if (drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
     window.addEventListener('mouseup', () => drawing = false);
+    
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); }, {passive: false});
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } }, {passive: false});
     canvas.addEventListener('touchend', () => drawing = false);
-
-    function startDraw(e) {
-        drawing = true;
-        lastPos = getPos(e);
-        lastTime = Date.now();
-        currentLineWidth = 6; // 初始落笔稍重
-    }
-
-    function draw(e) {
-        if (!drawing) return;
-        const newPos = getPos(e);
-        const newTime = Date.now();
-        
-        // 计算移动距离和时间
-        const dx = newPos.x - lastPos.x;
-        const dy = newPos.y - lastPos.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const timeDelta = newTime - lastTime || 1; 
-        
-        // 计算速度：速度越快，线条越细（模拟飞白）；速度越慢，线条越粗（模拟墨晕）
-        const speed = distance / timeDelta;
-        
-        // 核心算法：映射笔触粗细 (限制在 2px 到 12px 之间)
-        let targetLineWidth = Math.max(2, 12 - speed * 3);
-        
-        // 平滑过渡线条宽度，防止锯齿
-        currentLineWidth = currentLineWidth * 0.7 + targetLineWidth * 0.3;
-
-        ctx.lineWidth = currentLineWidth;
-        ctx.beginPath();
-        ctx.moveTo(lastPos.x, lastPos.y);
-        ctx.lineTo(newPos.x, newPos.y);
-        ctx.stroke();
-
-        lastPos = newPos;
-        lastTime = newTime;
-    }
 
     function clearBoard() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
     window.onresize = initCanvas;
