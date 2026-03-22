@@ -3,101 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>言叶之庭 - 双面境界版</title>
+    <title>言叶之庭 - 终极全功能版</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
     <style>
-        /* 默认：休闲模式变量 */
+        /* 样式变量：双模式适配 */
         :root {
             --bg: #f7f6f2; --card: #ffffff; --text: #2c3e50; --sub: #95a5a6; --border: #eceae2;
             --color-red: #d15147; --color-green: #6b8e6b; --shadow: 0 10px 40px rgba(0,0,0,0.05);
         }
 
-        /* 激烈模式变量 (暗黑红石像素风) */
         body.intense-mode {
             --bg: #120a0a; --card: #1f1111; --text: #f8ecec; --sub: #ff6b6b; --border: #3d1f1f;
-            --color-red: #ff3333; --color-green: #ff9f0a; --shadow: 0 10px 50px rgba(255, 0, 0, 0.15);
+            --color-red: #ff3333; --color-green: #ff9f0a; --shadow: 0 10px 50px rgba(255, 0, 0, 0.2);
         }
 
         * { box-sizing: border-box; transition: background-color 0.4s, color 0.4s, border-color 0.4s; }
-        body { font-family: "PingFang SC", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
 
+        /* 主卡片 */
         .main-card { width: 95%; max-width: 460px; background: var(--card); border-radius: 24px; box-shadow: var(--shadow); overflow: hidden; position: relative; z-index: 10; display: flex; flex-direction: column; border: 1px solid transparent; }
         body.intense-mode .main-card { border: 1px solid var(--border); }
         
+        /* 进度条 */
         .progress-wrap { width: 100%; height: 4px; background: var(--border); }
-        #progress-bar { height: 100%; width: 0%; background: var(--color-green); transition: width 0.2s ease; }
+        #progress-bar { height: 100%; width: 0%; background: var(--color-green); transition: width 0.3s ease; }
 
-        /* 游戏主体容器，用于穿梭动画 */
-        #game-content { display: flex; flex-direction: column; flex: 1; height: 100%; width: 100%; }
-
+        /* 导航栏 */
         .nav { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); font-size: 11px; color: var(--sub); letter-spacing: 1px; }
-        
-        #hint-btn, #mode-toggle-btn { cursor: pointer; font-weight: bold; }
-        .disabled { opacity: 0.4; pointer-events: none; }
+        #mode-toggle-btn { cursor: pointer; font-weight: bold; padding: 4px 8px; border-radius: 6px; background: var(--border); color: var(--text); }
+        #mode-toggle-btn.locked { opacity: 0.2; pointer-events: none; cursor: not-allowed; }
 
-        .quiz-box { padding: 30px 20px; text-align: center; min-height: 120px; display: flex; flex-direction: column; justify-content: center; }
+        /* 题目区 */
+        .quiz-box { padding: 30px 20px; text-align: center; min-height: 140px; display: flex; flex-direction: column; justify-content: center; }
+        #q-cat { font-size: 10px; color: var(--color-red); margin-bottom: 8px; font-weight: bold; letter-spacing: 2px; }
         #q-text { font-size: 1.6rem; font-weight: 600; line-height: 1.4; word-break: break-all; }
         #q-text.long { font-size: 1.2rem; }
 
+        /* 画板区 */
         .canvas-area { position: relative; width: 100%; height: 320px; background: transparent; border-bottom: 1px solid var(--border); overflow: hidden; }
         .grid-bg { position: absolute; inset: 0; opacity: 0.05; background-image: linear-gradient(var(--text) 1px, transparent 1px), linear-gradient(90deg, var(--text) 1px, transparent 1px); background-size: 50% 50%; background-position: center; pointer-events: none; }
-        body.intense-mode .grid-bg { opacity: 0.1; background-image: linear-gradient(var(--color-red) 1px, transparent 1px), linear-gradient(90deg, var(--color-red) 1px, transparent 1px); }
-        #board { position: relative; z-index: 5; touch-action: none; }
+        body.intense-mode .grid-bg { opacity: 0.12; background-image: linear-gradient(var(--color-red) 1px, transparent 1px), linear-gradient(90deg, var(--color-red) 1px, transparent 1px); }
+        #board { position: relative; z-index: 5; touch-action: none; cursor: crosshair; }
         
-        /* 备战中心 (Prep Overlay) */
-        #intense-prep { position: absolute; inset: 0; background: var(--card); z-index: 40; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; }
-        #intense-prep select { width: 100%; max-width: 260px; background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 12px; border-radius: 10px; margin-bottom: 30px; outline: none; text-align: center; font-weight: bold; }
-        .prep-start-btn { padding: 15px 50px; border-radius: 30px; border: none; background: var(--color-red); color: #fff; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 5px 20px rgba(255,51,51,0.4); transition: transform 0.2s; }
-        .prep-start-btn:active { transform: scale(0.95); }
-
-        /* 倒数与穿梭特效 */
-        #prep-countdown { position: absolute; inset: 0; background: rgba(18,10,10,0.95); z-index: 45; display: none; align-items: center; justify-content: center; font-size: 10rem; color: var(--color-red); font-family: 'Courier New', Courier, monospace; font-weight: 900; text-shadow: 0 0 40px rgba(255,0,0,0.8); }
-        .pop-anim { animation: numPop 1s ease-out; }
-        @keyframes numPop { 0% { transform: scale(0.5); opacity: 0; } 20% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
-
-        .warp-effect { position: absolute; inset: 0; pointer-events: none; z-index: 48; opacity: 0; background: radial-gradient(circle, transparent 20%, var(--color-red) 150%); }
-        .warp-active { animation: warpAnim 0.6s cubic-bezier(0.1, 0.8, 0.2, 1); }
-        @keyframes warpAnim { 0% { opacity: 0; transform: scale(1); } 30% { opacity: 1; transform: scale(2); filter: blur(5px); } 100% { opacity: 0; transform: scale(5); filter: blur(15px); } }
-        
-        .board-warp-in { animation: boardIn 0.5s ease-out; }
-        @keyframes boardIn { 0% { transform: scale(0.8); filter: blur(10px); opacity: 0; } 100% { transform: scale(1); filter: blur(0); opacity: 1; } }
-
-        /* 巨大压迫感水印倒计时 */
-        #intense-timer { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 7rem; font-family: 'Courier New', Courier, monospace; font-weight: 900; color: rgba(255, 51, 51, 0.15); z-index: 1; pointer-events: none; letter-spacing: -5px; }
+        /* 倒计时水印 */
+        #intense-timer { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 8rem; font-family: 'Courier New', monospace; font-weight: 900; color: rgba(255, 51, 51, 0.1); z-index: 1; pointer-events: none; }
         body.intense-mode #intense-timer { display: flex; }
-        #intense-timer.urgent { color: rgba(255, 51, 51, 0.5); text-shadow: 0 0 20px rgba(255,0,0,0.8); animation: urgent-shake 0.15s infinite; }
+        #intense-timer.prep { color: rgba(255, 159, 10, 0.3); font-size: 10rem; }
+        #intense-timer.urgent { color: rgba(255, 51, 51, 0.4); text-shadow: 0 0 20px rgba(255,0,0,0.6); animation: shake 0.1s infinite; }
 
-        @keyframes urgent-shake { 0% { transform: translate(3px, 1px) rotate(0deg); } 20% { transform: translate(-3px, -2px) rotate(-1deg); } 40% { transform: translate(1px, 3px) rotate(1deg); } 60% { transform: translate(-2px, -1px) rotate(0deg); } 80% { transform: translate(3px, -3px) rotate(1deg); } 100% { transform: translate(-1px, 2px) rotate(-1deg); } }
+        @keyframes shake { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } 100% { transform: translate(2px, -2px); } }
 
-        #ghost-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: "KaiTi", serif; color: var(--text); opacity: 0; pointer-events: none; z-index: 2; transition: opacity 0.5s ease-out; padding: 20px; text-align: center; }
-        #ghost-hint.show { opacity: 0.1; transition: opacity 0.1s ease-in; }
+        /* 提示词 */
+        #ghost-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: "KaiTi", "STKaiti", serif; color: var(--text); opacity: 0; pointer-events: none; z-index: 2; transition: opacity 0.4s; padding: 20px; text-align: center; }
+        #ghost-hint.show { opacity: 0.12; }
 
-        #finish-overlay { position: absolute; inset: 0; background: var(--bg); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; animation: fadeIn 0.8s; }
-        .huge-symbol { font-size: 8rem; color: var(--color-red); margin: 0; }
-        .congrats { font-size: 1.8rem; font-weight: bold; margin: 10px 0; }
-        .zen-quote { font-family: "KaiTi", serif; font-size: 1rem; color: var(--sub); margin-top: 20px; padding: 0 40px; line-height: 1.6; }
+        /* 结算界面 */
+        #finish-overlay { position: absolute; inset: 0; background: var(--bg); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+        .huge-symbol { font-size: 6rem; margin: 0; }
 
-        #ans-pop { position: fixed; right: calc(50% - 480px); top: 50%; transform: translateY(-50%) scale(0.8); width: 240px; background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 15px 45px rgba(0,0,0,0.2); text-align: center; opacity: 0; pointer-events: none; z-index: 100; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        #ans-pop.active { opacity: 1; pointer-events: auto; transform: translateY(-50%) scale(1); right: calc(50% - 510px); }
-        #ans-text { font-size: 2.4rem; font-family: "KaiTi", serif; color: var(--text); display: block; margin-bottom: 20px; word-break: break-all; line-height: 1.3; }
-        #ans-text.long { font-size: 1.4rem; }
-        #ans-text.extra-long { font-size: 1.1rem; }
+        /* 答案弹窗 */
+        #ans-pop { position: fixed; right: calc(50% - 480px); top: 50%; transform: translateY(-50%) scale(0.9); width: 260px; background: var(--card); padding: 25px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); text-align: center; opacity: 0; pointer-events: none; z-index: 200; transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        #ans-pop.active { opacity: 1; pointer-events: auto; transform: translateY(-50%) scale(1); right: calc(50% - 520px); }
+        #ans-text { font-size: 2.2rem; font-family: "KaiTi", serif; color: var(--text); display: block; margin-bottom: 20px; line-height: 1.2; }
 
-        .judge-btn { width: 100%; padding: 12px; margin-bottom: 8px; border-radius: 12px; border: none; font-size: 13px; cursor: pointer; color: white; font-weight: bold; }
+        /* 侧边栏：错题本 */
+        #wrong-sidebar { position: fixed; left: 0; top: 0; width: 280px; height: 100%; background: var(--card); border-right: 1px solid var(--border); z-index: 1000; transform: translateX(-100%); padding: 30px; display: flex; flex-direction: column; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        #wrong-sidebar.active { transform: translateX(0); box-shadow: 20px 0 60px rgba(0,0,0,0.1); }
+        #wrong-list { flex: 1; overflow-y: auto; margin: 20px 0; font-size: 14px; }
+        .wrong-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+
+        /* 设置界面 */
+        #settings { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; padding: 40px 20px; overflow-y: auto; }
+        .set-box { background: var(--card); border-radius: 24px; padding: 30px; max-width: 420px; margin: 0 auto; box-shadow: var(--shadow); }
+
+        /* 通用按钮 */
+        button { cursor: pointer; border: none; font-family: inherit; }
+        .judge-btn { width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 14px; font-weight: bold; color: white; }
         .btn-yes { background: var(--color-green); }
         .btn-no { background: var(--color-red); }
-
         .footer { display: grid; grid-template-columns: 1fr 1.5fr 1fr; background: var(--border); gap: 1px; }
-        .footer button { padding: 20px; border: none; background: var(--card); font-size: 14px; cursor: pointer; color: var(--text); }
-        .btn-main { background: var(--text) !important; color: var(--bg) !important; }
+        .footer button { padding: 22px; background: var(--card); font-size: 14px; color: var(--text); }
+        .btn-main { background: var(--text) !important; color: var(--bg) !important; font-weight: bold; }
 
-        #wrong-sidebar { position: fixed; left: 0; top: 0; width: 260px; height: 100%; background: var(--card); border-right: 1px solid var(--border); z-index: 1000; transform: translateX(-100%); padding: 30px; display: flex; flex-direction: column; transition: transform 0.4s; }
-        #wrong-sidebar.active { transform: translateX(0); box-shadow: 10px 0 30px rgba(0,0,0,0.1); }
-        #settings { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; padding: 30px; overflow-y: auto; }
-        .set-box { background: var(--card); border-radius: 20px; padding: 25px; max-width: 400px; margin: 0 auto; box-shadow: var(--shadow); }
-        textarea, select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; }
-
-        .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); margin-bottom: 15px; font-size: 14px; }
+        /* 开关按钮 */
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; inset: 0; background-color: var(--border); transition: .4s; border-radius: 34px; }
@@ -105,8 +93,12 @@
         input:checked + .slider { background-color: var(--color-green); }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        @media (max-width: 1000px) { #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(0.8) !important; width: 85%; } #ans-pop.active { transform: translate(50%, -50%) scale(1) !important; } }
+        textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; font-size: 14px; }
+
+        @media (max-width: 1000px) {
+            #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(0.9) !important; width: 85%; }
+            #ans-pop.active { transform: translate(50%, -50%) scale(1) !important; }
+        }
     </style>
 </head>
 <body>
@@ -115,12 +107,12 @@
 <audio id="bg-music-intense" src="bgm_intense.mp3" loop preload="auto"></audio>
 
 <div id="wrong-sidebar">
-    <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-        <h4 style="margin:0">错题本</h4>
-        <span onclick="toggleSidebar()" style="cursor:pointer">×</span>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0">错题本</h3>
+        <button onclick="toggleSidebar()" style="background:none; font-size:24px; color:var(--text);">×</button>
     </div>
-    <div id="wrong-list" style="flex:1; overflow-y:auto; font-size:13px;"></div>
-    <button onclick="clearWrongs()" style="width:100%; padding:10px; border:none; background:var(--border); color:var(--text); border-radius:8px;">清空错题</button>
+    <div id="wrong-list"></div>
+    <button onclick="clearWrongs()" style="width:100%; padding:12px; background:var(--border); border-radius:12px; font-size:12px;">清空本地记录</button>
 </div>
 
 <div class="main-card">
@@ -128,92 +120,81 @@
     
     <div id="finish-overlay">
         <p class="huge-symbol" id="finish-icon">🉑</p>
-        <p class="congrats" id="finish-title">恭喜。</p>
-        <p id="session-stats" style="color:var(--sub); font-size: 0.9rem; font-weight:bold;">正确 0 | 错误 0</p>
-        <p id="zen-quote-text" class="zen-quote">--</p>
-        <button onclick="restartSession()" style="margin-top:20px; padding:12px 35px; border-radius:25px; border:2px solid var(--text); background:transparent; color:var(--text); font-weight:bold; cursor:pointer;">再来一轮</button>
+        <h2 id="finish-title">完成挑战</h2>
+        <p id="session-stats" style="color:var(--sub); font-weight:bold;">正确 0 | 错误 0</p>
+        <p id="zen-quote-text" style="font-family:'KaiTi',serif; color:var(--sub); padding:0 30px; line-height:1.6;">--</p>
+        <button onclick="restartSession()" style="margin-top:30px; padding:15px 40px; border-radius:30px; border:2px solid var(--text); background:transparent; color:var(--text); font-weight:bold;">再来一轮</button>
     </div>
 
-    <div id="intense-prep">
-        <h2 style="color:var(--color-red); margin-bottom: 5px; font-size: 2.2rem; font-family: 'Courier New', monospace; letter-spacing: 2px;">[ 激烈模式 ]</h2>
-        <p style="font-size: 13px; color: var(--sub); margin-bottom: 30px; line-height: 1.8;">
-            系统警告：逻辑序列濒临坍塌。<br>
-            在倒计时归零前，尽可能多地完成判定。<br>
-            <span style="color:var(--color-red); font-weight:bold;">* 战斗协议启动后，中途不可退回休闲模式。</span>
-        </p>
-        <select id="prep-time-limit">
-            <option value="60">1 分钟极速挑战 (60s)</option>
-            <option value="120">2 分钟心跳挑战 (120s)</option>
-            <option value="300">5 分钟耐力挑战 (300s)</option>
-        </select>
-        <button onclick="startIntenseGame()" class="prep-start-btn">启动协议</button>
+    <div class="nav">
+        <span onclick="toggleSidebar()" style="cursor:pointer">📓 记录</span>
+        <span id="mode-toggle-btn" onclick="toggleAppMode()">🌸 休闲</span>
+        <span id="count-info">0 ITEMS</span>
+        <span id="hint-btn" onclick="peekHint()" style="cursor:pointer">💡 窥探</span>
+        <span onclick="toggleSettings(true)" style="cursor:pointer">⚙️ 设置</span>
     </div>
 
-    <div id="prep-countdown">3</div>
-    <div id="warp-effect" class="warp-effect"></div>
+    <div class="quiz-box">
+        <div id="q-cat">READY</div>
+        <div id="q-text">等待开始...</div>
+    </div>
 
-    <div id="game-content">
-        <div class="nav">
-            <span onclick="toggleSidebar()">📓 记录</span>
-            <span id="mode-toggle-btn" onclick="toggleAppMode()" style="color:var(--text); font-size:12px;">🌸 休闲模式</span>
-            <span id="hint-btn" onclick="peekHint()">💡 窥探</span>
-            <span onclick="toggleSettings(true)">⚙️ 设置</span>
-        </div>
-        <div class="quiz-box">
-            <div id="q-cat" style="font-size:10px; color:var(--color-red); margin-bottom:5px; font-weight:bold;">LOAD</div>
-            <div id="q-text">载入中...</div>
-        </div>
-        <div class="canvas-area">
-            <div class="grid-bg"></div>
-            <div id="ghost-hint"></div>
-            <div id="intense-timer">60</div>
-            <canvas id="board"></canvas>
-        </div>
-        <div class="footer">
-            <button onclick="clearBoard()" style="color:var(--sub);">重写</button>
-            <button class="btn-main" onclick="showAns(true)">检查答案</button>
-            <button onclick="skipQ()">跳过</button>
-        </div>
+    <div class="canvas-area">
+        <div class="grid-bg"></div>
+        <div id="ghost-hint"></div>
+        <div id="intense-timer"></div>
+        <canvas id="board"></canvas>
+    </div>
+
+    <div class="footer">
+        <button onclick="clearBoard()" style="color:var(--sub);">重写</button>
+        <button class="btn-main" onclick="showAns(true)">检查答案</button>
+        <button onclick="skipQ()">跳过</button>
     </div>
 </div>
 
 <div id="ans-pop">
-    <span style="font-size:11px; color:var(--sub); display:block; margin-bottom:10px;">核对</span>
+    <span style="font-size:11px; color:var(--sub); display:block; margin-bottom:15px;">核对结果</span>
     <div id="ans-text">--</div>
     <button class="judge-btn btn-yes" onclick="mark(true)">正确 ☑️</button>
-    <button class="judge-btn btn-no" onclick="mark(false)">不正确 🔘</button>
+    <button class="judge-btn btn-no" onclick="mark(false)">错误 🔘</button>
 </div>
 
 <div id="settings">
-    <div style="max-width:400px; margin:0 auto; display:flex; justify-content:space-between; margin-bottom:20px;">
-        <h3 style="margin:0">设置</h3>
-        <button onclick="toggleSettings(false)" style="border:none; background:none; font-size:20px; color:var(--text);">×</button>
-    </div>
     <div class="set-box">
-        <div class="toggle-row">
-            <span>🎵 播放背景音乐</span>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+            <h3 style="margin:0">系统设置</h3>
+            <button onclick="toggleSettings(false)" style="background:none; font-size:24px;">×</button>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <span>🎵 启用背景音乐</span>
             <label class="switch">
                 <input type="checkbox" id="bgm-toggle" onchange="toggleBGM()">
                 <span class="slider"></span>
             </label>
         </div>
 
-        <label style="font-size:12px; font-weight:bold; margin-top:10px; display:block;">出题规则</label>
-        <select id="mode" onchange="applyRule()">
-            <option value="all">随机全部题目</option>
-            <option value="wrong">仅本地错题</option>
-            <option value="word">仅单纯字词</option>
-            <option value="note">仅文言注释</option>
-            <option value="poem">仅古诗长句</option>
+        <label style="font-size:12px; font-weight:bold; color:var(--color-red);">激烈模式时长</label>
+        <select id="time-limit" onchange="restartSession()">
+            <option value="60">1 分钟极速挑战</option>
+            <option value="300">5 分钟耐力挑战</option>
         </select>
+
+        <label style="font-size:12px; font-weight:bold; margin-top:10px; display:block;">出题筛选</label>
+        <select id="mode" onchange="applyRule()">
+            <option value="all">随机全部库</option>
+            <option value="wrong">仅限错题本</option>
+        </select>
+
+        <label style="font-size:12px; font-weight:bold; margin-top:10px; display:block;">JSON 数据管理</label>
+        <textarea id="jsonInput" rows="5" placeholder='格式: [{"q":"题目","a":"答案","cat":"分类"}]'></textarea>
         
-        <label style="font-size:12px; font-weight:bold; margin-top:10px; display:block;">数据管理</label>
-        <textarea id="jsonInput" rows="4" placeholder="粘贴 JSON 数组..."></textarea>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <button onclick="upload('cover')" style="background:var(--text); color:var(--bg); border:none; padding:12px; border-radius:10px; cursor:pointer;">覆盖导入</button>
-            <button onclick="upload('merge')" style="border:1px solid var(--border); background:var(--card); color:var(--text); padding:12px; border-radius:10px; cursor:pointer;">增量合并</button>
+            <button onclick="upload('merge')" style="background:var(--text); color:var(--bg); padding:12px; border-radius:12px; font-weight:bold;">增量合并</button>
+            <button onclick="upload('cover')" style="background:var(--color-red); color:white; padding:12px; border-radius:12px; font-weight:bold;">清空覆盖</button>
         </div>
-        <button onclick="delCloud()" style="width:100%; color:var(--color-red); background:none; border:none; margin-top:15px; font-size:11px; cursor:pointer;">⚠️ 清空云端所有数据</button>
+        <p style="font-size:10px; color:var(--sub); margin-top:10px; text-align:center;">* 覆盖操作将删除云端所有旧数据</p>
     </div>
 </div>
 
@@ -222,112 +203,93 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0bmxtZ3RvcWVjdmN0eWVldG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjM4MTAsImV4cCI6MjA4OTYzOTgxMH0.OB5An1HAkEiASsE_cV1KoFCWBcyYQGUPa6BKsM6LwaI';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let all = [], filtered = [], wrongs = JSON.parse(localStorage.getItem('wrongs_v12') || '[]'), current = null;
-    let pool = [], sCorrect = 0, sWrong = 0;
+    let all = [], filtered = [], pool = [], current = null, wrongs = JSON.parse(localStorage.getItem('wrongs_v11') || '[]');
+    let sCorrect = 0, sWrong = 0;
     
-    // 状态控制
     let isIntenseMode = false;
-    let isGaming = false; // 激烈战斗状态
+    let isSessionActive = false; // 正式比赛锁定标志
     let timerInterval = null;
+    let prepInterval = null;
     let timeLeft = 60;
     let audioInitialized = false;
 
-    const zenQuotes = ["行到水穷处，坐看云起时。", "一期一会，世当珍惜。", "日日是好日。", "锲而不舍，金石可镂。"];
+    window.onload = () => { initCanvas(); sync(); initBGM(); renderWrongs(); };
 
-    window.onload = () => { initCanvas(); sync(); renderWrongs(); initBGMState(); };
-
-    // 核心切换逻辑
+    // 修复：模式切换
     function toggleAppMode() {
-        if (isGaming) return; // 战斗状态锁定，禁止切换
-        
+        if (isSessionActive) return; // 只有在倒计时正式开始后才锁定
+
         isIntenseMode = !isIntenseMode;
         document.body.classList.toggle('intense-mode', isIntenseMode);
-        ctx.strokeStyle = isIntenseMode ? '#f8ecec' : '#2c3e50';
+        document.getElementById('mode-toggle-btn').innerText = isIntenseMode ? '🔥 激烈' : '🌸 休闲';
         
+        ctx.strokeStyle = isIntenseMode ? '#f8ecec' : '#2c3e50';
+        playBGM();
+        restartSession();
+    }
+
+    function restartSession() {
+        clearInterval(timerInterval);
+        clearInterval(prepInterval);
+        isSessionActive = false;
+        document.getElementById('mode-toggle-btn').classList.remove('locked');
+        document.getElementById('intense-timer').classList.remove('prep', 'urgent');
+        document.getElementById('intense-timer').innerText = '';
+        document.getElementById('finish-overlay').style.display = 'none';
+
+        pool = [...filtered]; sCorrect = 0; sWrong = 0;
+        updateProgress();
+
         if (isIntenseMode) {
-            document.getElementById('mode-toggle-btn').innerText = '🔥 激烈 (准备)';
-            document.getElementById('bg-music').pause(); // 暂停休闲音乐
-            restartSession(); // 会自动呼出备战中心
+            startPrepCountdown();
         } else {
-            document.getElementById('mode-toggle-btn').innerText = '🌸 休闲模式';
-            playCurrentBGM(); // 恢复休闲音乐
-            restartSession();
+            if (pool.length > 0) nextQ();
+            else document.getElementById('q-text').innerText = "库中无题";
         }
     }
 
-    // 启动协议（点击备战中心的开始按钮）
-    function startIntenseGame() {
-        document.getElementById('intense-prep').style.display = 'none';
-        
-        // 播放激烈音乐
-        if (document.getElementById('bgm-toggle').checked) {
-            document.getElementById('bg-music-intense').play().catch(e=>console.log(e));
-        }
+    // 12秒开赛倒计时
+    function startPrepCountdown() {
+        let prepTime = 12; 
+        const timerEl = document.getElementById('intense-timer');
+        timerEl.classList.add('prep');
+        timerEl.innerText = prepTime;
+        document.getElementById('q-text').innerText = "准备进入激烈模式...";
+        document.getElementById('q-cat').innerText = "PREPARING";
 
-        // 倒数 3 2 1
-        const cdEl = document.getElementById('prep-countdown');
-        cdEl.style.display = 'flex';
-        let count = 12; // 这里是开始前的缓冲倒计时
-        cdEl.innerText = count;
-        cdEl.classList.add('pop-anim');
-
-        const cdInterval = setInterval(() => {
-            count--;
-            if (count > 0) {
-                cdEl.innerText = count;
-                cdEl.classList.remove('pop-anim');
-                void cdEl.offsetWidth; // 触发重绘
-                cdEl.classList.add('pop-anim');
-            } else {
-                clearInterval(cdInterval);
-                cdEl.style.display = 'none';
-                
-                // 触发穿梭特效
-                const warp = document.getElementById('warp-effect');
-                warp.classList.add('warp-active');
-                setTimeout(() => warp.classList.remove('warp-active'), 600);
-
-                const gameContent = document.getElementById('game-content');
-                gameContent.classList.remove('board-warp-in');
-                void gameContent.offsetWidth;
-                gameContent.classList.add('board-warp-in');
-
-                // 正式开始游戏
-                restartSession(true);
+        prepInterval = setInterval(() => {
+            prepTime--;
+            timerEl.innerText = prepTime;
+            if (prepTime <= 0) {
+                clearInterval(prepInterval);
+                timerEl.classList.remove('prep');
+                beginIntenseChallenge();
             }
         }, 1000);
     }
 
-    function initBGMState() {
-        const isBgmEnabled = localStorage.getItem('bgm_enabled') !== 'false';
-        document.getElementById('bgm-toggle').checked = isBgmEnabled;
-        document.body.addEventListener('click', () => {
-            if (!audioInitialized && document.getElementById('bgm-toggle').checked && !isIntenseMode) {
-                playCurrentBGM();
-                audioInitialized = true;
+    function beginIntenseChallenge() {
+        isSessionActive = true; 
+        document.getElementById('mode-toggle-btn').classList.add('locked');
+        
+        timeLeft = parseInt(document.getElementById('time-limit').value);
+        updateTimerDisplay();
+        
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+            if (timeLeft <= 10) document.getElementById('intense-timer').classList.add('urgent');
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                showFinish(true);
             }
-        }, { once: true });
+        }, 1000);
+
+        if (pool.length > 0) nextQ();
     }
 
-    function playCurrentBGM() {
-        const bgmNormal = document.getElementById('bg-music');
-        const bgmIntense = document.getElementById('bg-music-intense');
-        bgmNormal.pause();
-        bgmIntense.pause();
-
-        if (document.getElementById('bgm-toggle').checked) {
-            // 激烈模式的音乐由 startIntenseGame 独立控制，所以这里只管战斗中或休闲
-            if (!isIntenseMode || (isIntenseMode && isGaming)) {
-                const activeAudio = isIntenseMode ? bgmIntense : bgmNormal;
-                activeAudio.play().catch(e => console.log(e));
-            }
-        }
-    }
-
-    function toggleBGM() {
-        localStorage.setItem('bgm_enabled', document.getElementById('bgm-toggle').checked);
-        playCurrentBGM();
-        audioInitialized = true;
+    function updateTimerDisplay() {
+        document.getElementById('intense-timer').innerText = timeLeft;
     }
 
     async function sync() {
@@ -338,89 +300,20 @@
 
     function applyRule() {
         const m = document.getElementById('mode').value;
-        if(m==='all') filtered = all;
-        else if(m==='wrong') filtered = wrongs;
-        else if(m==='poem') filtered = all.filter(i => /(诗|句)/.test(i.cat || ''));
-        else if(m==='note') filtered = all.filter(i => /(注|释|文)/.test(i.cat || ''));
-        else if(m==='word') filtered = all.filter(i => !/(诗|句|注|释|文)/.test(i.cat || ''));
-        
+        filtered = (m === 'all') ? all : wrongs;
         document.getElementById('count-info').innerText = `${filtered.length} ITEMS`;
         restartSession();
-    }
-
-    function restartSession(forceStart = false) {
-        document.getElementById('finish-overlay').style.display = 'none';
-        
-        // 如果是激烈模式且不是真实开始（比如刚切换模式，或点击了“再来一轮”）
-        if (isIntenseMode && !forceStart) {
-            document.getElementById('intense-prep').style.display = 'flex';
-            isGaming = false;
-            document.getElementById('mode-toggle-btn').classList.remove('disabled');
-            document.getElementById('mode-toggle-btn').innerText = '🔥 激烈 (准备)';
-            clearInterval(timerInterval);
-            
-            // 音乐归位
-            const bgmIntense = document.getElementById('bg-music-intense');
-            bgmIntense.pause();
-            bgmIntense.currentTime = 0; 
-            return;
-        }
-
-        // --- 真实游戏逻辑 ---
-        pool = [...filtered]; sCorrect = 0; sWrong = 0;
-        updateProgress();
-        
-        clearInterval(timerInterval);
-        document.getElementById('intense-timer').classList.remove('urgent');
-        
-        if (isIntenseMode && forceStart) {
-            isGaming = true;
-            document.getElementById('mode-toggle-btn').innerText = '🔥 战斗中';
-            document.getElementById('mode-toggle-btn').classList.add('disabled'); // 锁定按钮
-            
-            timeLeft = parseInt(document.getElementById('prep-time-limit').value);
-            updateTimerDisplay();
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                updateTimerDisplay();
-                if (timeLeft <= 10) document.getElementById('intense-timer').classList.add('urgent');
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    showFinishScreen(true); // 时间耗尽
-                }
-            }, 1000);
-        } else {
-            isGaming = false;
-        }
-
-        if (pool.length > 0) nextQ();
-        else document.getElementById('q-text').innerText = "暂无内容";
-    }
-
-    function updateTimerDisplay() {
-        document.getElementById('intense-timer').innerText = timeLeft;
-    }
-
-    function updateProgress() {
-        const total = filtered.length;
-        const percent = total === 0 ? 0 : ((total - pool.length) / total) * 100;
-        document.getElementById('progress-bar').style.width = percent + '%';
     }
 
     function nextQ() {
         if(!pool.length) return;
         clearBoard();
-        document.getElementById('hint-btn').classList.remove('disabled');
         current = pool[Math.floor(Math.random() * pool.length)];
         const qEl = document.getElementById('q-text');
         qEl.innerText = current.q;
         qEl.className = current.q.length > 12 ? 'long' : '';
-        document.getElementById('q-cat').innerText = (current.cat || '言叶').toUpperCase();
-        const ansEl = document.getElementById('ans-text');
-        ansEl.innerText = current.a || '';
-        ansEl.className = '';
-        if(ansEl.innerText.length > 5 && ansEl.innerText.length <= 12) ansEl.classList.add('long');
-        else if(ansEl.innerText.length > 12) ansEl.classList.add('extra-long');
+        document.getElementById('q-cat').innerText = (current.cat || 'COMMON').toUpperCase();
+        document.getElementById('ans-text').innerText = current.a || '';
     }
 
     function mark(isOk) {
@@ -429,106 +322,90 @@
             sWrong++;
             if(!wrongs.find(i => i.q === current.q)) {
                 wrongs.push(current);
-                localStorage.setItem('wrongs_v12', JSON.stringify(wrongs));
+                localStorage.setItem('wrongs_v11', JSON.stringify(wrongs));
                 renderWrongs();
             }
         }
         pool = pool.filter(i => i !== current);
         updateProgress();
         showAns(false);
-        
         if (pool.length === 0) {
-            clearInterval(timerInterval); 
-            setTimeout(() => showFinishScreen(false), 400); // 提前通关
+            clearInterval(timerInterval);
+            showFinish(false);
         } else {
-            setTimeout(nextQ, 400);
+            setTimeout(nextQ, 350);
         }
     }
 
-    function peekHint() {
-        if(!current) return;
-        const btn = document.getElementById('hint-btn');
-        if(btn.classList.contains('disabled')) return;
-        const hintEl = document.getElementById('ghost-hint');
-        hintEl.innerText = current.a;
-        hintEl.style.fontSize = current.a.length > 10 ? '1.5rem' : '4rem';
-        hintEl.classList.add('show');
-        btn.classList.add('disabled');
-        setTimeout(() => hintEl.classList.remove('show'), 500);
-    }
-
-    function showFinishScreen(isTimeout = false) {
+    function showFinish(isTimeout) {
+        isSessionActive = false;
+        document.getElementById('mode-toggle-btn').classList.remove('locked');
         document.getElementById('session-stats').innerText = `正确 ${sCorrect} | 错误 ${sWrong}`;
         
+        const zenEl = document.getElementById('zen-quote-text');
         const iconEl = document.getElementById('finish-icon');
         const titleEl = document.getElementById('finish-title');
-        const quoteEl = document.getElementById('zen-quote-text');
 
         if (isIntenseMode) {
-            if (isTimeout) {
-                iconEl.innerText = '⏳';
-                titleEl.innerText = '时间耗尽';
-                quoteEl.innerText = '「 逻辑序列已坍塌，请重载... 」';
-                iconEl.style.color = 'var(--color-red)';
-            } else {
-                iconEl.innerText = '🏆';
-                titleEl.innerText = '极限通关';
-                quoteEl.innerText = `「 剩余时间: ${timeLeft} 秒 」`;
-                iconEl.style.color = 'var(--color-green)';
-            }
-            quoteEl.style.fontFamily = "'Courier New', monospace";
+            iconEl.innerText = isTimeout ? '⏳' : '🔥';
+            titleEl.innerText = isTimeout ? '时间耗尽' : '极限突破';
+            zenEl.innerText = isTimeout ? "「 逻辑序列已坍塌，请重载... 」" : "「 剩余时间: " + timeLeft + "s | 效率极高 」";
+            zenEl.style.fontFamily = "'Courier New', monospace";
         } else {
             iconEl.innerText = '🉑';
-            titleEl.innerText = '恭喜。';
-            quoteEl.innerText = `「 ${zenQuotes[Math.floor(Math.random()*zenQuotes.length)]} 」`;
-            iconEl.style.color = 'var(--color-red)';
-            quoteEl.style.fontFamily = '"KaiTi", serif';
+            titleEl.innerText = '洗练完成';
+            zenEl.innerText = "「 行到水穷处，坐看云起时。 」";
+            zenEl.style.fontFamily = '"KaiTi", serif';
         }
-        
         document.getElementById('finish-overlay').style.display = 'flex';
-        document.getElementById('progress-bar').style.width = '100%';
     }
 
-    function showAns(s) { document.getElementById('ans-pop').classList.toggle('active', s); }
+    // 恢复：侧边栏逻辑
     function toggleSidebar() { document.getElementById('wrong-sidebar').classList.toggle('active'); }
-    function toggleSettings(s) { document.getElementById('settings').style.display = s ? 'block' : 'none'; }
-    function clearWrongs() { if(confirm("清空？")) { wrongs=[]; localStorage.setItem('wrongs_v12','[]'); renderWrongs(); applyRule(); } }
-    function renderWrongs() { document.getElementById('wrong-list').innerHTML = wrongs.map(i => `<div style="padding:8px 0; border-bottom:1px solid var(--border)"><b>${i.a}</b> <small style="color:var(--sub)">${i.q}</small></div>`).join(''); }
-    function skipQ() { if(pool.length > 1) nextQ(); }
+    function renderWrongs() { 
+        document.getElementById('wrong-list').innerHTML = wrongs.map(i => `
+            <div class="wrong-item">
+                <div style="font-weight:bold; color:var(--text)">${i.a}</div>
+                <div style="font-size:12px; color:var(--sub)">${i.q}</div>
+            </div>
+        `).join(''); 
+    }
+    function clearWrongs() { if(confirm("清空本地记录？")) { wrongs=[]; localStorage.setItem('wrongs_v11','[]'); renderWrongs(); applyRule(); } }
 
+    // 恢复：上传/同步逻辑
     async function upload(mode) {
         const input = document.getElementById('jsonInput').value;
-        if(!input) return alert("请先粘贴 JSON 数据");
+        if(!input) return alert("请粘贴 JSON");
         try {
             const data = JSON.parse(input);
             if(mode === 'cover') {
-                if(!confirm("确定要【清空云端并覆盖】吗？此操作不可逆！")) return;
-                const { error: delErr } = await supabase.from('dictation_items').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-                if(delErr) throw delErr;
+                if(!confirm("确定清空云端并覆盖？")) return;
+                await supabase.from('dictation_items').delete().neq('id', '00000000-0000-0000-0000-000000000000');
             }
-            const { error: insErr } = await supabase.from('dictation_items').insert(data);
-            if(insErr) throw insErr;
-            alert("云端同步成功");
+            await supabase.from('dictation_items').insert(data);
+            alert("同步成功");
             document.getElementById('jsonInput').value = "";
             toggleSettings(false);
-            sync(); 
-        } catch(e) { 
-            alert("同步失败：" + e.message); 
+            sync();
+        } catch(e) { alert("失败: " + e.message); }
+    }
+
+    // BGM
+    function initBGM() {
+        document.getElementById('bgm-toggle').checked = localStorage.getItem('bgm_enabled') !== 'false';
+        document.body.addEventListener('click', () => { if (!audioInitialized) { playBGM(); audioInitialized = true; } }, { once: true });
+    }
+    function playBGM() {
+        const n = document.getElementById('bg-music'), i = document.getElementById('bg-music-intense');
+        n.pause(); i.pause();
+        if (document.getElementById('bgm-toggle').checked) {
+            const active = isIntenseMode ? i : n;
+            active.play().catch(() => {});
         }
     }
+    function toggleBGM() { localStorage.setItem('bgm_enabled', document.getElementById('bgm-toggle').checked); playBGM(); }
 
-    async function delCloud() { 
-        if(confirm("警告：确定要永久清空云端所有数据吗？")) { 
-            try {
-                const { error: delErr } = await supabase.from('dictation_items').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-                if(delErr) throw delErr;
-                alert("云端数据已全部清空");
-                sync();
-            } catch(e) { alert("清空失败：" + e.message); }
-        } 
-    }
-
-    // Canvas 画板
+    // Canvas
     const canvas = document.getElementById('board');
     const ctx = canvas.getContext('2d');
     let drawing = false;
@@ -543,12 +420,22 @@
         const cy = e.touches ? e.touches[0].clientY : e.clientY;
         return { x: cx - rect.left, y: cy - rect.top };
     };
-    canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
-    canvas.addEventListener('mousemove', (e) => { if(drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
-    window.addEventListener('mouseup', () => drawing = false);
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); }, {passive:false});
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if(drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } }, {passive:false});
+    window.addEventListener('touchend', () => drawing = false);
     function clearBoard() { ctx.clearRect(0,0,canvas.width,canvas.height); }
+    function showAns(s) { document.getElementById('ans-pop').classList.toggle('active', s); }
+    function updateProgress() {
+        const p = filtered.length === 0 ? 0 : ((filtered.length - pool.length) / filtered.length) * 100;
+        document.getElementById('progress-bar').style.width = p + '%';
+    }
+    function peekHint() {
+        const h = document.getElementById('ghost-hint');
+        h.innerText = current.a; h.classList.add('show');
+        setTimeout(() => h.classList.remove('show'), 800);
+    }
+    function skipQ() { if(pool.length > 1) nextQ(); }
+    function toggleSettings(s) { document.getElementById('settings').style.display = s ? 'block' : 'none'; }
     window.onresize = initCanvas;
 </script>
 </body>
