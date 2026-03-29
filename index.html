@@ -175,7 +175,8 @@
         <p>言叶之庭已向该邮箱发送了验证信件</p>
         <p style="font-size: 11px; color: var(--color-red); margin-top: -15px; margin-bottom: 20px;">* 请查收带有超大验证码的日系邮件</p>
         
-        <input type="text" id="auth-otp-input" class="auth-input" placeholder="输入 6 位验证码" maxlength="6" style="text-align:center; font-size: 22px; letter-spacing: 6px; font-family: monospace; font-weight:bold;">
+        <!-- 修复：限制解除，最大支持 8 位甚至更长，以兼容最新的 Supabase Token -->
+        <input type="text" id="auth-otp-input" class="auth-input" placeholder="输入邮件中的验证码" maxlength="10" style="text-align:center; font-size: 20px; letter-spacing: 4px; font-family: monospace; font-weight:bold;">
         
         <button class="auth-btn" id="otp-submit-btn" onclick="verifyOtpCode()">验证并登入</button>
         <button class="auth-toggle" onclick="cancelOtpMode()">返回重试</button>
@@ -324,7 +325,7 @@
     let currentUser = null;
     let isRegisterMode = false;
     let captchaResult = 0;
-    let pendingAuthEmail = ""; // 用于暂存需要输入验证码的邮箱
+    let pendingAuthEmail = ""; 
     let wrongStorageKey = 'wrongs_v11'; 
 
     window.onload = async () => {
@@ -370,7 +371,6 @@
             if (isRegisterMode) {
                 const { data, error } = await supabase.auth.signUp({ email, password: pwd });
                 if (error) throw error;
-                // 判断是否需要邮箱确认验证码
                 if (data.session === null) {
                     pendingAuthEmail = email;
                     document.getElementById('main-auth-card').style.display = 'none';
@@ -390,10 +390,10 @@
         }
     }
 
-    // 提交邮件验证码
+    // 修复：放宽长度限制判断，只要有输入就提交验证，由后端决定是否合法
     async function verifyOtpCode() {
         const token = document.getElementById('auth-otp-input').value.trim();
-        if(!token || token.length < 6) return alert("请输入完整的6位验证码");
+        if(!token || token.length < 5) return alert("请输入完整的验证码");
 
         try {
             document.getElementById('otp-submit-btn').innerText = '验证中...';
@@ -423,12 +423,25 @@
         initGame();
     }
 
+    // 修复：完善登出逻辑，不仅调 API，还强制清空相关本地缓存
     async function logoutAccount() {
-        await supabase.auth.signOut();
-        location.reload();
+        try {
+            document.getElementById('user-info-text').innerText = "正在切断连接...";
+            await supabase.auth.signOut();
+            
+            // 彻底清理当前域名下的 Supabase 相关的缓存令牌
+            for (let key in localStorage) {
+                if (key.startsWith('sb-')) localStorage.removeItem(key);
+            }
+            
+            // 强制重新加载页面并回到最干净的状态
+            window.location.replace(window.location.href.split('?')[0]);
+        } catch (error) {
+            alert("登出遇到小问题：" + error.message);
+            window.location.reload();
+        }
     }
 
-    // 注销账号彻底自毁功能
     async function deleteAccount() {
         const c1 = confirm("⚠️ 危险警告\n注销账号将永久销毁您的所有云端词库、错题本，此操作不可逆！\n\n确定要继续吗？");
         if (!c1) return;
@@ -438,12 +451,10 @@
             return;
         }
         try {
-            // 调用之前在 Supabase 创建的删除函数
             const { error } = await supabase.rpc('delete_user');
             if (error) throw error;
             alert("您的账号数据已彻底化为尘埃。有缘再见。");
-            await supabase.auth.signOut();
-            location.reload();
+            await logoutAccount(); // 复用修复后的强制登出清理逻辑
         } catch (e) {
             alert("注销失败：" + e.message + "\n(如报错未找到函数，请去Supabase按说明配置SQL)");
         }
@@ -507,7 +518,7 @@
         }
     }
 
-    // ======= 数据与规则系统 (已添加用户隔离) =======
+    // ======= 数据与规则系统 =======
     async function sync() {
         const { data } = await supabase.from('dictation_items').select('*');
         all = data || [];
