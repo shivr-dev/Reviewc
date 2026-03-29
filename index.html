@@ -6,7 +6,7 @@
     <title>言叶之庭 - 词库主题版</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
     <style>
-        /* ================= 调色盘系统 (6款全保留，新增毛玻璃RGB变量) ================= */
+        /* ================= 调色盘系统 ================= */
         :root {
             --bg: #f4f1eb; --card: rgba(255, 255, 255, 0.85); --text: #2c3e50; --sub: #8b979f; --border: #e2dfd6;
             --color-red: #d15147; --color-green: #5a825a; --shadow: 0 12px 40px rgba(0,0,0,0.08); --glass-blur: blur(16px);
@@ -55,6 +55,9 @@
             --bg: #0b140d; --card: rgba(20, 41, 24, 0.85); --text: #e1ede4; --sub: #386644; --border: #1f4227;
             --color-red: #ff382e; --color-green: #00cc44; --shadow: 0 12px 50px rgba(0, 204, 68, 0.2);
         }
+
+        /* 降级毛玻璃选项 */
+        body.no-glass * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 
         /* ================= 基础与动效提升 ================= */
         * { box-sizing: border-box; transition: background-color 0.4s, color 0.4s, border-color 0.4s, box-shadow 0.3s; }
@@ -105,7 +108,7 @@
         #wrong-list { flex: 1; overflow-y: auto; margin: 20px 0; font-size: 14px; padding-right: 10px; }
         .wrong-item { padding: 15px 0; border-bottom: 1px dashed var(--border); }
 
-        /* ================= 美化按钮与控件 ================= */
+        /* ================= 按钮控件 ================= */
         button { cursor: pointer; border: none; font-family: inherit; background: transparent; transition: all 0.2s; outline: none; }
         button:active { transform: scale(0.96); }
         .judge-btn { width: 100%; padding: 16px; margin-bottom: 12px; border-radius: 16px; font-weight: bold; font-size: 15px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -129,23 +132,23 @@
         input:checked + .slider { background-color: var(--color-green); }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        /* ================= 菜单与弹窗 (毛玻璃加强) ================= */
+        /* ================= 菜单、登录、资源 ================= */
         .full-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; display: none; padding: 40px 20px; overflow-y: auto; }
         .set-box { background: var(--card); backdrop-filter: var(--glass-blur); border: 1px solid rgba(255,255,255,0.4); border-radius: 28px; padding: 35px; max-width: 480px; margin: 0 auto; box-shadow: 0 25px 50px rgba(0,0,0,0.15); animation: slideUp 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
         @keyframes slideUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
 
         #auth-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .auth-card { background: var(--card); backdrop-filter: var(--glass-blur); border: 1px solid rgba(255,255,255,0.4); width: 100%; max-width: 400px; border-radius: 28px; padding: 45px 35px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); text-align: center; }
-        .auth-card h2 { margin-top: 0; color: var(--text); margin-bottom: 10px; font-size: 24px; }
-        .auth-card p { font-size: 13px; color: var(--sub); margin-bottom: 30px; line-height: 1.6; }
+        .auth-card { background: var(--card); backdrop-filter: var(--glass-blur); border: 1px solid rgba(255,255,255,0.4); width: 100%; max-width: 400px; border-radius: 28px; padding: 40px 35px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); text-align: center; }
+        
+        .auth-tabs { display: flex; background: rgba(0,0,0,0.05); border-radius: 14px; margin-bottom: 20px; overflow: hidden; }
+        .auth-tab { flex: 1; padding: 12px; font-size: 14px; font-weight: bold; cursor: pointer; color: var(--sub); transition: 0.3s; }
+        .auth-tab.active { background: var(--text); color: var(--bg); }
+        
         .captcha-box { display: flex; gap: 12px; margin-bottom: 20px; align-items: center; }
         .captcha-math { flex: 1; background: rgba(0,0,0,0.03); border-radius: 16px; padding: 15px; font-weight: bold; font-family: monospace; font-size: 20px; color: var(--text); letter-spacing: 2px; }
-        .captcha-input { flex: 1; margin-bottom: 0; font-size: 18px; text-align: center; }
         .auth-btn { width: 100%; padding: 16px; background: var(--text); color: var(--bg); border-radius: 16px; font-weight: bold; font-size: 16px; margin-top: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
         .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(0,0,0,0.15); }
-        .auth-toggle { background: none; border: none; color: var(--color-green); font-size: 13px; margin-top: 25px; cursor: pointer; text-decoration: underline; opacity: 0.8; }
 
-        /* ================= 资源中心精美样式 ================= */
         .rc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 25px; }
         .rc-item { background: var(--bg); border-radius: 20px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s, box-shadow 0.3s; }
         .rc-item:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); }
@@ -157,16 +160,15 @@
         .rc-actions { display: flex; gap: 8px; padding: 0 18px 18px 18px; }
         .rc-btn { flex: 1; padding: 10px; border-radius: 12px; font-size: 13px; font-weight: bold; text-align: center; cursor: pointer; transition: all 0.2s; }
         .rc-btn-dl { background: var(--text); color: var(--bg); border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .rc-btn-dl:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
         .rc-btn-del { background: transparent; color: var(--color-red); border: 1px solid var(--color-red); }
-        .rc-btn-del:hover { background: var(--color-red); color: white; }
 
-        /* 本地上传按钮特调 */
         .file-upload-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; margin-bottom: 15px; }
         .file-upload-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
         .file-upload-btn { width: 100%; padding: 14px; background: rgba(0,0,0,0.03); border: 2px dashed var(--border); border-radius: 16px; color: var(--sub); font-size: 14px; text-align: center; pointer-events: none; transition: all 0.3s; }
-        .file-upload-wrapper:hover .file-upload-btn { border-color: var(--color-green); color: var(--color-green); background: rgba(90, 130, 90, 0.05); }
+        .file-upload-wrapper:hover .file-upload-btn { border-color: var(--color-green); color: var(--color-green); }
 
+        #admin-panel { background: rgba(255, 165, 0, 0.1); border: 1px dashed orange; border-radius: 16px; padding: 15px; margin-bottom: 25px; display: none; }
+        
         @media (max-width: 1000px) {
             #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(0.9) !important; width: 85%; }
             #ans-pop.active { transform: translate(50%, -50%) scale(1) !important; }
@@ -178,27 +180,32 @@
 <!-- ================= 登录验证浮层 ================= -->
 <div id="auth-overlay">
     <div class="auth-card" id="main-auth-card">
-        <h2 id="auth-title">登录账号</h2>
-        <p id="auth-sub">题库与错题本将云端私密同步</p>
+        <h2 id="auth-title" style="margin-bottom:20px;">言叶之庭</h2>
         
-        <input type="text" id="auth-email" class="auth-input" placeholder="邮箱地址 (管理员填 admin)">
-        <input type="password" id="auth-pwd" class="auth-input" placeholder="密码（至少6位）">
+        <div class="auth-tabs">
+            <span class="auth-tab active" id="tab-email" onclick="switchAuthType('email')">✉️ 邮箱验证</span>
+            <span class="auth-tab" id="tab-user" onclick="switchAuthType('username')">👤 邀请码注册</span>
+        </div>
+
+        <input type="text" id="auth-account" class="auth-input" placeholder="输入邮箱 (或管理员 admin)">
+        <input type="password" id="auth-pwd" class="auth-input" placeholder="设置密码（至少6位）">
+        <input type="text" id="auth-invite" class="auth-input" placeholder="输入收到的邀请码" style="display:none; border-color: orange;">
         
         <div class="captcha-box">
             <div id="captcha-math" class="captcha-math">? + ? =</div>
-            <input type="number" id="captcha-input" class="auth-input captcha-input" placeholder="结果">
+            <input type="number" id="captcha-input" class="auth-input" placeholder="结果" style="margin-bottom:0;">
         </div>
 
         <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">登 录</button>
-        <button class="auth-toggle" id="auth-toggle-btn" onclick="toggleAuthMode()">没有账号？点击注册</button>
+        <button class="auth-toggle" id="auth-toggle-btn" onclick="toggleAuthMode()" style="background:none; border:none; color:var(--color-green); margin-top:20px; cursor:pointer; text-decoration:underline;">没有账号？点击注册</button>
     </div>
 
     <div class="auth-card" id="otp-auth-card" style="display: none;">
         <h2>📧 信件验证</h2>
-        <p>已向该邮箱发送了验证信件</p>
+        <p style="font-size:12px; color:var(--sub); margin-bottom:20px;">已向该邮箱发送了验证信件</p>
         <input type="text" id="auth-otp-input" class="auth-input" placeholder="输入邮件验证码" maxlength="10" style="text-align:center; font-size: 22px; letter-spacing: 6px; font-family: monospace; font-weight:bold;">
         <button class="auth-btn" id="otp-submit-btn" onclick="verifyOtpCode()">验证并登入</button>
-        <button class="auth-toggle" onclick="cancelOtpMode()">返回重试</button>
+        <button class="auth-toggle" onclick="cancelOtpMode()" style="background:none; border:none; margin-top:15px; color:var(--sub); cursor:pointer;">返回重试</button>
     </div>
 </div>
 
@@ -223,7 +230,7 @@
         <h2 id="finish-title">完成挑战</h2>
         <p id="session-stats" style="color:var(--sub); font-weight:bold; font-size:1.1rem; margin-bottom: 5px;">正确 0 | 错误 0</p>
         <p id="zen-quote-text" style="font-family:'KaiTi',serif; color:var(--sub); padding:0 30px; line-height:1.6;">--</p>
-        <button onclick="restartSession()" style="margin-top:40px; padding:16px 50px; border-radius:30px; border:2px solid var(--text); background:transparent; color:var(--text); font-weight:bold; font-size:16px;">再来一轮</button>
+        <button onclick="restartSession()" style="margin-top:40px; padding:16px 50px; border-radius:30px; border:2px solid var(--text); background:transparent; color:var(--text); font-weight:bold; font-size:16px; z-index:100;">再来一轮</button>
     </div>
 
     <div class="nav">
@@ -294,7 +301,7 @@
             <input type="file" id="rc-up-file" accept="image/*" onchange="handleLocalImage(event)">
             <div class="file-upload-btn" id="rc-up-file-label">📸 点击此处选择本地图片</div>
         </div>
-        <input type="hidden" id="rc-up-cover-base64"> <!-- 隐藏存储 Base64 -->
+        <input type="hidden" id="rc-up-cover-base64">
         
         <label class="set-label">☁️ 题库 JSON 数据 (带cat细分)</label>
         <p style="font-size:11px; color:var(--sub); margin:0 0 8px 0;">格式与本地导入相同：<br><code>[{"q":"题目","a":"答案","cat":"古诗"}]</code></p>
@@ -312,6 +319,16 @@
             <button onclick="toggleSettings(false)" style="background:none; font-size:28px; color:var(--text);">×</button>
         </div>
         
+        <!-- 管理员专属：邀请码生成器 -->
+        <div id="admin-panel">
+            <h4 style="margin:0 0 10px 0; color: orange;">👑 管理员邀请码引擎</h4>
+            <div style="display:flex; gap:10px; margin-bottom: 10px;">
+                <button onclick="generateInviteCodeToDB()" style="flex:1; padding:10px; background:orange; color:white; border-radius:10px; font-weight:bold;">生成 1 个邀请码</button>
+                <button onclick="fetchInviteCodesAdmin()" style="padding:10px; background:var(--border); border-radius:10px;">🔄 刷新记录</button>
+            </div>
+            <div id="admin-codes" style="font-size:12px; max-height: 100px; overflow-y: auto; color: var(--text);"></div>
+        </div>
+
         <div style="text-align:center; padding-bottom: 20px; border-bottom: 1px dashed var(--border); margin-bottom: 20px;">
             <span id="user-info-text" style="font-size:13px; color:var(--sub); display:block; margin-bottom: 12px; font-weight:bold;">未登录</span>
             <div style="display:flex; justify-content:center; gap: 12px;">
@@ -321,6 +338,11 @@
         </div>
         
         <button onclick="toggleResourceCenter(true)" style="width:100%; padding:16px; background:var(--text); color:var(--bg); border-radius:16px; font-weight:bold; font-size: 15px; margin-bottom: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">🌐 进入共享资源中心</button>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+            <span style="font-size:14px; font-weight:bold;">✨ 开启毛玻璃特效 (降低性能可关)</span>
+            <label class="switch"><input type="checkbox" id="glass-toggle" onchange="toggleGlass()"><span class="slider"></span></label>
+        </div>
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
             <span style="font-size:14px; font-weight:bold;">🎵 沉浸背景音乐</span>
@@ -390,31 +412,28 @@
     let audioInitialized = false;
 
     let currentUser = null;
+    let authType = 'email'; // email | username
     let isRegisterMode = false;
     let captchaResult = 0;
     let pendingAuthEmail = ""; 
     let wrongStorageKey = 'wrongs_v11'; 
     let allowDblClickClear = true;
+    let isGlassOn = true;
 
-    // 新增：Web Audio API 音效系统
+    // Web Audio API 音效系统
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSFX(type) {
         if(audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
         if(type === 'yes') {
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
             osc.start(); osc.stop(audioCtx.currentTime + 0.3);
         } else {
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
             osc.start(); osc.stop(audioCtx.currentTime + 0.3);
         }
     }
@@ -430,14 +449,37 @@
         
         allowDblClickClear = localStorage.getItem('allow_dblclick') !== 'false';
         document.getElementById('dblclick-toggle').checked = allowDblClickClear;
+
+        isGlassOn = localStorage.getItem('glass_fx') !== 'false';
+        document.getElementById('glass-toggle').checked = isGlassOn;
+        if(!isGlassOn) document.body.classList.add('no-glass');
     };
 
+    function toggleGlass() {
+        isGlassOn = document.getElementById('glass-toggle').checked;
+        localStorage.setItem('glass_fx', isGlassOn);
+        document.body.classList.toggle('no-glass', !isGlassOn);
+    }
     function toggleDblClick() {
         allowDblClickClear = document.getElementById('dblclick-toggle').checked;
         localStorage.setItem('allow_dblclick', allowDblClickClear);
     }
 
-    // ======= 完美修复的 Admin 与账号系统 =======
+    // ======= 邀请码 + 双通道账号系统 =======
+    function switchAuthType(type) {
+        authType = type;
+        document.getElementById('tab-email').className = `auth-tab ${type === 'email' ? 'active' : ''}`;
+        document.getElementById('tab-user').className = `auth-tab ${type === 'username' ? 'active' : ''}`;
+        document.getElementById('auth-account').placeholder = type === 'email' ? '输入邮箱 (或管理员 admin)' : '输入纯数字或字母的用户名';
+        
+        // 动态显示/隐藏邀请码框
+        if (type === 'username' && isRegisterMode) {
+            document.getElementById('auth-invite').style.display = 'block';
+        } else {
+            document.getElementById('auth-invite').style.display = 'none';
+        }
+    }
+
     function generateCaptcha() {
         const num1 = Math.floor(Math.random() * 20) + 1;
         const num2 = Math.floor(Math.random() * 20) + 1;
@@ -448,56 +490,73 @@
 
     function toggleAuthMode() {
         isRegisterMode = !isRegisterMode;
-        document.getElementById('auth-title').innerText = isRegisterMode ? '注册新账号' : '登录账号';
+        document.getElementById('auth-title').innerText = isRegisterMode ? '加入言叶之庭' : '登录账号';
         document.getElementById('auth-submit-btn').innerText = isRegisterMode ? '注 册' : '登 录';
         document.getElementById('auth-toggle-btn').innerText = isRegisterMode ? '已有账号？点击登录' : '没有账号？点击注册';
+        switchAuthType(authType); // 刷新UI
         generateCaptcha();
     }
 
     async function handleAuth() {
-        let email = document.getElementById('auth-email').value.trim();
+        let account = document.getElementById('auth-account').value.trim();
         const pwd = document.getElementById('auth-pwd').value;
+        const inviteCode = document.getElementById('auth-invite').value.trim();
         const ans = parseInt(document.getElementById('captcha-input').value);
 
-        if (!email || !pwd) return alert("请填写账号和密码");
+        if (!account || !pwd) return alert("请填写账号和密码");
         if (ans !== captchaResult) { alert("验证码计算错误！"); generateCaptcha(); return; }
 
-        document.getElementById('auth-submit-btn').innerText = '连接中...';
+        document.getElementById('auth-submit-btn').innerText = '数据连接中...';
 
-        // Admin 智能通道逻辑
-        if (email.toLowerCase() === 'admin') {
-            email = 'admin@yanye.com';
-            // 尝试直接登录
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password: pwd });
+        // Admin 特殊通道
+        if (account.toLowerCase() === 'admin') {
+            account = 'admin@yanye.com'; authType = 'email';
+            const { data, error } = await supabase.auth.signInWithPassword({ email: account, password: pwd });
             if (error) {
-                // 如果登录失败，大概率是没注册过，尝试无缝注册
-                const regRes = await supabase.auth.signUp({ email, password: pwd });
+                const regRes = await supabase.auth.signUp({ email: account, password: pwd });
                 if (regRes.data?.session === null) {
-                    alert("【官方拦截提示】\n系统检测到正在创建全新的 admin 账号，但您的 Supabase 开启了邮箱验证。\n\n由于虚拟邮箱收不到验证码，请前往 Supabase 后台 -> Authentication -> Providers -> Email，暂时关闭 【Confirm email】，然后再试一次！");
-                    document.getElementById('auth-submit-btn').innerText = '登 录';
-                    generateCaptcha(); return;
-                } else if (regRes.error) {
-                    alert("Admin注册异常: " + regRes.error.message);
-                    document.getElementById('auth-submit-btn').innerText = '登 录';
-                    generateCaptcha(); return;
+                    alert("【官方拦截提示】\n检测到创建 admin 账号，但 Supabase 开启了邮箱验证。\n请先去后台暂时关闭【Confirm email】，再试一次！");
+                    document.getElementById('auth-submit-btn').innerText = '登 录'; generateCaptcha(); return;
                 }
-                loginSuccess(regRes.data.user); return;
+                loginSuccess(regRes.data?.user); return;
             }
             loginSuccess(data.user); return;
         }
 
-        // 正常用户通道逻辑
+        // 处理真实注册或登录
         try {
+            let finalEmail = account;
+            if (authType === 'username') {
+                if (!/^[a-zA-Z0-9_]+$/.test(account)) throw new Error("用户名只能包含字母、数字或下划线");
+                finalEmail = account + '@yanye.local'; // 映射虚拟邮箱，触发数据库免验证黑科技
+            }
+
             if (isRegisterMode) {
-                const { data, error } = await supabase.auth.signUp({ email, password: pwd });
+                // 如果是用户名注册，先严格验证邀请码
+                if (authType === 'username') {
+                    if(!inviteCode) throw new Error("邀请码为必填项");
+                    const { data: codeData, error: codeErr } = await supabase.from('invitation_codes').select('*').eq('code', inviteCode).single();
+                    if (codeErr || !codeData || codeData.is_used) throw new Error("邀请码无效或已被使用");
+                }
+
+                const { data, error } = await supabase.auth.signUp({ email: finalEmail, password: pwd });
                 if (error) throw error;
-                if (data.session === null) {
-                    pendingAuthEmail = email;
+
+                // 注册成功后，如果是用户名，需要销毁邀请码并直接登录
+                if (authType === 'username') {
+                    await supabase.from('invitation_codes').update({ is_used: true, used_by: account }).eq('code', inviteCode);
+                    loginSuccess(data.user);
+                } else if (data.session === null) {
+                    // 邮箱注册等待验证码
+                    pendingAuthEmail = finalEmail;
                     document.getElementById('main-auth-card').style.display = 'none';
                     document.getElementById('otp-auth-card').style.display = 'block';
-                } else { loginSuccess(data.user); }
+                } else {
+                    loginSuccess(data.user);
+                }
             } else {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password: pwd });
+                // 登录流程
+                const { data, error } = await supabase.auth.signInWithPassword({ email: finalEmail, password: pwd });
                 if (error) throw error;
                 loginSuccess(data.user);
             }
@@ -525,20 +584,56 @@
     function cancelOtpMode() {
         document.getElementById('otp-auth-card').style.display = 'none';
         document.getElementById('main-auth-card').style.display = 'block';
-        document.getElementById('auth-submit-btn').innerText = '注 册';
-        generateCaptcha();
+        document.getElementById('auth-submit-btn').innerText = '注 册'; generateCaptcha();
     }
 
     function loginSuccess(user) {
         currentUser = user;
         document.getElementById('auth-overlay').style.display = 'none';
         
-        const displayEmail = user.email === 'admin@yanye.com' ? '🌟 超级管理员 (Admin)' : user.email;
+        let displayEmail = user.email;
+        if (displayEmail === 'admin@yanye.com') displayEmail = '🌟 超级管理员 (Admin)';
+        else if (displayEmail.endsWith('@yanye.local')) displayEmail = '👤 ' + displayEmail.replace('@yanye.local', '');
+        
         document.getElementById('user-info-text').innerText = `已连接账号: ${displayEmail}`;
         
+        // 渲染管理员面板
+        if (user.email === 'admin@yanye.com') {
+            document.getElementById('admin-panel').style.display = 'block';
+            fetchInviteCodesAdmin();
+        }
+
         wrongStorageKey = `wrongs_v11_${user.id}`;
         wrongs = JSON.parse(localStorage.getItem(wrongStorageKey) || '[]');
         initGame();
+    }
+
+    // 管理员：生成邀请码
+    async function generateInviteCodeToDB() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let code = ''; for(let i=0; i<6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+        try {
+            const { error } = await supabase.from('invitation_codes').insert({ code, created_by: currentUser.id });
+            if (error) throw error;
+            alert(`生成成功！\n全新邀请码: ${code}`);
+            fetchInviteCodesAdmin();
+        } catch (e) { alert("生成失败: " + e.message); }
+    }
+
+    // 管理员：获取所有邀请码
+    async function fetchInviteCodesAdmin() {
+        const div = document.getElementById('admin-codes');
+        div.innerHTML = "读取中...";
+        try {
+            const { data, error } = await supabase.from('invitation_codes').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            div.innerHTML = data.map(c => `
+                <div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid rgba(0,0,0,0.1);">
+                    <strong style="color:${c.is_used ? 'var(--sub)' : 'var(--color-green)'}; letter-spacing:1px;">${c.code}</strong>
+                    <span>${c.is_used ? ('已由 ' + c.used_by + ' 使用') : '✨ 可用'}</span>
+                </div>
+            `).join('');
+        } catch (e) { div.innerHTML = "读取失败: " + e.message; }
     }
 
     async function logoutAccount() {
@@ -547,20 +642,20 @@
             await supabase.auth.signOut();
             for (let key in localStorage) { if (key.startsWith('sb-')) localStorage.removeItem(key); }
             window.location.replace(window.location.href.split('?')[0]);
-        } catch (error) { alert("登出遇到小问题：" + error.message); window.location.reload(); }
+        } catch (error) { window.location.reload(); }
     }
 
     async function deleteAccount() {
         const c1 = confirm("⚠️ 危险警告\n注销账号将永久销毁您的所有云端词库、错题本，此操作不可逆！\n\n确定要继续吗？");
         if (!c1) return;
         const c2 = prompt("请输入【确认注销】四个字以执行自毁程序：");
-        if (c2 !== "确认注销") return alert("输入不匹配，自毁程序已中止。");
+        if (c2 !== "确认注销") return alert("自毁程序已中止。");
         try {
             const { error } = await supabase.rpc('delete_user');
             if (error) throw error;
             alert("您的账号数据已彻底化为尘埃。有缘再见。");
             await logoutAccount();
-        } catch (e) { alert("注销失败：" + e.message + "\n(如报错未找到函数，请去Supabase按说明配置SQL)"); }
+        } catch (e) { alert("注销失败：" + e.message); }
     }
 
     // ======= 资源中心功能 (包含本地传图 & 洗净ID) =======
@@ -573,7 +668,7 @@
     
     function toggleUploadModal(show) { 
         document.getElementById('upload-modal').style.display = show ? 'block' : 'none'; 
-        if(!show) { // 重置表单
+        if(!show) {
             document.getElementById('rc-up-file').value = "";
             document.getElementById('rc-up-cover-base64').value = "";
             document.getElementById('rc-up-file-label').innerText = "📸 点击此处选择本地图片";
@@ -582,7 +677,6 @@
         }
     }
 
-    // 本地图片转 Base64 自动压缩
     function handleLocalImage(e) {
         const file = e.target.files[0];
         if(!file) return;
@@ -591,7 +685,7 @@
             const img = new Image();
             img.onload = () => {
                 const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-                const maxSize = 500; // 压缩阈值
+                const maxSize = 500; 
                 let width = img.width, height = img.height;
                 if (width > height && width > maxSize) { height *= maxSize / width; width = maxSize; }
                 else if (height > maxSize) { width *= maxSize / height; height = maxSize; }
@@ -601,8 +695,7 @@
                 document.getElementById('rc-up-cover-base64').value = canvas.toDataURL('image/jpeg', 0.8);
                 const label = document.getElementById('rc-up-file-label');
                 label.innerText = `✅ 图片已就绪 (${file.name})`;
-                label.style.borderColor = "var(--color-green)";
-                label.style.color = "var(--color-green)";
+                label.style.borderColor = "var(--color-green)"; label.style.color = "var(--color-green)";
             };
             img.src = event.target.result;
         };
@@ -615,8 +708,7 @@
         try {
             const { data, error } = await supabase.from('resource_center').select('*').order('created_at', { ascending: false });
             if (error) throw error;
-            resourceData = data || [];
-            renderResources();
+            resourceData = data || []; renderResources();
         } catch(e) { listDiv.innerHTML = `<p style="color:red; font-size:14px; grid-column:1/-1; text-align:center;">卫星连接失败: ${e.message}</p>`; }
     }
 
@@ -630,18 +722,21 @@
 
         listDiv.innerHTML = resourceData.map(res => {
             const canDelete = currentUser && (res.uploader_id === currentUser.id || isAdmin);
+            let displayAuthor = res.uploader_email.split('@')[0];
+            if(res.uploader_email === 'admin@yanye.com') displayAuthor = '👑 官方精选';
+            
             const cover = res.cover_url || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><rect width="100%" height="100%" fill="%23e2dfd6"/><text x="50%" y="50%" fill="%238b979f" font-size="14" font-family="sans-serif" text-anchor="middle" dominant-baseline="middle">言叶之庭</text></svg>';
             return `
             <div class="rc-item">
                 <img src="${cover}" class="rc-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100%\\' height=\\'100%\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23e2dfd6\\'/><text x=\\'50%\\' y=\\'50%\\' fill=\\'%238b979f\\' font-size=\\'14\\' text-anchor=\\'middle\\' dominant-baseline=\\'middle\\'>载入失败</text></svg>'">
                 <div class="rc-info">
                     <h4 class="rc-title">${res.title}</h4>
-                    <div class="rc-author">贡献者: ${res.uploader_email.split('@')[0]}</div>
+                    <div class="rc-author">${displayAuthor}</div>
                     <p class="rc-desc">${res.description || '暂无简介'}</p>
                 </div>
                 <div class="rc-actions">
                     <button class="rc-btn rc-btn-dl" onclick="downloadResource('${res.id}')">📥 下载</button>
-                    ${canDelete ? `<button class="rc-btn rc-btn-del" onclick="deleteResource('${res.id}')">🗑️ 删除</button>` : ''}
+                    ${canDelete ? `<button class="rc-btn rc-btn-del" onclick="deleteResource('${res.id}')">🗑️</button>` : ''}
                 </div>
             </div>`;
         }).join('');
@@ -650,7 +745,7 @@
     async function submitResource() {
         const title = document.getElementById('rc-up-title').value.trim();
         const desc = document.getElementById('rc-up-desc').value.trim();
-        const cover = document.getElementById('rc-up-cover-base64').value; // 读取隐藏的Base64
+        const cover = document.getElementById('rc-up-cover-base64').value; 
         const jsonText = document.getElementById('rc-up-json').value.trim();
 
         if(!title || !jsonText) return alert("标题和 JSON 数据为必填项！");
@@ -663,11 +758,9 @@
 
         try {
             document.getElementById('rc-up-title').value = '正在上传数据流...';
-            const authorName = currentUser.email === 'admin@yanye.com' ? '👑 官方精选' : currentUser.email;
-            
             const { error } = await supabase.from('resource_center').insert({
                 title, description: desc, cover_url: cover, json_data: jsonData,
-                uploader_id: currentUser.id, uploader_email: authorName
+                uploader_id: currentUser.id, uploader_email: currentUser.email
             });
             if (error) throw error;
             
@@ -675,8 +768,7 @@
             document.getElementById('rc-up-title').value = '';
             document.getElementById('rc-up-desc').value = '';
             document.getElementById('rc-up-json').value = '';
-            toggleUploadModal(false);
-            fetchResources();
+            toggleUploadModal(false); fetchResources();
         } catch(e) { alert("发布失败: " + e.message); document.getElementById('rc-up-title').value = title; }
     }
 
@@ -687,19 +779,15 @@
         if(!groupName) return;
 
         try {
-            // 完美修复：彻底清洗掉云端他人分享带来的 id 和 created_at，防止插入时主键冲突
             const dataToInsert = res.json_data.map(item => {
                 const cleanItem = { ...item, group_name: groupName, user_id: currentUser.id };
-                delete cleanItem.id;
-                delete cleanItem.created_at;
-                return cleanItem;
+                delete cleanItem.id; delete cleanItem.created_at; return cleanItem;
             });
             
             const { error } = await supabase.from('dictation_items').insert(dataToInsert);
             if (error) throw error;
             alert(`成功！${dataToInsert.length} 个词条已落入您的【${groupName}】分组！`);
-            sync();
-            toggleResourceCenter(false);
+            sync(); toggleResourceCenter(false);
         } catch (e) { alert("下载失败：" + e.message); }
     }
 
@@ -707,8 +795,7 @@
         if(!confirm("确定要从全网资源中心彻底抹除这个分享吗？")) return;
         try {
             const { error } = await supabase.from('resource_center').delete().eq('id', id);
-            if (error) throw error;
-            fetchResources();
+            if (error) throw error; fetchResources();
         } catch(e) { alert("删除失败: " + e.message); }
     }
 
@@ -718,8 +805,7 @@
     function changeTheme() {
         const t = document.getElementById('theme-select').value;
         document.body.setAttribute('data-theme', t);
-        localStorage.setItem('app_theme', t);
-        initCanvas(); 
+        localStorage.setItem('app_theme', t); initCanvas(); 
     }
     function loadTheme() {
         const saved = localStorage.getItem('app_theme') || 'default';
@@ -743,7 +829,6 @@
         document.getElementById('intense-timer').innerText = '';
         document.getElementById('finish-overlay').style.display = 'none';
         
-        // 停止特效
         const cCanvas = document.getElementById('confetti-canvas');
         const cCtx = cCanvas.getContext('2d');
         cCtx.clearRect(0,0,cCanvas.width,cCanvas.height);
@@ -851,7 +936,6 @@
         else { setTimeout(nextQ, 350); }
     }
 
-    // 纯代码极简撒花特效
     function fireConfetti() {
         const canvas = document.getElementById('confetti-canvas');
         const ctx = canvas.getContext('2d');
@@ -892,7 +976,7 @@
             zenEl.style.fontFamily = "'Courier New', monospace";
         } else {
             iconEl.innerText = '🉑'; titleEl.innerText = '洗练完成'; zenEl.innerText = "「 行到水穷处，坐看云起时。 」"; zenEl.style.fontFamily = '"KaiTi", serif';
-            setTimeout(fireConfetti, 100); // 触发撒花
+            setTimeout(fireConfetti, 100); 
         }
         document.getElementById('finish-overlay').style.display = 'flex';
     }
