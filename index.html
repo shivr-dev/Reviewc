@@ -3,80 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>言叶之庭 - 终极全功能版</title>
+    <title>言叶之庭 - 词库主题版</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
     <style>
-        /* 样式变量：双模式适配 */
+        /* ================= 调色盘系统 ================= */
+        /* 1. 默认主题 (抹茶原味) */
         :root {
             --bg: #f7f6f2; --card: #ffffff; --text: #2c3e50; --sub: #95a5a6; --border: #eceae2;
             --color-red: #d15147; --color-green: #6b8e6b; --shadow: 0 10px 40px rgba(0,0,0,0.05);
         }
-
         body.intense-mode {
             --bg: #120a0a; --card: #1f1111; --text: #f8ecec; --sub: #ff6b6b; --border: #3d1f1f;
             --color-red: #ff3333; --color-green: #ff9f0a; --shadow: 0 10px 50px rgba(255, 0, 0, 0.2);
         }
 
+        /* 2. 樱花主题 (Sakura) */
+        body[data-theme="sakura"] {
+            --bg: #fdf5f7; --card: #ffffff; --text: #4a3b3e; --sub: #b59fa4; --border: #fae3e8;
+            --color-red: #e07a8f; --color-green: #d49fb0; --shadow: 0 10px 40px rgba(224, 122, 143, 0.08);
+        }
+        body[data-theme="sakura"].intense-mode {
+            --bg: #1a0f14; --card: #26161d; --text: #ffeef3; --sub: #ff8fae; --border: #40212e;
+            --color-red: #ff3366; --color-green: #ff80aa; --shadow: 0 10px 50px rgba(255, 51, 102, 0.2);
+        }
+
+        /* 3. 晴空主题 (Sora) */
+        body[data-theme="sora"] {
+            --bg: #f2f7fa; --card: #ffffff; --text: #2b3a4a; --sub: #8da4b5; --border: #dfe8f0;
+            --color-red: #588bb3; --color-green: #7fb0d6; --shadow: 0 10px 40px rgba(88, 139, 179, 0.08);
+        }
+        body[data-theme="sora"].intense-mode {
+            --bg: #0b111a; --card: #121d2b; --text: #e6f0fa; --sub: #66a3ff; --border: #1f334d;
+            --color-red: #3385ff; --color-green: #66d9ff; --shadow: 0 10px 50px rgba(51, 133, 255, 0.2);
+        }
+
+        /* ================= 基础样式 ================= */
         * { box-sizing: border-box; transition: background-color 0.4s, color 0.4s, border-color 0.4s; }
         body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
 
-        /* 主卡片 */
         .main-card { width: 95%; max-width: 460px; background: var(--card); border-radius: 24px; box-shadow: var(--shadow); overflow: hidden; position: relative; z-index: 10; display: flex; flex-direction: column; border: 1px solid transparent; }
         body.intense-mode .main-card { border: 1px solid var(--border); }
         
-        /* 进度条 */
         .progress-wrap { width: 100%; height: 4px; background: var(--border); }
         #progress-bar { height: 100%; width: 0%; background: var(--color-green); transition: width 0.3s ease; }
 
-        /* 导航栏 */
         .nav { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); font-size: 11px; color: var(--sub); letter-spacing: 1px; }
         #mode-toggle-btn { cursor: pointer; font-weight: bold; padding: 4px 8px; border-radius: 6px; background: var(--border); color: var(--text); }
         #mode-toggle-btn.locked { opacity: 0.2; pointer-events: none; cursor: not-allowed; }
 
-        /* 题目区 */
         .quiz-box { padding: 30px 20px; text-align: center; min-height: 140px; display: flex; flex-direction: column; justify-content: center; }
         #q-cat { font-size: 10px; color: var(--color-red); margin-bottom: 8px; font-weight: bold; letter-spacing: 2px; }
         #q-text { font-size: 1.6rem; font-weight: 600; line-height: 1.4; word-break: break-all; }
         #q-text.long { font-size: 1.2rem; }
 
-        /* 画板区 */
         .canvas-area { position: relative; width: 100%; height: 320px; background: transparent; border-bottom: 1px solid var(--border); overflow: hidden; }
         .grid-bg { position: absolute; inset: 0; opacity: 0.05; background-image: linear-gradient(var(--text) 1px, transparent 1px), linear-gradient(90deg, var(--text) 1px, transparent 1px); background-size: 50% 50%; background-position: center; pointer-events: none; }
         body.intense-mode .grid-bg { opacity: 0.12; background-image: linear-gradient(var(--color-red) 1px, transparent 1px), linear-gradient(90deg, var(--color-red) 1px, transparent 1px); }
         #board { position: relative; z-index: 5; touch-action: none; cursor: crosshair; }
         
-        /* 倒计时水印 */
+        /* 倒计时系统 */
         #intense-timer { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 8rem; font-family: 'Courier New', monospace; font-weight: 900; color: rgba(255, 51, 51, 0.1); z-index: 1; pointer-events: none; }
         body.intense-mode #intense-timer { display: flex; }
         #intense-timer.prep { color: rgba(255, 159, 10, 0.3); font-size: 10rem; }
         #intense-timer.urgent { color: rgba(255, 51, 51, 0.4); text-shadow: 0 0 20px rgba(255,0,0,0.6); animation: shake 0.1s infinite; }
-
         @keyframes shake { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } 100% { transform: translate(2px, -2px); } }
 
-        /* 提示词 */
         #ghost-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: "KaiTi", "STKaiti", serif; color: var(--text); opacity: 0; pointer-events: none; z-index: 2; transition: opacity 0.4s; padding: 20px; text-align: center; }
         #ghost-hint.show { opacity: 0.12; }
 
-        /* 结算界面 */
         #finish-overlay { position: absolute; inset: 0; background: var(--bg); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
         .huge-symbol { font-size: 6rem; margin: 0; }
 
-        /* 答案弹窗 */
         #ans-pop { position: fixed; right: calc(50% - 480px); top: 50%; transform: translateY(-50%) scale(0.9); width: 260px; background: var(--card); padding: 25px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); text-align: center; opacity: 0; pointer-events: none; z-index: 200; transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
         #ans-pop.active { opacity: 1; pointer-events: auto; transform: translateY(-50%) scale(1); right: calc(50% - 520px); }
         #ans-text { font-size: 2.2rem; font-family: "KaiTi", serif; color: var(--text); display: block; margin-bottom: 20px; line-height: 1.2; }
 
-        /* 侧边栏：错题本 */
         #wrong-sidebar { position: fixed; left: 0; top: 0; width: 280px; height: 100%; background: var(--card); border-right: 1px solid var(--border); z-index: 1000; transform: translateX(-100%); padding: 30px; display: flex; flex-direction: column; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         #wrong-sidebar.active { transform: translateX(0); box-shadow: 20px 0 60px rgba(0,0,0,0.1); }
         #wrong-list { flex: 1; overflow-y: auto; margin: 20px 0; font-size: 14px; }
         .wrong-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
 
-        /* 设置界面 */
         #settings { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; padding: 40px 20px; overflow-y: auto; }
         .set-box { background: var(--card); border-radius: 24px; padding: 30px; max-width: 420px; margin: 0 auto; box-shadow: var(--shadow); }
 
-        /* 通用按钮 */
         button { cursor: pointer; border: none; font-family: inherit; }
         .judge-btn { width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 14px; font-weight: bold; color: white; }
         .btn-yes { background: var(--color-green); }
@@ -85,7 +94,6 @@
         .footer button { padding: 22px; background: var(--card); font-size: 14px; color: var(--text); }
         .btn-main { background: var(--text) !important; color: var(--bg) !important; font-weight: bold; }
 
-        /* 开关按钮 */
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; inset: 0; background-color: var(--border); transition: .4s; border-radius: 34px; }
@@ -93,7 +101,8 @@
         input:checked + .slider { background-color: var(--color-green); }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        textarea, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; font-size: 14px; }
+        textarea, select, input[type="text"] { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; font-size: 14px; outline: none; }
+        .set-label { font-size: 12px; font-weight: bold; color: var(--color-red); display: block; margin-top: 5px; margin-bottom: 5px; }
 
         @media (max-width: 1000px) {
             #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(0.9) !important; width: 85%; }
@@ -101,7 +110,7 @@
         }
     </style>
 </head>
-<body>
+<body data-theme="default">
 
 <audio id="bg-music" src="bgm.mp3" loop preload="auto"></audio>
 <audio id="bg-music-intense" src="bgm_intense.mp3" loop preload="auto"></audio>
@@ -112,7 +121,7 @@
         <button onclick="toggleSidebar()" style="background:none; font-size:24px; color:var(--text);">×</button>
     </div>
     <div id="wrong-list"></div>
-    <button onclick="clearWrongs()" style="width:100%; padding:12px; background:var(--border); border-radius:12px; font-size:12px;">清空本地记录</button>
+    <button onclick="clearWrongs()" style="width:100%; padding:12px; background:var(--border); border-radius:12px; font-size:12px; color:var(--text)">清空本地记录</button>
 </div>
 
 <div class="main-card">
@@ -162,39 +171,56 @@
 
 <div id="settings">
     <div class="set-box">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-            <h3 style="margin:0">系统设置</h3>
-            <button onclick="toggleSettings(false)" style="background:none; font-size:24px;">×</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 style="margin:0">系统设定</h3>
+            <button onclick="toggleSettings(false)" style="background:none; font-size:24px; color:var(--text);">×</button>
         </div>
         
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <span>🎵 启用背景音乐</span>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <span style="font-size:14px; font-weight:bold;">🎵 背景音乐</span>
             <label class="switch">
                 <input type="checkbox" id="bgm-toggle" onchange="toggleBGM()">
                 <span class="slider"></span>
             </label>
         </div>
 
-        <label style="font-size:12px; font-weight:bold; color:var(--color-red);">激烈模式时长</label>
+        <label class="set-label">🎨 画面主题</label>
+        <select id="theme-select" onchange="changeTheme()">
+            <option value="default">🍵 抹茶 (默认)</option>
+            <option value="sakura">🌸 落樱 (粉红)</option>
+            <option value="sora">☁️ 晴空 (天蓝)</option>
+        </select>
+
+        <label class="set-label">⚔️ 激烈模式时长</label>
         <select id="time-limit" onchange="restartSession()">
             <option value="60">1 分钟极速挑战</option>
             <option value="300">5 分钟耐力挑战</option>
         </select>
 
-        <label style="font-size:12px; font-weight:bold; margin-top:10px; display:block;">出题筛选</label>
+        <div style="height:1px; background:var(--border); margin:20px 0;"></div>
+
+        <label class="set-label">📚 当前词库选择</label>
+        <select id="group-select" onchange="applyRule()"></select>
+
+        <label class="set-label">🎯 出题规则过滤</label>
         <select id="mode" onchange="applyRule()">
-            <option value="all">随机全部库</option>
+            <option value="all">随机全部 (当前词库)</option>
             <option value="wrong">仅限错题本</option>
+            <option value="word">仅单纯字词</option>
+            <option value="note">仅文言注释</option>
+            <option value="poem">仅古诗长句</option>
         </select>
 
-        <label style="font-size:12px; font-weight:bold; margin-top:10px; display:block;">JSON 数据管理</label>
-        <textarea id="jsonInput" rows="5" placeholder='格式: [{"q":"题目","a":"答案","cat":"分类"}]'></textarea>
+        <div style="height:1px; background:var(--border); margin:20px 0;"></div>
+
+        <label class="set-label">☁️ 导入新数据</label>
+        <input type="text" id="upload-group" placeholder="输入你想导入的词库名称，例如：期中考试词汇" value="默认词库">
+        <textarea id="jsonInput" rows="4" placeholder='格式: [{"q":"题目","a":"答案","cat":"分类(可选)"}]'></textarea>
         
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <button onclick="upload('merge')" style="background:var(--text); color:var(--bg); padding:12px; border-radius:12px; font-weight:bold;">增量合并</button>
             <button onclick="upload('cover')" style="background:var(--color-red); color:white; padding:12px; border-radius:12px; font-weight:bold;">清空覆盖</button>
         </div>
-        <p style="font-size:10px; color:var(--sub); margin-top:10px; text-align:center;">* 覆盖操作将删除云端所有旧数据</p>
     </div>
 </div>
 
@@ -207,24 +233,35 @@
     let sCorrect = 0, sWrong = 0;
     
     let isIntenseMode = false;
-    let isSessionActive = false; // 正式比赛锁定标志
-    let timerInterval = null;
-    let prepInterval = null;
+    let isSessionActive = false;
+    let timerInterval = null, prepInterval = null;
     let timeLeft = 60;
     let audioInitialized = false;
 
-    window.onload = () => { initCanvas(); sync(); initBGM(); renderWrongs(); };
+    window.onload = () => { initCanvas(); sync(); initBGM(); renderWrongs(); loadTheme(); };
 
-    // 修复：模式切换
+    // ======= 主题系统 =======
+    function changeTheme() {
+        const t = document.getElementById('theme-select').value;
+        document.body.setAttribute('data-theme', t);
+        localStorage.setItem('app_theme', t);
+        initCanvas(); // 刷新画笔颜色
+    }
+    function loadTheme() {
+        const saved = localStorage.getItem('app_theme') || 'default';
+        document.getElementById('theme-select').value = saved;
+        document.body.setAttribute('data-theme', saved);
+    }
+
+    // ======= 模式切换与 BGM 重置逻辑 =======
     function toggleAppMode() {
-        if (isSessionActive) return; // 只有在倒计时正式开始后才锁定
-
+        if (isSessionActive) return;
         isIntenseMode = !isIntenseMode;
         document.body.classList.toggle('intense-mode', isIntenseMode);
         document.getElementById('mode-toggle-btn').innerText = isIntenseMode ? '🔥 激烈' : '🌸 休闲';
         
-        ctx.strokeStyle = isIntenseMode ? '#f8ecec' : '#2c3e50';
-        playBGM();
+        initCanvas();
+        playBGM(true); // 切换模式时，强制从头播放
         restartSession();
     }
 
@@ -240,15 +277,54 @@
         pool = [...filtered]; sCorrect = 0; sWrong = 0;
         updateProgress();
 
+        // 重新开始时，强制音乐重置
+        if (audioInitialized) playBGM(true);
+
         if (isIntenseMode) {
             startPrepCountdown();
         } else {
             if (pool.length > 0) nextQ();
-            else document.getElementById('q-text').innerText = "库中无题";
+            else document.getElementById('q-text').innerText = "该库下暂无题目";
         }
     }
 
-    // 12秒开赛倒计时
+    // ======= 数据与规则系统 =======
+    async function sync() {
+        const { data } = await supabase.from('dictation_items').select('*');
+        all = data || [];
+        updateGroupSelect();
+        applyRule();
+    }
+
+    function updateGroupSelect() {
+        // 提取所有不重复的 group_name
+        const groups = [...new Set(all.map(i => i.group_name || '默认词库'))];
+        const select = document.getElementById('group-select');
+        select.innerHTML = `<option value="ALL">全部词库总合</option>` + groups.map(g => `<option value="${g}">${g}</option>`).join('');
+    }
+
+    function applyRule() {
+        const m = document.getElementById('mode').value;
+        const g = document.getElementById('group-select').value;
+
+        // 1. 先按词库过滤
+        let baseList = all;
+        if (g !== 'ALL') {
+            baseList = all.filter(i => (i.group_name || '默认词库') === g);
+        }
+
+        // 2. 再按出题规则过滤 (修复了之前遗失的分类过滤)
+        if(m === 'all') filtered = baseList;
+        else if(m === 'wrong') filtered = wrongs; // 错题本不受词库限制
+        else if(m === 'poem') filtered = baseList.filter(i => /(诗|句)/.test(i.cat || ''));
+        else if(m === 'note') filtered = baseList.filter(i => /(注|释|文)/.test(i.cat || ''));
+        else if(m === 'word') filtered = baseList.filter(i => !/(诗|句|注|释|文)/.test(i.cat || ''));
+        
+        document.getElementById('count-info').innerText = `${filtered.length} ITEMS`;
+        restartSession();
+    }
+
+    // ======= 激烈倒计时 =======
     function startPrepCountdown() {
         let prepTime = 12; 
         const timerEl = document.getElementById('intense-timer');
@@ -288,22 +364,7 @@
         if (pool.length > 0) nextQ();
     }
 
-    function updateTimerDisplay() {
-        document.getElementById('intense-timer').innerText = timeLeft;
-    }
-
-    async function sync() {
-        const { data } = await supabase.from('dictation_items').select('*');
-        all = data || [];
-        applyRule();
-    }
-
-    function applyRule() {
-        const m = document.getElementById('mode').value;
-        filtered = (m === 'all') ? all : wrongs;
-        document.getElementById('count-info').innerText = `${filtered.length} ITEMS`;
-        restartSession();
-    }
+    function updateTimerDisplay() { document.getElementById('intense-timer').innerText = timeLeft; }
 
     function nextQ() {
         if(!pool.length) return;
@@ -341,10 +402,7 @@
         isSessionActive = false;
         document.getElementById('mode-toggle-btn').classList.remove('locked');
         document.getElementById('session-stats').innerText = `正确 ${sCorrect} | 错误 ${sWrong}`;
-        
-        const zenEl = document.getElementById('zen-quote-text');
-        const iconEl = document.getElementById('finish-icon');
-        const titleEl = document.getElementById('finish-title');
+        const zenEl = document.getElementById('zen-quote-text'), iconEl = document.getElementById('finish-icon'), titleEl = document.getElementById('finish-title');
 
         if (isIntenseMode) {
             iconEl.innerText = isTimeout ? '⏳' : '🔥';
@@ -352,67 +410,61 @@
             zenEl.innerText = isTimeout ? "「 逻辑序列已坍塌，请重载... 」" : "「 剩余时间: " + timeLeft + "s | 效率极高 」";
             zenEl.style.fontFamily = "'Courier New', monospace";
         } else {
-            iconEl.innerText = '🉑';
-            titleEl.innerText = '洗练完成';
-            zenEl.innerText = "「 行到水穷处，坐看云起时。 」";
-            zenEl.style.fontFamily = '"KaiTi", serif';
+            iconEl.innerText = '🉑'; titleEl.innerText = '洗练完成'; zenEl.innerText = "「 行到水穷处，坐看云起时。 」"; zenEl.style.fontFamily = '"KaiTi", serif';
         }
         document.getElementById('finish-overlay').style.display = 'flex';
     }
 
-    // 恢复：侧边栏逻辑
-    function toggleSidebar() { document.getElementById('wrong-sidebar').classList.toggle('active'); }
-    function renderWrongs() { 
-        document.getElementById('wrong-list').innerHTML = wrongs.map(i => `
-            <div class="wrong-item">
-                <div style="font-weight:bold; color:var(--text)">${i.a}</div>
-                <div style="font-size:12px; color:var(--sub)">${i.q}</div>
-            </div>
-        `).join(''); 
+    // ======= BGM 控制 (支持重置) =======
+    function initBGM() {
+        document.getElementById('bgm-toggle').checked = localStorage.getItem('bgm_enabled') !== 'false';
+        document.body.addEventListener('click', () => { if (!audioInitialized) { playBGM(); audioInitialized = true; } }, { once: true });
     }
+    function playBGM(forceRestart = false) {
+        const n = document.getElementById('bg-music'), i = document.getElementById('bg-music-intense');
+        n.pause(); i.pause();
+        if (document.getElementById('bgm-toggle').checked) {
+            const active = isIntenseMode ? i : n;
+            if (forceRestart) active.currentTime = 0; // 核心修复：强制回表重放
+            active.play().catch(() => {});
+        }
+    }
+    function toggleBGM() { localStorage.setItem('bgm_enabled', document.getElementById('bgm-toggle').checked); playBGM(); }
+
+    // ======= 侧边栏与数据 =======
+    function toggleSidebar() { document.getElementById('wrong-sidebar').classList.toggle('active'); }
+    function renderWrongs() { document.getElementById('wrong-list').innerHTML = wrongs.map(i => `<div class="wrong-item"><div style="font-weight:bold; color:var(--text)">${i.a}</div><div style="font-size:12px; color:var(--sub)">${i.q}</div></div>`).join(''); }
     function clearWrongs() { if(confirm("清空本地记录？")) { wrongs=[]; localStorage.setItem('wrongs_v11','[]'); renderWrongs(); applyRule(); } }
 
-    // 恢复：上传/同步逻辑
     async function upload(mode) {
         const input = document.getElementById('jsonInput').value;
+        const groupName = document.getElementById('upload-group').value || '默认词库';
         if(!input) return alert("请粘贴 JSON");
         try {
-            const data = JSON.parse(input);
+            // 给所有数据打上你填写的“词库组名”标签
+            const data = JSON.parse(input).map(item => ({ ...item, group_name: groupName }));
             if(mode === 'cover') {
-                if(!confirm("确定清空云端并覆盖？")) return;
+                if(!confirm("确定清空云端所有词库并覆盖？")) return;
                 await supabase.from('dictation_items').delete().neq('id', '00000000-0000-0000-0000-000000000000');
             }
             await supabase.from('dictation_items').insert(data);
-            alert("同步成功");
+            alert("词库同步成功！");
             document.getElementById('jsonInput').value = "";
             toggleSettings(false);
             sync();
         } catch(e) { alert("失败: " + e.message); }
     }
 
-    // BGM
-    function initBGM() {
-        document.getElementById('bgm-toggle').checked = localStorage.getItem('bgm_enabled') !== 'false';
-        document.body.addEventListener('click', () => { if (!audioInitialized) { playBGM(); audioInitialized = true; } }, { once: true });
-    }
-    function playBGM() {
-        const n = document.getElementById('bg-music'), i = document.getElementById('bg-music-intense');
-        n.pause(); i.pause();
-        if (document.getElementById('bgm-toggle').checked) {
-            const active = isIntenseMode ? i : n;
-            active.play().catch(() => {});
-        }
-    }
-    function toggleBGM() { localStorage.setItem('bgm_enabled', document.getElementById('bgm-toggle').checked); playBGM(); }
-
-    // Canvas
+    // ======= 画板系统 =======
     const canvas = document.getElementById('board');
     const ctx = canvas.getContext('2d');
     let drawing = false;
     function initCanvas() {
         const rect = canvas.parentNode.getBoundingClientRect();
         canvas.width = rect.width; canvas.height = rect.height;
-        ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = isIntenseMode ? '#f8ecec' : '#2c3e50';
+        ctx.lineWidth = 4; ctx.lineCap = 'round'; 
+        // 动态读取当前字体的颜色作为画笔颜色
+        ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--text').trim(); 
     }
     const getPos = (e) => {
         const rect = canvas.getBoundingClientRect();
@@ -423,17 +475,14 @@
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); }, {passive:false});
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if(drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } }, {passive:false});
     window.addEventListener('touchend', () => drawing = false);
+    canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener('mousemove', (e) => { if(drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
+    window.addEventListener('mouseup', () => drawing = false);
+
     function clearBoard() { ctx.clearRect(0,0,canvas.width,canvas.height); }
     function showAns(s) { document.getElementById('ans-pop').classList.toggle('active', s); }
-    function updateProgress() {
-        const p = filtered.length === 0 ? 0 : ((filtered.length - pool.length) / filtered.length) * 100;
-        document.getElementById('progress-bar').style.width = p + '%';
-    }
-    function peekHint() {
-        const h = document.getElementById('ghost-hint');
-        h.innerText = current.a; h.classList.add('show');
-        setTimeout(() => h.classList.remove('show'), 800);
-    }
+    function updateProgress() { document.getElementById('progress-bar').style.width = (filtered.length === 0 ? 0 : ((filtered.length - pool.length) / filtered.length) * 100) + '%'; }
+    function peekHint() { const h = document.getElementById('ghost-hint'); h.innerText = current.a; h.classList.add('show'); setTimeout(() => h.classList.remove('show'), 800); }
     function skipQ() { if(pool.length > 1) nextQ(); }
     function toggleSettings(s) { document.getElementById('settings').style.display = s ? 'block' : 'none'; }
     window.onresize = initCanvas;
