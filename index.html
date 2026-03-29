@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
     <style>
         /* ================= 调色盘系统 (已增强对比度) ================= */
+        /* 1. 默认主题 (抹茶原味) */
         :root {
             --bg: #f4f1eb; --card: #ffffff; --text: #2c3e50; --sub: #8b979f; --border: #e2dfd6;
             --color-red: #d15147; --color-green: #5a825a; --shadow: 0 10px 40px rgba(0,0,0,0.06);
@@ -15,6 +16,7 @@
             --bg: #0f0a0a; --card: #1a1111; --text: #fdf5f5; --sub: #d66b6b; --border: #381c1c;
             --color-red: #ff2a2a; --color-green: #ff9f0a; --shadow: 0 10px 50px rgba(255, 0, 0, 0.25);
         }
+        /* 2. 樱花主题 (Sakura) */
         body[data-theme="sakura"] {
             --bg: #fce4ec; --card: #ffffff; --text: #880e4f; --sub: #d81b60; --border: #f8bbd0;
             --color-red: #e91e63; --color-green: #ec407a; --shadow: 0 10px 40px rgba(233, 30, 99, 0.08);
@@ -23,6 +25,7 @@
             --bg: #2a0821; --card: #3b0d2e; --text: #ffe6f2; --sub: #b84d85; --border: #6b1853;
             --color-red: #ff1744; --color-green: #ff6e40; --shadow: 0 10px 50px rgba(255, 23, 68, 0.3);
         }
+        /* 3. 晴空主题 (Sora) */
         body[data-theme="sora"] {
             --bg: #e3f2fd; --card: #ffffff; --text: #0d47a1; --sub: #1976d2; --border: #bbdefb;
             --color-red: #f57c00; --color-green: #1e88e5; --shadow: 0 10px 40px rgba(30, 136, 229, 0.08);
@@ -30,6 +33,33 @@
         body[data-theme="sora"].intense-mode {
             --bg: #050d1a; --card: #0b172a; --text: #e1f0ff; --sub: #4477b3; --border: #1a365d;
             --color-red: #ff3d00; --color-green: #00b4d8; --shadow: 0 10px 50px rgba(0, 180, 216, 0.2);
+        }
+        /* 4. 夜色主题 (Yoru) */
+        body[data-theme="yoru"] {
+            --bg: #1a1a24; --card: #252533; --text: #dcdce6; --sub: #7b7b99; --border: #3d3d52;
+            --color-red: #ff6666; --color-green: #33cc99; --shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        body[data-theme="yoru"].intense-mode {
+            --bg: #09090d; --card: #12121a; --text: #f0f0f5; --sub: #5c5c7a; --border: #242433;
+            --color-red: #ff3333; --color-green: #00e6ac; --shadow: 0 10px 50px rgba(255, 51, 51, 0.4);
+        }
+        /* 5. 枫叶主题 (Aki) */
+        body[data-theme="aki"] {
+            --bg: #faefe6; --card: #ffffff; --text: #70290a; --sub: #b35929; --border: #f0d4c2;
+            --color-red: #d1300a; --color-green: #a86b14; --shadow: 0 10px 40px rgba(112, 41, 10, 0.08);
+        }
+        body[data-theme="aki"].intense-mode {
+            --bg: #210c03; --card: #361405; --text: #fcebd9; --sub: #c9642e; --border: #5c240a;
+            --color-red: #ff3c0a; --color-green: #e6921c; --shadow: 0 10px 50px rgba(255, 60, 10, 0.3);
+        }
+        /* 6. 修竹主题 (Take) */
+        body[data-theme="take"] {
+            --bg: #e8f0e8; --card: #ffffff; --text: #1f3b26; --sub: #467a53; --border: #c4d9c6;
+            --color-red: #c24038; --color-green: #298a44; --shadow: 0 10px 40px rgba(31, 59, 38, 0.08);
+        }
+        body[data-theme="take"].intense-mode {
+            --bg: #0b140d; --card: #142918; --text: #e1ede4; --sub: #386644; --border: #1f4227;
+            --color-red: #ff382e; --color-green: #00cc44; --shadow: 0 10px 50px rgba(0, 204, 68, 0.2);
         }
 
         /* ================= 基础样式 ================= */
@@ -80,12 +110,13 @@
         #settings { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; padding: 40px 20px; overflow-y: auto; }
         .set-box { background: var(--card); border-radius: 24px; padding: 30px; max-width: 420px; margin: 0 auto; box-shadow: var(--shadow); }
 
-        /* ================= 登录系统样式 ================= */
+        /* ================= 登录验证浮层 ================= */
         #auth-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .auth-card { background: var(--card); width: 100%; max-width: 380px; border-radius: 24px; padding: 40px 30px; box-shadow: var(--shadow); text-align: center; }
         .auth-card h2 { margin-top: 0; color: var(--text); margin-bottom: 10px; }
-        .auth-card p { font-size: 12px; color: var(--sub); margin-bottom: 25px; }
-        .auth-input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; font-size: 14px; outline: none; }
+        .auth-card p { font-size: 12px; color: var(--sub); margin-bottom: 25px; line-height: 1.6; }
+        .auth-input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 15px; font-size: 14px; outline: none; transition: border 0.3s; }
+        .auth-input:focus { border-color: var(--color-green); }
         .captcha-box { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; }
         .captcha-math { flex: 1; background: var(--border); border-radius: 12px; padding: 14px; font-weight: bold; font-family: monospace; font-size: 18px; color: var(--text); letter-spacing: 2px; }
         .captcha-input { flex: 1; margin-bottom: 0; }
@@ -119,9 +150,10 @@
 </head>
 <body data-theme="default">
 
-<!-- ================= 登录验证浮层 ================= -->
+<!-- ================= 登录/注册验证浮层 ================= -->
 <div id="auth-overlay">
-    <div class="auth-card">
+    <!-- 主登录/注册面板 -->
+    <div class="auth-card" id="main-auth-card">
         <h2 id="auth-title">登录账号</h2>
         <p id="auth-sub">题库与错题本将云端私密同步</p>
         
@@ -135,6 +167,18 @@
 
         <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">登 录</button>
         <button class="auth-toggle" id="auth-toggle-btn" onclick="toggleAuthMode()">没有账号？点击注册</button>
+    </div>
+
+    <!-- 邮箱验证码（OTP）面板 -->
+    <div class="auth-card" id="otp-auth-card" style="display: none;">
+        <h2>📧 邮箱信件验证</h2>
+        <p>言叶之庭已向该邮箱发送了验证信件</p>
+        <p style="font-size: 11px; color: var(--color-red); margin-top: -15px; margin-bottom: 20px;">* 请查收带有超大验证码的日系邮件</p>
+        
+        <input type="text" id="auth-otp-input" class="auth-input" placeholder="输入 6 位验证码" maxlength="6" style="text-align:center; font-size: 22px; letter-spacing: 6px; font-family: monospace; font-weight:bold;">
+        
+        <button class="auth-btn" id="otp-submit-btn" onclick="verifyOtpCode()">验证并登入</button>
+        <button class="auth-toggle" onclick="cancelOtpMode()">返回重试</button>
     </div>
 </div>
 
@@ -204,8 +248,11 @@
         </div>
         
         <div style="text-align:center; padding-bottom: 15px; border-bottom: 1px solid var(--border); margin-bottom: 15px;">
-            <span id="user-info-text" style="font-size:12px; color:var(--sub); display:block; margin-bottom: 8px;">未登录</span>
-            <button onclick="logoutAccount()" style="padding:8px 20px; border-radius:8px; border:1px solid var(--color-red); color:var(--color-red); font-size:12px;">登出当前账号</button>
+            <span id="user-info-text" style="font-size:12px; color:var(--sub); display:block; margin-bottom: 10px;">未登录</span>
+            <div style="display:flex; justify-content:center; gap: 10px;">
+                <button onclick="logoutAccount()" style="padding:8px 16px; border-radius:8px; border:1px solid var(--color-green); color:var(--color-green); font-size:12px;">安全登出</button>
+                <button onclick="deleteAccount()" style="padding:8px 16px; border-radius:8px; border:1px solid var(--color-red); color:var(--color-red); font-size:12px;">危险: 注销账号</button>
+            </div>
         </div>
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
@@ -218,9 +265,12 @@
 
         <label class="set-label">🎨 画面主题</label>
         <select id="theme-select" onchange="changeTheme()">
-            <option value="default">🍵 抹茶 (默认)</option>
+            <option value="default">🍵 抹茶 (默认绿)</option>
             <option value="sakura">🌸 落樱 (粉红)</option>
             <option value="sora">☁️ 晴空 (天蓝)</option>
+            <option value="yoru">🌙 夜色 (暗紫)</option>
+            <option value="aki">🍁 枫叶 (橙红)</option>
+            <option value="take">🎋 修竹 (深绿)</option>
         </select>
 
         <label class="set-label">⚔️ 激烈模式时长</label>
@@ -274,10 +324,10 @@
     let currentUser = null;
     let isRegisterMode = false;
     let captchaResult = 0;
+    let pendingAuthEmail = ""; // 用于暂存需要输入验证码的邮箱
     let wrongStorageKey = 'wrongs_v11'; 
 
     window.onload = async () => {
-        // 检查登录状态
         const { data: { session } } = await supabase.auth.getSession();
         if (session && session.user) {
             loginSuccess(session.user);
@@ -316,12 +366,18 @@
         }
 
         try {
-            document.getElementById('auth-submit-btn').innerText = '处理中...';
+            document.getElementById('auth-submit-btn').innerText = '通信中...';
             if (isRegisterMode) {
                 const { data, error } = await supabase.auth.signUp({ email, password: pwd });
                 if (error) throw error;
-                alert("注册成功！(若无法登录请检查邮箱验证或后台设置)");
-                if(data.user) loginSuccess(data.user);
+                // 判断是否需要邮箱确认验证码
+                if (data.session === null) {
+                    pendingAuthEmail = email;
+                    document.getElementById('main-auth-card').style.display = 'none';
+                    document.getElementById('otp-auth-card').style.display = 'block';
+                } else {
+                    loginSuccess(data.user);
+                }
             } else {
                 const { data, error } = await supabase.auth.signInWithPassword({ email, password: pwd });
                 if (error) throw error;
@@ -334,21 +390,63 @@
         }
     }
 
+    // 提交邮件验证码
+    async function verifyOtpCode() {
+        const token = document.getElementById('auth-otp-input').value.trim();
+        if(!token || token.length < 6) return alert("请输入完整的6位验证码");
+
+        try {
+            document.getElementById('otp-submit-btn').innerText = '验证中...';
+            const { data, error } = await supabase.auth.verifyOtp({ email: pendingAuthEmail, token, type: 'signup' });
+            if (error) throw error;
+            loginSuccess(data.user);
+        } catch (e) {
+            alert("验证失败: " + e.message);
+            document.getElementById('otp-submit-btn').innerText = '验证并登入';
+        }
+    }
+
+    function cancelOtpMode() {
+        document.getElementById('otp-auth-card').style.display = 'none';
+        document.getElementById('main-auth-card').style.display = 'block';
+        document.getElementById('auth-submit-btn').innerText = '注 册';
+        generateCaptcha();
+    }
+
     function loginSuccess(user) {
         currentUser = user;
         document.getElementById('auth-overlay').style.display = 'none';
-        document.getElementById('user-info-text').innerText = `当前账号: ${user.email}`;
+        document.getElementById('user-info-text').innerText = `已连接账号: ${user.email}`;
         
-        // 绑定该用户的独立错题本 key
         wrongStorageKey = `wrongs_v11_${user.id}`;
         wrongs = JSON.parse(localStorage.getItem(wrongStorageKey) || '[]');
-        
         initGame();
     }
 
     async function logoutAccount() {
         await supabase.auth.signOut();
         location.reload();
+    }
+
+    // 注销账号彻底自毁功能
+    async function deleteAccount() {
+        const c1 = confirm("⚠️ 危险警告\n注销账号将永久销毁您的所有云端词库、错题本，此操作不可逆！\n\n确定要继续吗？");
+        if (!c1) return;
+        const c2 = prompt("请输入【确认注销】四个字以执行自毁程序：");
+        if (c2 !== "确认注销") {
+            alert("输入不匹配，自毁程序已中止。");
+            return;
+        }
+        try {
+            // 调用之前在 Supabase 创建的删除函数
+            const { error } = await supabase.rpc('delete_user');
+            if (error) throw error;
+            alert("您的账号数据已彻底化为尘埃。有缘再见。");
+            await supabase.auth.signOut();
+            location.reload();
+        } catch (e) {
+            alert("注销失败：" + e.message + "\n(如报错未找到函数，请去Supabase按说明配置SQL)");
+        }
     }
 
     // ======= 初始化游戏核心 =======
@@ -411,7 +509,6 @@
 
     // ======= 数据与规则系统 (已添加用户隔离) =======
     async function sync() {
-        // 由于配置了RLS，这里查出来的自然只是当前用户的数据
         const { data } = await supabase.from('dictation_items').select('*');
         all = data || [];
         updateGroupSelect();
@@ -568,12 +665,10 @@
         const groupName = document.getElementById('upload-group').value || '默认词库';
         if(!input) return alert("请粘贴 JSON");
         try {
-            // 关键：在插入数据时强制带上当前用户的 user_id
             const data = JSON.parse(input).map(item => ({ ...item, group_name: groupName, user_id: currentUser.id }));
             
             if(mode === 'cover') {
                 if(!confirm("确定清空你云端当前的【所有词库】并覆盖？")) return;
-                // 由于配置了 RLS，这样删除也只会删掉该账号下的数据，安全隔离
                 await supabase.from('dictation_items').delete().eq('user_id', currentUser.id);
             }
             
