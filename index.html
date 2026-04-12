@@ -68,7 +68,7 @@
         }
         body.no-glass * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 
-        /* ================= 基础与动效提升 ================= */
+        /* ================= 基础与动效 ================= */
         * { box-sizing: border-box; transition: background-color 0.4s, color 0.4s, border-color 0.4s, box-shadow 0.3s, border-radius 0.3s; }
         body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
 
@@ -110,7 +110,7 @@
 
         #ans-pop { position: fixed; right: calc(50% - 480px); top: 50%; transform: translateY(-50%) scale(0.9); width: 260px; background: var(--card); backdrop-filter: var(--glass-blur); border: 1px solid rgba(255,255,255,0.4); padding: 30px 25px; border-radius: var(--ui-radius); box-shadow: 0 20px 60px rgba(0,0,0,0.15); text-align: center; opacity: 0; pointer-events: none; z-index: 200; transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
         #ans-pop.active { opacity: 1; pointer-events: auto; transform: translateY(-50%) scale(1); right: calc(50% - 540px); }
-        #ans-pop.timeout-state .judge-btn { display: none; } /* 超时状态隐藏按钮 */
+        #ans-pop.timeout-state .judge-btn { display: none; }
         #ans-text { font-size: 2.2rem; font-family: "KaiTi", serif; color: var(--text); display: block; margin-bottom: 25px; line-height: 1.2; font-weight: bold; }
         body[data-theme="github"] #ans-pop { border: 1px solid var(--border); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
 
@@ -119,7 +119,7 @@
         #wrong-list { flex: 1; overflow-y: auto; margin: 20px 0; font-size: 14px; padding-right: 10px; }
         .wrong-item { padding: 15px 0; border-bottom: 1px dashed var(--border); }
 
-        /* ================= 按钮控件 ================= */
+        /* ================= 按钮控件 (新增撤销按钮的 5列网格) ================= */
         button { cursor: pointer; border: none; font-family: inherit; background: transparent; transition: all 0.2s; outline: none; }
         button:active { transform: scale(0.96); }
         .judge-btn { width: 100%; padding: 16px; margin-bottom: 12px; border-radius: 12px; font-weight: bold; font-size: 15px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -129,10 +129,11 @@
         body[data-theme="github"] .btn-yes { background: var(--color-green); box-shadow: none; }
         body[data-theme="github"] .btn-no { background: var(--color-red); box-shadow: none; }
         
-        .footer { display: grid; grid-template-columns: 1fr 1fr 1.5fr 1fr; background: transparent; gap: 8px; padding: 12px; }
-        .footer button { padding: 18px 0; background: var(--border); border-radius: var(--ui-radius); font-size: 13px; font-weight: bold; color: var(--text); }
+        /* 实用升级：改为5列布局加入撤销功能 */
+        .footer { display: grid; grid-template-columns: 1fr 1fr 1fr 1.5fr 1fr; background: transparent; gap: 6px; padding: 10px; }
+        .footer button { padding: 16px 0; background: var(--border); border-radius: var(--ui-radius); font-size: 12px; font-weight: bold; color: var(--text); white-space: nowrap;}
         .footer button:hover { filter: brightness(0.95); }
-        .btn-main { background: var(--text) !important; color: var(--bg) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .btn-main { background: var(--text) !important; color: var(--bg) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 13px !important;}
         body[data-theme="github"] .btn-main { box-shadow: none; }
 
         textarea, select, input[type="text"], input[type="email"], input[type="password"], input[type="number"] { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid transparent; background: rgba(0,0,0,0.04); color: var(--text); margin-bottom: 15px; font-size: 14px; outline: none; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); }
@@ -197,7 +198,7 @@
 </head>
 <body data-theme="default">
 
-<!-- ================= 登录验证浮层 (reCAPTCHA升级版) ================= -->
+<!-- ================= 登录验证浮层 (reCAPTCHA v2) ================= -->
 <div id="auth-overlay">
     <div class="auth-card" id="main-auth-card">
         <h2 id="auth-title" style="margin-bottom:20px;">言叶之庭</h2>
@@ -211,10 +212,9 @@
         <input type="password" id="auth-pwd" class="auth-input" placeholder="设置密码（至少6位）">
         <input type="text" id="auth-invite" class="auth-input" placeholder="输入收到的邀请码" style="display:none; border-color: orange;">
         
-        <!-- reCAPTCHA v2 组件 (仅注册时显示) -->
+        <!-- reCAPTCHA v2 组件 (已绑定你提供的 Site Key) -->
         <div id="recaptcha-container" style="display:none; margin: 0 auto 15px auto; transform: scale(0.95); transform-origin: center;">
-            <!-- 请在此替换你自己的 sitekey -->
-            <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+            <div class="g-recaptcha" data-sitekey="6Ldjl7MsAAAAAKdB1F1MLbTAtYwzwBGVvNXk5khz"></div>
         </div>
 
         <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">登 录</button>
@@ -239,7 +239,11 @@
         <button onclick="toggleSidebar()" style="background:none; font-size:28px; color:var(--text);">×</button>
     </div>
     <div id="wrong-list"></div>
-    <button onclick="clearWrongs()" style="width:100%; padding:14px; background:var(--border); border-radius:12px; font-size:13px; font-weight:bold; color:var(--text)">清空本地记录</button>
+    <!-- 新增功能：错题导出与清空并行 -->
+    <div style="display:flex; gap:10px;">
+        <button onclick="clearWrongs()" style="flex:1; padding:14px; background:var(--border); border-radius:12px; font-size:13px; font-weight:bold; color:var(--text)">清空记录</button>
+        <button onclick="exportWrongs()" style="flex:1; padding:14px; background:var(--color-green); border-radius:12px; font-size:13px; font-weight:bold; color:white">📤 导出文本</button>
+    </div>
 </div>
 
 <div class="main-card">
@@ -274,8 +278,10 @@
         <canvas id="board"></canvas>
     </div>
 
+    <!-- 新增功能：5列网格，加入无限撤销按钮 -->
     <div class="footer">
         <button onclick="clearBoard()" style="color:var(--sub);">🗑️ 清空</button>
+        <button onclick="undoDraw()" style="color:var(--sub);">↩️ 撤销</button>
         <button id="eraser-btn" onclick="toggleEraser()" style="color:var(--sub);">✏️ 画笔</button>
         <button class="btn-main" onclick="showAns(true)">核对答案</button>
         <button onclick="skipQ()">跳过</button>
@@ -351,6 +357,8 @@
             </div>
         </div>
         
+        <!-- 新增功能：沉浸全屏模式切换 -->
+        <button onclick="toggleFullScreen()" style="width:100%; padding:14px; background:rgba(0,0,0,0.05); border:2px solid var(--border); color:var(--text); border-radius:14px; font-weight:bold; font-size: 15px; margin-bottom: 15px;">🔲 开启/退出沉浸全屏</button>
         <button onclick="toggleResourceCenter(true)" style="width:100%; padding:16px; background:var(--text); color:var(--bg); border-radius:14px; font-weight:bold; font-size: 15px; margin-bottom: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">🌐 进入共享资源中心</button>
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
@@ -457,6 +465,30 @@
         }
     }
 
+    // 新增实用功能：全屏切换
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => { alert(`全屏请求被拒绝: ${err.message}`); });
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+        toggleSettings(false);
+    }
+
+    // 新增实用功能：导出错题本 (TXT)
+    function exportWrongs() {
+        if (wrongs.length === 0) return alert("错题本空空如也，无需导出！");
+        let content = "言叶之庭 - 个人错题本导出\n==========================\n\n";
+        wrongs.forEach((w, index) => {
+            content += `[${index + 1}] 类别: ${w.cat || '综合'}\n题目: ${w.q}\n答案: ${w.a}\n--------------------------\n`;
+        });
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = "我的错题本_言叶之庭.txt";
+        a.click(); URL.revokeObjectURL(url);
+    }
+
     window.onload = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session && session.user) loginSuccess(session.user);
@@ -495,7 +527,6 @@
         document.getElementById('auth-submit-btn').innerText = isRegisterMode ? '注 册' : '登 录';
         document.getElementById('auth-toggle-btn').innerText = isRegisterMode ? '已有账号？点击登录' : '没有账号？点击注册';
         
-        // 注册时显示 reCAPTCHA 组件
         document.getElementById('recaptcha-container').style.display = isRegisterMode ? 'block' : 'none';
         switchAuthType(authType);
     }
@@ -507,12 +538,10 @@
 
         if (!account || !pwd) return alert("请填写账号和密码");
 
-        // 如果是注册，必须要过前端 reCAPTCHA 验证
+        // 仅前端完成 reCAPTCHA 人机验证拦截 (Secret Key 请保留在后端使用)
         if (isRegisterMode && account.toLowerCase() !== 'admin') {
-            const recaptchaResponse = grecaptcha.getResponse();
-            if (!recaptchaResponse) {
-                alert("请先勾选人机验证！"); return;
-            }
+            const recaptchaResponse = window.grecaptcha ? grecaptcha.getResponse() : null;
+            if (!recaptchaResponse) { alert("请先完成人机安全验证！"); return; }
         }
 
         document.getElementById('auth-submit-btn').innerText = '数据连接中...';
@@ -563,7 +592,7 @@
         } catch (e) {
             alert("操作失败：" + e.message);
             document.getElementById('auth-submit-btn').innerText = isRegisterMode ? '注 册' : '登 录';
-            if(window.grecaptcha) grecaptcha.reset(); // 失败重置验证码
+            if(window.grecaptcha) grecaptcha.reset(); 
         }
     }
 
@@ -832,10 +861,9 @@
 
     function handleTimeUp() {
         playSFX('no');
-        document.getElementById('ans-pop').classList.add('timeout-state'); // 隐藏对错按钮
+        document.getElementById('ans-pop').classList.add('timeout-state'); 
         document.getElementById('ans-text').innerHTML = current.a + '<br><span style="color:var(--color-red); font-size:14px; display:block; margin-top:10px;">⏳ 超时自动跳过</span>';
         showAns(true);
-        // 停留 1.5 秒后自动算错并跳过
         autoNextTimeout = setTimeout(() => {
             document.getElementById('ans-pop').classList.remove('timeout-state');
             mark(false);
@@ -847,7 +875,7 @@
             sCorrect++; playSFX('yes');
             if (document.getElementById('mode').value === 'wrong') { wrongs = wrongs.filter(i => i.q !== current.q); localStorage.setItem(wrongStorageKey, JSON.stringify(wrongs)); renderWrongs(); document.getElementById('count-info').innerText = `${pool.length - 1} ITEMS`; }
         } else {
-            sWrong++; if(!isIntenseMode) playSFX('no'); // 激烈模式超时已响过一次
+            sWrong++; if(!isIntenseMode) playSFX('no'); 
             if(!wrongs.find(i => i.q === current.q)) { wrongs.push(current); localStorage.setItem(wrongStorageKey, JSON.stringify(wrongs)); renderWrongs(); }
         }
         pool = pool.filter(i => i !== current); updateProgress(); showAns(false);
@@ -898,19 +926,44 @@
             await supabase.from('dictation_items').insert(data); alert("词库同步成功！"); document.getElementById('jsonInput').value = ""; toggleSettings(false); sync();
         } catch(e) { alert("失败: " + e.message); }
     }
+    
+    // ======= 新增功能：无限撤销画笔 =======
     const canvas = document.getElementById('board'); const ctx = canvas.getContext('2d'); let drawing = false, isEraser = false, lastTap = 0;
+    let undoStack = []; // 撤销栈
+
+    function saveCanvasState() {
+        undoStack.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        if(undoStack.length > 20) undoStack.shift(); // 最多保存 20 步
+    }
+
+    function undoDraw() {
+        if(undoStack.length > 0) ctx.putImageData(undoStack.pop(), 0, 0);
+    }
+
     function initCanvas() { const rect = canvas.parentNode.getBoundingClientRect(); canvas.width = rect.width; canvas.height = rect.height; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; applyBrushStyle(); }
     function toggleEraser() { isEraser = !isEraser; const btn = document.getElementById('eraser-btn'); btn.innerText = isEraser ? '🧽 橡皮' : '✏️ 画笔'; btn.style.color = isEraser ? 'var(--color-red)' : 'var(--sub)'; applyBrushStyle(); }
     function resetEraser() { isEraser = false; const btn = document.getElementById('eraser-btn'); if (btn) { btn.innerText = '✏️ 画笔'; btn.style.color = 'var(--sub)'; } applyBrushStyle(); }
     function applyBrushStyle() { if (isEraser) { ctx.globalCompositeOperation = 'destination-out'; ctx.lineWidth = 28; } else { ctx.globalCompositeOperation = 'source-over'; ctx.lineWidth = 4; ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--text').trim(); } }
     const getPos = (e) => { const rect = canvas.getBoundingClientRect(); const cx = e.touches ? e.touches[0].clientX : e.clientX; const cy = e.touches ? e.touches[0].clientY : e.clientY; return { x: cx - rect.left, y: cy - rect.top }; };
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); const currentTime = new Date().getTime(); const tapLength = currentTime - lastTap; if (tapLength < 300 && tapLength > 0 && allowDblClickClear) { clearBoard(); } lastTap = currentTime; }, {passive:false});
+    
+    canvas.addEventListener('touchstart', (e) => { 
+        e.preventDefault(); 
+        const currentTime = new Date().getTime(); const tapLength = currentTime - lastTap; 
+        if (tapLength < 300 && tapLength > 0 && allowDblClickClear) { clearBoard(); return; } 
+        lastTap = currentTime;
+        saveCanvasState(); 
+        drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); 
+    }, {passive:false});
+    
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if(drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } }, {passive:false}); window.addEventListener('touchend', () => drawing = false);
-    canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); }); canvas.addEventListener('mousemove', (e) => { if(drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } }); window.addEventListener('mouseup', () => drawing = false);
+    canvas.addEventListener('mousedown', (e) => { saveCanvasState(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); }); 
+    canvas.addEventListener('mousemove', (e) => { if(drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } }); window.addEventListener('mouseup', () => drawing = false);
+    
     canvas.addEventListener('dblclick', () => { if(allowDblClickClear) clearBoard(); });
-    function clearBoard() { ctx.clearRect(0,0,canvas.width,canvas.height); }
+    function clearBoard() { saveCanvasState(); ctx.clearRect(0,0,canvas.width,canvas.height); }
+    
     function showAns(s) { 
-        if (s && isIntenseMode) clearInterval(qTimerInterval); // 提前偷看则暂停倒数
+        if (s && isIntenseMode) clearInterval(qTimerInterval); 
         document.getElementById('ans-pop').classList.toggle('active', s); 
     }
     function updateProgress() { document.getElementById('progress-bar').style.width = (filtered.length === 0 ? 0 : ((filtered.length - pool.length) / filtered.length) * 100) + '%'; }
