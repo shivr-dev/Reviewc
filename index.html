@@ -75,7 +75,7 @@
         .device-btn {
             width: 100%; max-width: 320px; padding: 25px; margin: 12px 0; border-radius: 24px;
             background: var(--card); border: 2px solid var(--border); font-size: 20px; font-weight: bold; color: var(--text);
-            box-shadow: var(--shadow); transition: 0.3s; display: flex; flex-direction: column; gap: 8px; align-items: center;
+            box-shadow: var(--shadow); transition: 0.3s; display: flex; flex-direction: column; gap: 8px; align-items: center; cursor: pointer;
         }
         .device-btn span { font-size: 13px; color: var(--sub); font-weight: normal; }
         .device-btn.highlight { border-color: var(--color-green); background: rgba(90, 130, 90, 0.1); transform: scale(1.02); }
@@ -202,46 +202,101 @@
         body[data-theme="github"] #admin-panel { border-radius: 6px; }
 
         /* ================= 专属适配：Oppo Watch X (46mm) ================= */
+        /* 手表专属的占位与触发按钮 */
+        .watch-start-write { display: none; }
+        .watch-q-overlay { display: none; }
+        
         body.watch-mode {
-            clip-path: circle(50%); /* 强制物理裁切，模拟圆屏边缘防越界 */
+            clip-path: circle(50%); /* 圆形裁切安全区 */
             background: #000 !important;
-            /* 强制重写深色变量，适配手表高对比OLED */
-            --bg: #000; --card: #000; --text: #fff; --sub: #aaa; --border: #333;
+            /* 强制重写深色变量，适配 OLED */
+            --bg: #000; --card: #000; --text: #fff; --sub: #aaa; --border: #222;
             --glass-blur: none; --ui-radius: 0;
         }
-        body.watch-mode .main-card, 
-        body.watch-mode .auth-card, 
-        body.watch-mode .set-box {
-            background: transparent !important; border: none !important; box-shadow: none !important;
-            padding: 40px 15px; max-width: 100%; height: 100%; border-radius: 0; justify-content: center;
+
+        body.watch-mode .main-card {
+            border: none !important; box-shadow: none !important; border-radius: 0;
+            justify-content: center; position: absolute; inset: 0; max-width: 100%;
         }
-        
-        body.watch-mode .nav { padding: 5px 15px 10px; border-bottom: 1px solid #222; }
-        body.watch-mode .nav span { font-size: 14px; padding: 6px 12px; background: #1a1a1a; border-radius: 12px; }
-        body.watch-mode #count-info { display: none; } /* 隐藏非必要字数以省空间 */
-        body.watch-mode #hint-btn { display: none; } /* 缩小导航菜单宽度 */
-        
-        body.watch-mode .quiz-box { padding: 5px; }
-        body.watch-mode #q-text { font-size: 1.6rem; }
-        body.watch-mode .canvas-area { height: 150px; border-color: #222; margin-top: 5px; }
-        
-        body.watch-mode .footer { grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 15px; }
-        body.watch-mode .footer button { font-size: 14px; padding: 12px 0; border-radius: 16px; background: #222; }
-        body.watch-mode .footer .btn-main { grid-column: 1 / -1; font-size: 15px !important; background: var(--color-green) !important; color: white !important;}
-        body.watch-mode .footer button:nth-child(2) { display: none; } /* 隐藏撤销功能避免拥挤 */
 
-        body.watch-mode .full-overlay { padding: 50px 15px 70px 15px; } /* 上下增加边距避开圆弧裁切 */
-        body.watch-mode .set-box { padding-bottom: 80px; }
+        /* 手表闲置态 (读题) */
+        body.watch-mode .nav {
+            position: absolute; top: 15%; width: 100%; justify-content: space-around;
+            padding: 0 50px; border: none; z-index: 20;
+        }
+        body.watch-mode .nav span { font-size: 20px; padding: 10px; background: #1a1a1a; border-radius: 50%; }
+        body.watch-mode #count-info, body.watch-mode #mode-toggle-btn { display: none; }
         
-        body.watch-mode #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(1) !important; width: 80%; background: #111; border: 1px solid #333; }
-        body.watch-mode #ans-text { font-size: 1.8rem; }
-        body.watch-mode .judge-btn { padding: 12px; font-size: 16px; }
+        body.watch-mode .quiz-box { position: absolute; top: 35%; width: 100%; z-index: 10; padding: 0 20px; }
+        body.watch-mode #q-text { font-size: 1.8rem; margin-bottom: 10px; line-height: 1.3; }
 
-        body.watch-mode .auth-tabs { flex-direction: column; gap: 5px; background: transparent; }
-        body.watch-mode .auth-tab { background: #222; border-radius: 12px; }
+        /* 呼出画板的巨型按钮 */
+        body.watch-mode .watch-start-write {
+            position: absolute; bottom: 12%; left: 50%; transform: translateX(-50%);
+            background: var(--color-green); color: #fff; font-size: 16px; font-weight: bold;
+            padding: 12px 25px; border-radius: 30px; z-index: 20; display: block; white-space: nowrap;
+        }
+
+        /* --- 手表书写态 (全屏画板) --- */
+        body.watch-mode .canvas-area {
+            position: absolute; inset: 0; height: 100%; width: 100%; border: none;
+            z-index: 50; display: none; background: #000; margin: 0;
+        }
+        body.watch-mode.is-writing .canvas-area { display: block; }
+        
+        body.watch-mode.is-writing .nav,
+        body.watch-mode.is-writing .quiz-box,
+        body.watch-mode.is-writing .watch-start-write { display: none !important; }
+
+        /* 悬浮在画板上的题目水印 */
+        body.watch-mode .watch-q-overlay {
+            position: absolute; top: 18%; width: 80%; left: 10%; text-align: center;
+            color: rgba(255,255,255,0.3); font-size: 14px; pointer-events: none; z-index: 55;
+            font-family: "KaiTi", serif; line-height: 1.2;
+        }
+        body.watch-mode.is-writing .watch-q-overlay { display: block; }
+
+        /* 画板周围的悬浮按钮 */
+        body.watch-mode .footer {
+            position: absolute; inset: 0; height: 100%; display: none; z-index: 60; pointer-events: none; padding: 0; background: transparent;
+        }
+        body.watch-mode.is-writing .footer { display: block; }
+        
+        body.watch-mode .footer button { 
+            pointer-events: auto; position: absolute; background: rgba(30,30,30,0.8); 
+            border-radius: 50%; width: 45px; height: 45px; padding: 0; color: #fff; border: 1px solid #444; 
+            display: flex; align-items: center; justify-content: center; font-size: 16px;
+        }
+        /* 左上：清空 */ body.watch-mode .footer button:nth-child(1) { top: 15%; left: 15%; } 
+        /* 右上：撤销 */ body.watch-mode .footer button:nth-child(2) { top: 15%; right: 15%; } 
+        /* 左下：返回 */ body.watch-mode .footer button:nth-child(6) { bottom: 15%; left: 15%; }
+        /* 正下：核对 (大按钮) */ 
+        body.watch-mode .footer button:nth-child(4) { 
+            bottom: 8%; left: 50%; transform: translateX(-50%); 
+            background: var(--color-green); font-size: 16px; padding: 12px 25px; 
+            width: auto; height: auto; border-radius: 25px; 
+        } 
+        body.watch-mode .footer button:nth-child(3), /* 橡皮擦 */
+        body.watch-mode .footer button:nth-child(5) { display: none; } /* 跳过 */
+
+        /* 模态框弹窗深度适配 */
+        body.watch-mode .full-overlay { padding: 60px 15px 80px 15px; align-items: center; } 
+        body.watch-mode .set-box { padding: 20px; width: 100%; padding-bottom: 40px; border-radius: 0; background: transparent; }
+        body.watch-mode #wrong-sidebar { width: 100%; height: 100%; transform: translateY(100%); padding: 50px 20px; }
+        body.watch-mode #wrong-sidebar.active { transform: translateY(0); }
+        
+        body.watch-mode #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(1) !important; width: 85%; background: #111; border: 1px solid #333; padding: 20px; }
+        body.watch-mode #ans-text { font-size: 1.8rem; margin-bottom: 15px; }
+        body.watch-mode .judge-btn { padding: 12px; font-size: 14px; margin-bottom: 8px; }
+
+        body.watch-mode .auth-card { padding: 50px 20px; background: transparent; border: none; }
+        body.watch-mode .auth-tabs { flex-direction: column; gap: 5px; background: transparent; margin-bottom: 10px; }
+        body.watch-mode .auth-tab { background: #222; border-radius: 12px; padding: 8px; }
         body.watch-mode .auth-tab.active { background: var(--color-green); }
-        body.watch-mode #recaptcha-container { transform: scale(0.7); transform-origin: top center; margin-bottom: 0; }
+        body.watch-mode .auth-input { padding: 10px; margin-bottom: 10px; }
+        body.watch-mode #recaptcha-container { transform: scale(0.65); transform-origin: top center; margin-bottom: -15px; }
         
+        /* 隐藏非必需项 */
         body.watch-mode .hide-on-watch { display: none !important; }
         
         @media (max-width: 1000px) {
@@ -261,7 +316,7 @@
     </div>
     <div class="device-btn" id="device-watch-btn" onclick="selectDevice('watch')">
         ⌚ 智能手表 (Oppo Watch X)
-        <span>圆形表盘极简适配，禁用音效</span>
+        <span>专属沉浸式单开书写，圆屏防裁切</span>
     </div>
 </div>
 
@@ -279,9 +334,9 @@
         <input type="password" id="auth-pwd" class="auth-input" placeholder="设置密码（至少6位）">
         <input type="text" id="auth-invite" class="auth-input" placeholder="输入收到的邀请码" style="display:none; border-color: orange;">
         
-        <!-- reCAPTCHA v2 组件 -->
-        <div id="recaptcha-container" style="display:none; margin: 0 auto 15px auto; transform: scale(0.95); transform-origin: center;">
-            <div class="g-recaptcha" data-sitekey="6Ldjl7MsAAAAAKdB1F1MLbTAtYwzwBGVvNXk5khz"></div>
+        <!-- reCAPTCHA v2 组件 (已绑定更新的 Site Key) -->
+        <div id="recaptcha-container" style="display:none;">
+            <div class="g-recaptcha" data-sitekey="6LdjI7MsAAAAAKdB1F1MLbTAtYwzwBGVvNXk5khz"></div>
         </div>
 
         <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">登 录</button>
@@ -337,7 +392,11 @@
         <div id="q-text">等待开始...</div>
     </div>
 
+    <!-- 腕表呼出画板按键 -->
+    <button class="watch-start-write" onclick="enterWatchWriting()">✏️ 开始书写</button>
+
     <div class="canvas-area">
+        <div class="watch-q-overlay" id="watch-q-watermark"></div> <!-- 手表水印题干 -->
         <div class="grid-bg"></div>
         <div id="ghost-hint"></div>
         <div id="intense-timer"></div>
@@ -350,6 +409,8 @@
         <button id="eraser-btn" onclick="toggleEraser()" style="color:var(--sub);">✏️ 画笔</button>
         <button class="btn-main" onclick="showAns(true)">核对答案</button>
         <button onclick="skipQ()">跳过</button>
+        <!-- 仅手表模式显示的返回按钮 (索引第6项) -->
+        <button onclick="exitWatchWriting()" class="hide-on-pc" style="display:none; color:var(--color-red);">❌</button>
     </div>
 </div>
 
@@ -404,8 +465,8 @@
             <button onclick="toggleSettings(false)" style="background:none; font-size:28px; color:var(--text);">×</button>
         </div>
         
-        <div id="admin-panel">
-            <h4 style="margin:0 0 15px 0; color: orange; font-size: 16px;">👑 邀请码 & 账号管理中心</h4>
+        <div id="admin-panel" class="hide-on-watch">
+            <h4 style="margin:0 0 15px 0; color: orange; font-size: 16px;">👑 邀请码 & 账号管理</h4>
             <div style="display:flex; gap:10px; margin-bottom: 15px;">
                 <button onclick="generateInviteCodeToDB()" style="flex:1; padding:12px; background:orange; color:white; border-radius:10px; font-weight:bold;">生成 1 个</button>
                 <button onclick="fetchInviteCodesAdmin()" style="padding:12px; background:var(--card); border: 1px solid var(--border); border-radius:10px; color: var(--text);">🔄 刷新</button>
@@ -422,7 +483,7 @@
         </div>
         
         <button onclick="toggleFullScreen()" class="hide-on-watch" style="width:100%; padding:14px; background:rgba(0,0,0,0.05); border:2px solid var(--border); color:var(--text); border-radius:14px; font-weight:bold; font-size: 15px; margin-bottom: 15px;">🔲 开启/退出沉浸全屏</button>
-        <button onclick="toggleResourceCenter(true)" style="width:100%; padding:16px; background:var(--text); color:var(--bg); border-radius:14px; font-weight:bold; font-size: 15px; margin-bottom: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">🌐 进入共享资源中心</button>
+        <button onclick="toggleResourceCenter(true)" class="hide-on-watch" style="width:100%; padding:16px; background:var(--text); color:var(--bg); border-radius:14px; font-weight:bold; font-size: 15px; margin-bottom: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">🌐 进入共享资源中心</button>
 
         <div class="hide-on-watch" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
             <span style="font-size:14px; font-weight:bold;">✨ 开启毛玻璃特效</span>
@@ -439,8 +500,8 @@
             <label class="switch"><input type="checkbox" id="dblclick-toggle" onchange="toggleDblClick()"><span class="slider"></span></label>
         </div>
 
-        <label class="set-label">🎨 画面主题</label>
-        <select id="theme-select" onchange="changeTheme()">
+        <label class="set-label hide-on-watch">🎨 画面主题</label>
+        <select id="theme-select" class="hide-on-watch" onchange="changeTheme()">
             <option value="default">🍵 抹茶 (默认绿)</option>
             <option value="sakura">🌸 落樱 (粉红)</option>
             <option value="sora">☁️ 晴空 (天蓝)</option>
@@ -471,14 +532,14 @@
             <option value="poem">仅古诗长句</option>
         </select>
 
-        <div style="height:1px; background:var(--border); margin:25px 0;"></div>
+        <div class="hide-on-watch" style="height:1px; background:var(--border); margin:25px 0;"></div>
 
-        <label class="set-label">☁️ 导入新数据 (私密隔离)</label>
-        <p style="font-size:11px; color:var(--sub); margin:0 0 8px 0; line-height: 1.5;">分组名由下方决定，JSON内填：<br><code>[{"q":"题目","a":"答案","cat":"古诗/字词/课文"}]</code></p>
-        <input type="text" id="upload-group" placeholder="输入分组名，如：期中考试词汇" value="默认分组">
-        <textarea id="jsonInput" rows="4" placeholder='复制你的 JSON 数据粘贴到这里...'></textarea>
+        <label class="set-label hide-on-watch">☁️ 导入新数据 (私密隔离)</label>
+        <p class="hide-on-watch" style="font-size:11px; color:var(--sub); margin:0 0 8px 0; line-height: 1.5;">分组名由下方决定，JSON内填：<br><code>[{"q":"题目","a":"答案","cat":"古诗/字词/课文"}]</code></p>
+        <input type="text" id="upload-group" class="hide-on-watch" placeholder="输入分组名，如：期中考试词汇" value="默认分组">
+        <textarea id="jsonInput" class="hide-on-watch" rows="4" placeholder='复制你的 JSON 数据粘贴到这里...'></textarea>
         
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="hide-on-watch" style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <button onclick="upload('merge')" style="background:var(--text); color:var(--bg); padding:14px; border-radius:10px; font-weight:bold;">增量合并</button>
             <button onclick="upload('cover')" style="background:var(--color-red); color:white; padding:14px; border-radius:10px; font-weight:bold;">清空覆盖(当前组)</button>
         </div>
@@ -500,12 +561,12 @@
     let currentUser = null, authType = 'email', isRegisterMode = false, pendingAuthEmail = ""; 
     let wrongStorageKey = 'wrongs_v11'; 
     let allowDblClickClear = true, isGlassOn = true;
-    let isWatchMode = false; // 新增：腕表模式判定标识
+    let isWatchMode = false; 
 
-    // 音效系统 (腕表模式将被拦截)
+    // 音效
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSFX(type) {
-        if(isWatchMode) return; // 腕表模式禁音
+        if(isWatchMode) return; 
         if(audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
@@ -521,14 +582,11 @@
         }
     }
 
-    // 实用功能：全屏
     function toggleFullScreen() {
         if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => { alert(`全屏失败: ${err.message}`); }); } 
         else { if (document.exitFullscreen) document.exitFullscreen(); }
         toggleSettings(false);
     }
-
-    // 实用功能：错题导出
     function exportWrongs() {
         if (wrongs.length === 0) return alert("错题本空空如也，无需导出！");
         let content = "言叶之庭 - 个人错题本导出\n==========================\n\n";
@@ -540,7 +598,6 @@
     }
 
     window.onload = async () => {
-        // 第一步：判断显示模式（腕表 vs 宽屏）
         const isSmallScreen = window.innerWidth <= 450 && window.innerHeight <= 450;
         if (isSmallScreen) document.getElementById('device-watch-btn').classList.add('highlight');
         else document.getElementById('device-pc-btn').classList.add('highlight');
@@ -551,9 +608,11 @@
         document.getElementById('device-selector-overlay').style.display = 'none';
         if (mode === 'watch') {
             isWatchMode = true;
-            document.body.classList.add('watch-mode', 'intense-mode'); // 腕表强制暗黑模式 + 裁切
+            document.body.classList.add('watch-mode', 'intense-mode');
+            // 显示手表的专属按钮，隐藏PC的
+            document.querySelector('.footer button:nth-child(6)').style.display = 'flex';
         }
-        initAuth(); // 进入账号认证阶段
+        initAuth(); 
     }
 
     async function initAuth() {
@@ -580,6 +639,16 @@
     function toggleDblClick() {
         allowDblClickClear = document.getElementById('dblclick-toggle').checked;
         localStorage.setItem('allow_dblclick', allowDblClickClear);
+    }
+
+    // ======= 手表专用书写范式 =======
+    function enterWatchWriting() {
+        document.body.classList.add('is-writing');
+        setTimeout(() => { initCanvas(); }, 50); // 延迟重绘确保宽高已 100% 展开
+    }
+    function exitWatchWriting() {
+        document.body.classList.remove('is-writing');
+        setTimeout(() => { initCanvas(); }, 50); // 恢复原有比例
     }
 
     // ======= Auth =======
@@ -682,7 +751,7 @@
         if (displayEmail === 'admin@yanye.com') displayEmail = '🌟 管理员 (Admin)';
         else if (displayEmail.endsWith('@yanye.local')) displayEmail = '👤 ' + displayEmail.replace('@yanye.local', '');
         document.getElementById('user-info-text').innerText = `已连接账号: ${displayEmail}`;
-        if (user.email === 'admin@yanye.com') { document.getElementById('admin-panel').style.display = 'block'; fetchInviteCodesAdmin(); }
+        if (user.email === 'admin@yanye.com' && !isWatchMode) { document.getElementById('admin-panel').style.display = 'block'; fetchInviteCodesAdmin(); }
         wrongStorageKey = `wrongs_v11_${user.id}`; wrongs = JSON.parse(localStorage.getItem(wrongStorageKey) || '[]');
         initGame();
     }
@@ -780,7 +849,7 @@
     // ======= 核心系统 =======
     function initGame() { initCanvas(); sync(); initBGM(); renderWrongs(); loadTheme(); }
     function changeTheme() {
-        if(isWatchMode) return; // 腕表强制黑色
+        if(isWatchMode) return; 
         const t = document.getElementById('theme-select').value; document.body.setAttribute('data-theme', t); localStorage.setItem('app_theme', t); initCanvas(); 
     }
     function loadTheme() {
@@ -800,6 +869,7 @@
         const cCtx = document.getElementById('confetti-canvas').getContext('2d'); cCtx.clearRect(0,0,window.innerWidth,window.innerHeight);
         document.getElementById('ans-pop').classList.remove('timeout-state');
         
+        if(isWatchMode) exitWatchWriting();
         resetEraser(); pool = [...filtered]; sCorrect = 0; sWrong = 0; updateProgress();
         if (audioInitialized) playBGM(true);
         if (isIntenseMode) startPrepCountdown(); else { if (pool.length > 0) nextQ(); else document.getElementById('q-text').innerText = "该分组下暂无题目"; }
@@ -814,7 +884,7 @@
     }
 
     function startPrepCountdown() {
-        let prepTime = isWatchMode ? 5 : 12; // 腕表模式准备时间缩短
+        let prepTime = isWatchMode ? 5 : 12; 
         const timerEl = document.getElementById('intense-timer'); timerEl.classList.add('prep'); timerEl.innerText = prepTime;
         document.getElementById('q-text').innerText = "准备迎接极限考验..."; document.getElementById('q-cat').innerText = "PREPARING";
         prepInterval = setInterval(() => { prepTime--; timerEl.innerText = prepTime; if (prepTime <= 0) { clearInterval(prepInterval); timerEl.classList.remove('prep'); beginIntenseChallenge(); } }, 1000);
@@ -826,8 +896,11 @@
     }
 
     function nextQ() {
-        if(!pool.length) return; clearBoard(); current = pool[Math.floor(Math.random() * pool.length)];
+        if(!pool.length) return; 
+        if(isWatchMode) exitWatchWriting();
+        clearBoard(); current = pool[Math.floor(Math.random() * pool.length)];
         const qEl = document.getElementById('q-text'); qEl.innerText = current.q; qEl.className = current.q.length > 12 ? 'long' : '';
+        document.getElementById('watch-q-watermark').innerText = current.q; // 腕表水印
         document.getElementById('q-cat').innerText = `${(current.cat || 'COMMON').toUpperCase()} · 共 ${current.a ? current.a.length : 0} 字`; 
         document.getElementById('ans-text').innerText = current.a || '';
         document.getElementById('ans-pop').classList.remove('timeout-state');
@@ -878,7 +951,7 @@
     }
 
     function fireConfetti() {
-        if(isWatchMode) return; // 腕表禁用繁重特效
+        if(isWatchMode) return; 
         const canvas = document.getElementById('confetti-canvas'); const ctx = canvas.getContext('2d'); canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         const pieces = []; const colors = ['#d15147', '#5a825a', '#ff9f0a', '#00b4d8', '#ec407a'];
         for(let i=0; i<100; i++) pieces.push({ x: canvas.width/2, y: canvas.height/2 + 100, vx: (Math.random()-0.5)*20, vy: (Math.random()-1)*20, size: Math.random()*10+5, color: colors[Math.floor(Math.random()*colors.length)], rot: Math.random()*360, rotS: (Math.random()-0.5)*10 });
@@ -931,7 +1004,10 @@
     canvas.addEventListener('dblclick', () => { if(allowDblClickClear) clearBoard(); });
     function clearBoard() { saveCanvasState(); ctx.clearRect(0,0,canvas.width,canvas.height); }
     
-    function showAns(s) { if (s && isIntenseMode) clearInterval(qTimerInterval); document.getElementById('ans-pop').classList.toggle('active', s); }
+    function showAns(s) { 
+        if (s && isIntenseMode) clearInterval(qTimerInterval); 
+        document.getElementById('ans-pop').classList.toggle('active', s); 
+    }
     function updateProgress() { document.getElementById('progress-bar').style.width = (filtered.length === 0 ? 0 : ((filtered.length - pool.length) / filtered.length) * 100) + '%'; }
     function peekHint() { const h = document.getElementById('ghost-hint'); h.innerText = current.a; h.classList.add('show'); setTimeout(() => h.classList.remove('show'), 1000); }
     function skipQ() { if(pool.length > 1) { clearInterval(qTimerInterval); nextQ(); } }
