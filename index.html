@@ -4,66 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>言叶之庭 - 词库主题版</title>
+    <!-- 引入 Supabase 和 reCAPTCHA v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
     <script src="https://recaptcha.net/recaptcha/api.js" async defer></script>
     <style>
         /* ================= 调色盘系统 ================= */
         :root {
             --bg: #f4f1eb; --card: rgba(255, 255, 255, 0.85); --text: #2c3e50; --sub: #8b979f; --border: #e2dfd6;
-            --color-red: #d15147; --color-green: #5a825a; --shadow: 0 12px 40px rgba(0,0,0,0.08); --glass-blur: blur(16px);
+            --color-red: #d15147; --color-green: #5a825a; --color-brand: #2c3e50; --shadow: 0 12px 40px rgba(0,0,0,0.08); --glass-blur: blur(16px);
             --ui-radius: 28px;
         }
         body.intense-mode {
             --bg: #0f0a0a; --card: rgba(26, 17, 17, 0.85); --text: #fdf5f5; --sub: #d66b6b; --border: #381c1c;
-            --color-red: #ff2a2a; --color-green: #ff9f0a; --shadow: 0 12px 50px rgba(255, 0, 0, 0.25);
+            --color-red: #ff2a2a; --color-green: #ff9f0a; --color-brand: #ff9f0a; --shadow: 0 12px 50px rgba(255, 0, 0, 0.25);
         }
         body[data-theme="sakura"] {
             --bg: #fce4ec; --card: rgba(255, 255, 255, 0.85); --text: #880e4f; --sub: #d81b60; --border: #f8bbd0;
-            --color-red: #e91e63; --color-green: #ec407a; --shadow: 0 12px 40px rgba(233, 30, 99, 0.12);
+            --color-red: #e91e63; --color-green: #ec407a; --color-brand: #ec407a; --shadow: 0 12px 40px rgba(233, 30, 99, 0.12);
         }
         body[data-theme="sakura"].intense-mode {
             --bg: #2a0821; --card: rgba(59, 13, 46, 0.85); --text: #ffe6f2; --sub: #b84d85; --border: #6b1853;
-            --color-red: #ff1744; --color-green: #ff6e40; --shadow: 0 12px 50px rgba(255, 23, 68, 0.3);
+            --color-red: #ff1744; --color-green: #ff6e40; --color-brand: #ff6e40; --shadow: 0 12px 50px rgba(255, 23, 68, 0.3);
         }
         body[data-theme="sora"] {
             --bg: #e3f2fd; --card: rgba(255, 255, 255, 0.85); --text: #0d47a1; --sub: #1976d2; --border: #bbdefb;
-            --color-red: #f57c00; --color-green: #1e88e5; --shadow: 0 12px 40px rgba(30, 136, 229, 0.12);
+            --color-red: #f57c00; --color-green: #1e88e5; --color-brand: #1e88e5; --shadow: 0 12px 40px rgba(30, 136, 229, 0.12);
         }
         body[data-theme="sora"].intense-mode {
             --bg: #050d1a; --card: rgba(11, 23, 42, 0.85); --text: #e1f0ff; --sub: #4477b3; --border: #1a365d;
-            --color-red: #ff3d00; --color-green: #00b4d8; --shadow: 0 12px 50px rgba(0, 180, 216, 0.2);
+            --color-red: #ff3d00; --color-green: #00b4d8; --color-brand: #00b4d8; --shadow: 0 12px 50px rgba(0, 180, 216, 0.2);
         }
         body[data-theme="yoru"] {
             --bg: #1a1a24; --card: rgba(37, 37, 51, 0.85); --text: #dcdce6; --sub: #7b7b99; --border: #3d3d52;
-            --color-red: #ff6666; --color-green: #33cc99; --shadow: 0 12px 40px rgba(0,0,0,0.3);
+            --color-red: #ff6666; --color-green: #33cc99; --color-brand: #33cc99; --shadow: 0 12px 40px rgba(0,0,0,0.3);
         }
         body[data-theme="yoru"].intense-mode {
             --bg: #09090d; --card: rgba(18, 18, 26, 0.85); --text: #f0f0f5; --sub: #5c5c7a; --border: #242433;
-            --color-red: #ff3333; --color-green: #00e6ac; --shadow: 0 12px 50px rgba(255, 51, 51, 0.4);
+            --color-red: #ff3333; --color-green: #00e6ac; --color-brand: #00e6ac; --shadow: 0 12px 50px rgba(255, 51, 51, 0.4);
         }
         body[data-theme="aki"] {
             --bg: #faefe6; --card: rgba(255, 255, 255, 0.85); --text: #70290a; --sub: #b35929; --border: #f0d4c2;
-            --color-red: #d1300a; --color-green: #a86b14; --shadow: 0 12px 40px rgba(112, 41, 10, 0.12);
+            --color-red: #d1300a; --color-green: #a86b14; --color-brand: #a86b14; --shadow: 0 12px 40px rgba(112, 41, 10, 0.12);
         }
         body[data-theme="aki"].intense-mode {
             --bg: #210c03; --card: rgba(54, 20, 5, 0.85); --text: #fcebd9; --sub: #c9642e; --border: #5c240a;
-            --color-red: #ff3c0a; --color-green: #e6921c; --shadow: 0 12px 50px rgba(255, 60, 10, 0.3);
+            --color-red: #ff3c0a; --color-green: #e6921c; --color-brand: #e6921c; --shadow: 0 12px 50px rgba(255, 60, 10, 0.3);
         }
         body[data-theme="take"] {
             --bg: #e8f0e8; --card: rgba(255, 255, 255, 0.85); --text: #1f3b26; --sub: #467a53; --border: #c4d9c6;
-            --color-red: #c24038; --color-green: #298a44; --shadow: 0 12px 40px rgba(31, 59, 38, 0.12);
+            --color-red: #c24038; --color-green: #298a44; --color-brand: #298a44; --shadow: 0 12px 40px rgba(31, 59, 38, 0.12);
         }
         body[data-theme="take"].intense-mode {
             --bg: #0b140d; --card: rgba(20, 41, 24, 0.85); --text: #e1ede4; --sub: #386644; --border: #1f4227;
-            --color-red: #ff382e; --color-green: #00cc44; --shadow: 0 12px 50px rgba(0, 204, 68, 0.2);
+            --color-red: #ff382e; --color-green: #00cc44; --color-brand: #00cc44; --shadow: 0 12px 50px rgba(0, 204, 68, 0.2);
         }
         body[data-theme="github"] {
             --bg: #ffffff; --card: #f6f8fa; --text: #24292f; --sub: #57606a; --border: #d0d7de;
-            --color-red: #cf222e; --color-green: #2da44e; --shadow: none; --glass-blur: none; --ui-radius: 6px;
+            --color-red: #cf222e; --color-green: #2da44e; --color-brand: #2da44e; --shadow: none; --glass-blur: none; --ui-radius: 6px;
         }
         body[data-theme="github"].intense-mode {
             --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --sub: #8b949e; --border: #30363d;
-            --color-red: #da3633; --color-green: #238636; --shadow: none; --glass-blur: none; --ui-radius: 6px;
+            --color-red: #da3633; --color-green: #238636; --color-brand: #238636; --shadow: none; --glass-blur: none; --ui-radius: 6px;
         }
         body.no-glass * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 
@@ -82,7 +83,7 @@
 
         /* ================= 基础与动效 ================= */
         * { box-sizing: border-box; transition: background-color 0.4s, color 0.4s, border-color 0.4s, box-shadow 0.3s, border-radius 0.3s; }
-        body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; }
+        body { font-family: "OPPO Sans", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; }
 
         .main-card { width: 95%; max-width: 460px; background: var(--card); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border-radius: var(--ui-radius); box-shadow: var(--shadow); overflow: hidden; position: relative; z-index: 10; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.3); }
         body.intense-mode .main-card, body[data-theme="github"] .main-card { border: 1px solid var(--border); }
@@ -126,9 +127,10 @@
         #ans-text { font-size: 2.2rem; font-family: "KaiTi", serif; color: var(--text); display: block; margin-bottom: 25px; line-height: 1.2; font-weight: bold; }
         body[data-theme="github"] #ans-pop { border: 1px solid var(--border); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
 
-        #wrong-sidebar { position: fixed; left: 0; top: 0; width: 300px; height: 100%; background: var(--card); backdrop-filter: var(--glass-blur); border-right: 1px solid var(--border); z-index: 1000; transform: translateX(-100%); padding: 30px; display: flex; flex-direction: column; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        #wrong-sidebar { position: fixed; left: 0; top: 0; width: 300px; height: 100%; background: var(--card); backdrop-filter: var(--glass-blur); border-right: 1px solid var(--border); z-index: 1000; transform: translateX(-100%); display: flex; flex-direction: column; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         #wrong-sidebar.active { transform: translateX(0); box-shadow: 20px 0 60px rgba(0,0,0,0.1); }
-        #wrong-list { flex: 1; overflow-y: auto; margin: 20px 0; font-size: 14px; padding-right: 10px; }
+        #wrong-sidebar-inner { display: flex; flex-direction: column; height: 100%; padding: 30px; overflow-y: auto; }
+        #wrong-list { flex: 1; margin: 20px 0; font-size: 14px; padding-right: 10px; }
         .wrong-item { padding: 15px 0; border-bottom: 1px dashed var(--border); }
 
         /* ================= 按钮控件 ================= */
@@ -160,14 +162,14 @@
         input:checked + .slider:before { transform: translateX(22px); }
 
         /* ================= 菜单、登录、资源 ================= */
-        .full-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; display: none; padding: 40px 20px; overflow-y: auto; }
+        .full-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; display: none; overflow-y: auto; padding: 40px 20px; }
         body.no-glass .full-overlay { background: rgba(0,0,0,0.7); }
         .set-box { background: var(--card); backdrop-filter: var(--glass-blur); border: 1px solid rgba(255,255,255,0.4); border-radius: var(--ui-radius); padding: 35px; max-width: 480px; margin: 0 auto; box-shadow: 0 25px 50px rgba(0,0,0,0.15); animation: slideUp 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
         body[data-theme="github"] .set-box { border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         @keyframes slideUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
 
-        #auth-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .auth-card { background: var(--card); backdrop-filter: var(--glass-blur); border: 1px solid rgba(255,255,255,0.4); width: 100%; max-width: 400px; border-radius: var(--ui-radius); padding: 40px 35px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); text-align: center; }
+        #auth-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: none; overflow-y: auto; padding: 40px 20px; flex-direction: column; justify-content: center; align-items: center; }
+        .auth-card { background: var(--card); backdrop-filter: var(--glass-blur); border: 1px solid rgba(255,255,255,0.4); width: 100%; max-width: 400px; border-radius: var(--ui-radius); padding: 40px 35px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); text-align: center; margin: auto; }
         body[data-theme="github"] .auth-card { border: 1px solid var(--border); box-shadow: none; }
         
         .auth-tabs { display: flex; background: rgba(0,0,0,0.05); border-radius: 12px; margin-bottom: 20px; overflow: hidden; }
@@ -201,30 +203,37 @@
         #admin-panel { background: rgba(255, 165, 0, 0.05); border: 1px dashed orange; border-radius: 16px; padding: 20px; margin-bottom: 25px; display: none; }
         body[data-theme="github"] #admin-panel { border-radius: 6px; }
 
-        /* ================= 专属适配：Oppo Watch X (46mm) ================= */
+        /* ================= 专属适配：Oppo Watch X (46mm BoxInsetLayout 等效) ================= */
         /* 手表专属的占位与触发按钮 */
         .watch-start-write { display: none; }
         .watch-q-overlay { display: none; }
         
         body.watch-mode {
-            clip-path: circle(50%); /* 圆形裁切安全区 */
+            clip-path: circle(50%); /* 强制物理圆裁切防越界 */
             background: #000 !important;
-            /* 强制重写深色变量，适配 OLED */
-            --bg: #000; --card: #000; --text: #fff; --sub: #aaa; --border: #222;
-            --glass-blur: none; --ui-radius: 0;
+            /* 覆写为 OLED 黑与高对比蓝/绿/红 */
+            --bg: #000000; --card: #1A1A1A; --text: #FFFFFF; --sub: #8A8A8F; --border: #333333;
+            --color-red: #FF3B30; --color-green: #00C853; --color-brand: #0094FF;
+            --glass-blur: none; --ui-radius: 16px; --shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
         body.watch-mode .main-card {
             border: none !important; box-shadow: none !important; border-radius: 0;
-            justify-content: center; position: absolute; inset: 0; max-width: 100%;
+            justify-content: center; position: absolute; inset: 0; max-width: 100%; width: 100vw; height: 100vh;
         }
 
-        /* 手表闲置态 (读题) */
+        /* 手表按钮统一重塑 */
+        body.watch-mode .btn-main, body.watch-mode .watch-start-write, body.watch-mode .auth-btn {
+            background: var(--color-brand) !important; color: #FFFFFF !important;
+            border-radius: 16px; font-size: 16px; font-weight: bold; min-height: 48px; box-shadow: none;
+        }
+
+        /* 手表闲置态 (读题模式) */
         body.watch-mode .nav {
             position: absolute; top: 15%; width: 100%; justify-content: space-around;
-            padding: 0 50px; border: none; z-index: 20;
+            padding: 0 40px; border: none; z-index: 20;
         }
-        body.watch-mode .nav span { font-size: 20px; padding: 10px; background: #1a1a1a; border-radius: 50%; }
+        body.watch-mode .nav span { font-size: 24px; padding: 10px; background: transparent; border-radius: 50%; }
         body.watch-mode #count-info, body.watch-mode #mode-toggle-btn { display: none; }
         
         body.watch-mode .quiz-box { position: absolute; top: 35%; width: 100%; z-index: 10; padding: 0 20px; }
@@ -233,11 +242,10 @@
         /* 呼出画板的巨型按钮 */
         body.watch-mode .watch-start-write {
             position: absolute; bottom: 12%; left: 50%; transform: translateX(-50%);
-            background: var(--color-green); color: #fff; font-size: 16px; font-weight: bold;
-            padding: 12px 25px; border-radius: 30px; z-index: 20; display: block; white-space: nowrap;
+            padding: 12px 30px; border-radius: 24px; z-index: 20; display: block; white-space: nowrap;
         }
 
-        /* --- 手表书写态 (全屏画板) --- */
+        /* --- 手表书写态 (全屏画板模式) --- */
         body.watch-mode .canvas-area {
             position: absolute; inset: 0; height: 100%; width: 100%; border: none;
             z-index: 50; display: none; background: #000; margin: 0;
@@ -250,50 +258,58 @@
 
         /* 悬浮在画板上的题目水印 */
         body.watch-mode .watch-q-overlay {
-            position: absolute; top: 18%; width: 80%; left: 10%; text-align: center;
+            position: absolute; top: 12%; width: 70%; left: 15%; text-align: center;
             color: rgba(255,255,255,0.3); font-size: 14px; pointer-events: none; z-index: 55;
-            font-family: "KaiTi", serif; line-height: 1.2;
+            line-height: 1.2; font-weight: bold;
         }
         body.watch-mode.is-writing .watch-q-overlay { display: block; }
 
-        /* 画板周围的悬浮按钮 */
+        /* 画板周围的悬浮按钮 (精确避开圆屏裁切) */
         body.watch-mode .footer {
             position: absolute; inset: 0; height: 100%; display: none; z-index: 60; pointer-events: none; padding: 0; background: transparent;
         }
         body.watch-mode.is-writing .footer { display: block; }
         
         body.watch-mode .footer button { 
-            pointer-events: auto; position: absolute; background: rgba(30,30,30,0.8); 
-            border-radius: 50%; width: 45px; height: 45px; padding: 0; color: #fff; border: 1px solid #444; 
-            display: flex; align-items: center; justify-content: center; font-size: 16px;
+            pointer-events: auto; position: absolute; background: #1A1A1A; 
+            border-radius: 50%; width: 48px; height: 48px; padding: 0; color: #fff; border: 1px solid #333; 
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
         }
-        /* 左上：清空 */ body.watch-mode .footer button:nth-child(1) { top: 15%; left: 15%; } 
-        /* 右上：撤销 */ body.watch-mode .footer button:nth-child(2) { top: 15%; right: 15%; } 
-        /* 左下：返回 */ body.watch-mode .footer button:nth-child(6) { bottom: 15%; left: 15%; }
-        /* 正下：核对 (大按钮) */ 
-        body.watch-mode .footer button:nth-child(4) { 
-            bottom: 8%; left: 50%; transform: translateX(-50%); 
-            background: var(--color-green); font-size: 16px; padding: 12px 25px; 
-            width: auto; height: auto; border-radius: 25px; 
+        body.watch-mode .footer button:nth-child(1) { top: 40px; left: 30px; } /* 🗑️ 清空 */
+        body.watch-mode .footer button:nth-child(2) { top: 40px; right: 30px; } /* ↩️ 撤销 */
+        body.watch-mode .footer button:nth-child(6) { bottom: 40px; left: 30px; } /* ❌ 退出 */
+        body.watch-mode .footer button:nth-child(4) { /* ✅ 核对 (主按钮) */ 
+            bottom: 25px; left: 50%; transform: translateX(-50%); 
+            background: var(--color-brand) !important; font-size: 16px; padding: 0 24px; 
+            width: auto; height: 48px; border-radius: 24px; border: none;
         } 
-        body.watch-mode .footer button:nth-child(3), /* 橡皮擦 */
-        body.watch-mode .footer button:nth-child(5) { display: none; } /* 跳过 */
+        body.watch-mode .footer button:nth-child(3), body.watch-mode .footer button:nth-child(5) { display: none; } 
 
-        /* 模态框弹窗深度适配 */
-        body.watch-mode .full-overlay { padding: 60px 15px 80px 15px; align-items: center; } 
-        body.watch-mode .set-box { padding: 20px; width: 100%; padding-bottom: 40px; border-radius: 0; background: transparent; }
-        body.watch-mode #wrong-sidebar { width: 100%; height: 100%; transform: translateY(100%); padding: 50px 20px; }
-        body.watch-mode #wrong-sidebar.active { transform: translateY(0); }
+        /* ====== 手表模态框与列表深度适配 (上下大留白) ====== */
+        body.watch-mode .full-overlay,
+        body.watch-mode #auth-overlay { 
+            padding: 80px 20px !important; align-items: flex-start; /* 让内容在圆内可滚动浏览 */
+            display: none; 
+        }
+        body.watch-mode #auth-overlay.active-flex { display: block; } /* 覆盖 Flex 导致无法滚动的 Bug */
         
-        body.watch-mode #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(1) !important; width: 85%; background: #111; border: 1px solid #333; padding: 20px; }
+        body.watch-mode .set-box, body.watch-mode .auth-card { 
+            padding: 0; width: 100%; background: transparent; border: none; box-shadow: none; 
+        }
+        body.watch-mode #wrong-sidebar { width: 100%; height: 100%; transform: translateY(100%); padding: 0; }
+        body.watch-mode #wrong-sidebar.active { transform: translateY(0); }
+        body.watch-mode #wrong-sidebar-inner { padding: 80px 25px; height: 100%; overflow-y: auto; }
+        
+        body.watch-mode #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(1) !important; width: 80%; background: #1A1A1A; border: 1px solid #333; padding: 20px; }
         body.watch-mode #ans-text { font-size: 1.8rem; margin-bottom: 15px; }
-        body.watch-mode .judge-btn { padding: 12px; font-size: 14px; margin-bottom: 8px; }
+        body.watch-mode .judge-btn { padding: 14px; font-size: 14px; margin-bottom: 8px; border-radius: 12px; }
+        body.watch-mode .btn-yes { background: var(--color-green); }
+        body.watch-mode .btn-no { background: var(--color-red); }
 
-        body.watch-mode .auth-card { padding: 50px 20px; background: transparent; border: none; }
-        body.watch-mode .auth-tabs { flex-direction: column; gap: 5px; background: transparent; margin-bottom: 10px; }
-        body.watch-mode .auth-tab { background: #222; border-radius: 12px; padding: 8px; }
-        body.watch-mode .auth-tab.active { background: var(--color-green); }
-        body.watch-mode .auth-input { padding: 10px; margin-bottom: 10px; }
+        body.watch-mode .auth-tabs { flex-direction: column; gap: 8px; background: transparent; margin-bottom: 15px; }
+        body.watch-mode .auth-tab { background: #1A1A1A; border-radius: 12px; padding: 12px; border: 1px solid #333; }
+        body.watch-mode .auth-tab.active { background: var(--color-brand); border-color: var(--color-brand); }
+        body.watch-mode .auth-input { padding: 14px; margin-bottom: 12px; background: #000; border: 1px solid #333; border-radius: 12px; text-align: center; }
         body.watch-mode #recaptcha-container { transform: scale(0.65); transform-origin: top center; margin-bottom: -15px; }
         
         /* 隐藏非必需项 */
@@ -315,8 +331,8 @@
         <span>标准宽屏沉浸体验</span>
     </div>
     <div class="device-btn" id="device-watch-btn" onclick="selectDevice('watch')">
-        ⌚ 智能手表 (Oppo Watch X)
-        <span>专属沉浸式单开书写，圆屏防裁切</span>
+        ⌚ 智能腕表 (圆屏)
+        <span>专属沉浸式单开书写，防裁切优化</span>
     </div>
 </div>
 
@@ -356,14 +372,16 @@
 <audio id="bg-music-intense" src="bgm_intense.mp3" loop preload="auto"></audio>
 
 <div id="wrong-sidebar">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3 style="margin:0">错题本</h3>
-        <button onclick="toggleSidebar()" style="background:none; font-size:28px; color:var(--text);">×</button>
-    </div>
-    <div id="wrong-list"></div>
-    <div style="display:flex; gap:10px; flex-shrink: 0;">
-        <button onclick="clearWrongs()" style="flex:1; padding:14px; background:var(--border); border-radius:12px; font-size:13px; font-weight:bold; color:var(--text)">清空记录</button>
-        <button onclick="exportWrongs()" class="hide-on-watch" style="flex:1; padding:14px; background:var(--color-green); border-radius:12px; font-size:13px; font-weight:bold; color:white">📤 导出文本</button>
+    <div id="wrong-sidebar-inner">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0">错题本</h3>
+            <button onclick="toggleSidebar()" style="background:none; font-size:28px; color:var(--text);">×</button>
+        </div>
+        <div id="wrong-list"></div>
+        <div style="display:flex; gap:10px; flex-shrink: 0; flex-direction: column;">
+            <button onclick="clearWrongs()" style="width:100%; padding:14px; background:var(--border); border-radius:12px; font-size:14px; font-weight:bold; color:var(--text)">🗑️ 清空记录</button>
+            <button onclick="exportWrongs()" class="hide-on-watch" style="width:100%; padding:14px; background:var(--color-green); border-radius:12px; font-size:14px; font-weight:bold; color:white">📤 导出为文本 (.txt)</button>
+        </div>
     </div>
 </div>
 
@@ -380,11 +398,11 @@
     </div>
 
     <div class="nav">
-        <span onclick="toggleSidebar()">📓 记录</span>
+        <span onclick="toggleSidebar()">📓</span>
         <span id="mode-toggle-btn" onclick="toggleAppMode()">🌸 休闲</span>
         <span id="count-info">0 ITEMS</span>
-        <span id="hint-btn" onclick="peekHint()">💡 窥探</span>
-        <span onclick="toggleSettings(true)">⚙️ 设置</span>
+        <span id="hint-btn" onclick="peekHint()">💡</span>
+        <span onclick="toggleSettings(true)">⚙️</span>
     </div>
 
     <div class="quiz-box">
@@ -396,7 +414,7 @@
     <button class="watch-start-write" onclick="enterWatchWriting()">✏️ 开始书写</button>
 
     <div class="canvas-area">
-        <div class="watch-q-overlay" id="watch-q-watermark"></div> <!-- 手表水印题干 -->
+        <div class="watch-q-overlay" id="watch-q-watermark"></div>
         <div class="grid-bg"></div>
         <div id="ghost-hint"></div>
         <div id="intense-timer"></div>
@@ -409,8 +427,8 @@
         <button id="eraser-btn" onclick="toggleEraser()" style="color:var(--sub);">✏️ 画笔</button>
         <button class="btn-main" onclick="showAns(true)">核对答案</button>
         <button onclick="skipQ()">跳过</button>
-        <!-- 仅手表模式显示的返回按钮 (索引第6项) -->
-        <button onclick="exitWatchWriting()" class="hide-on-pc" style="display:none; color:var(--color-red);">❌</button>
+        <!-- 仅手表模式显示的返回按钮 -->
+        <button onclick="exitWatchWriting()" style="display:none; color:var(--color-red);">❌</button>
     </div>
 </div>
 
@@ -476,9 +494,9 @@
 
         <div style="text-align:center; padding-bottom: 20px; border-bottom: 1px dashed var(--border); margin-bottom: 20px;">
             <span id="user-info-text" style="font-size:13px; color:var(--sub); display:block; margin-bottom: 12px; font-weight:bold;">未登录</span>
-            <div style="display:flex; justify-content:center; gap: 12px;">
-                <button onclick="logoutAccount()" style="padding:10px 20px; border-radius:10px; border:2px solid var(--color-green); color:var(--color-green); font-size:12px; font-weight:bold;">安全登出</button>
-                <button onclick="deleteAccount()" style="padding:10px 20px; border-radius:10px; border:2px solid var(--color-red); color:var(--color-red); font-size:12px; font-weight:bold;">危险: 注销</button>
+            <div style="display:flex; justify-content:center; gap: 12px; flex-direction: column;">
+                <button onclick="logoutAccount()" style="padding:12px 20px; border-radius:10px; border:2px solid var(--color-green); color:var(--color-green); font-size:14px; font-weight:bold;">安全登出</button>
+                <button onclick="deleteAccount()" style="padding:12px 20px; border-radius:10px; border:2px solid var(--color-red); color:var(--color-red); font-size:14px; font-weight:bold;">危险: 注销</button>
             </div>
         </div>
         
@@ -508,7 +526,7 @@
             <option value="yoru">🌙 夜色 (暗紫)</option>
             <option value="aki">🍁 枫叶 (橙红)</option>
             <option value="take">🎋 修竹 (深绿)</option>
-            <option value="github">🐙 极客 (GitHub 极简扁平)</option>
+            <option value="github">🐙 极客 (GitHub 扁平)</option>
         </select>
 
         <label class="set-label">⚡ 激烈模式 (每题限时)</label>
@@ -520,13 +538,13 @@
 
         <div style="height:1px; background:var(--border); margin:25px 0;"></div>
 
-        <label class="set-label">📚 本地词库分组选择 (Group)</label>
+        <label class="set-label">📚 本地分组选择 (Group)</label>
         <select id="group-select" onchange="applyRule()"></select>
 
-        <label class="set-label">🎯 分组内类型过滤 (Cat)</label>
+        <label class="set-label">🎯 分组内类型 (Cat)</label>
         <select id="mode" onchange="applyRule()">
             <option value="all">随机全部 (当前分组)</option>
-            <option value="wrong">仅限错题本 (答对自动移出)</option>
+            <option value="wrong">仅限错题本 (答对移出)</option>
             <option value="word">仅单纯字词</option>
             <option value="note">仅文言注释</option>
             <option value="poem">仅古诗长句</option>
@@ -534,10 +552,10 @@
 
         <div class="hide-on-watch" style="height:1px; background:var(--border); margin:25px 0;"></div>
 
-        <label class="set-label hide-on-watch">☁️ 导入新数据 (私密隔离)</label>
-        <p class="hide-on-watch" style="font-size:11px; color:var(--sub); margin:0 0 8px 0; line-height: 1.5;">分组名由下方决定，JSON内填：<br><code>[{"q":"题目","a":"答案","cat":"古诗/字词/课文"}]</code></p>
-        <input type="text" id="upload-group" class="hide-on-watch" placeholder="输入分组名，如：期中考试词汇" value="默认分组">
-        <textarea id="jsonInput" class="hide-on-watch" rows="4" placeholder='复制你的 JSON 数据粘贴到这里...'></textarea>
+        <label class="set-label hide-on-watch">☁️ 导入新数据</label>
+        <p class="hide-on-watch" style="font-size:11px; color:var(--sub); margin:0 0 8px 0; line-height: 1.5;">JSON格式：<br><code>[{"q":"题目","a":"答案","cat":"古诗"}]</code></p>
+        <input type="text" id="upload-group" class="hide-on-watch" placeholder="输入分组名" value="默认分组">
+        <textarea id="jsonInput" class="hide-on-watch" rows="4" placeholder='复制 JSON 数据...'></textarea>
         
         <div class="hide-on-watch" style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <button onclick="upload('merge')" style="background:var(--text); color:var(--bg); padding:14px; border-radius:10px; font-weight:bold;">增量合并</button>
@@ -582,6 +600,7 @@
         }
     }
 
+    // 实用功能
     function toggleFullScreen() {
         if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => { alert(`全屏失败: ${err.message}`); }); } 
         else { if (document.exitFullscreen) document.exitFullscreen(); }
@@ -598,10 +617,18 @@
     }
 
     window.onload = async () => {
-        const isSmallScreen = window.innerWidth <= 450 && window.innerHeight <= 450;
-        if (isSmallScreen) document.getElementById('device-watch-btn').classList.add('highlight');
-        else document.getElementById('device-pc-btn').classList.add('highlight');
-        document.getElementById('device-selector-overlay').style.display = 'flex';
+        // 检测设备类型
+        const ua = navigator.userAgent.toLowerCase();
+        const isWatchUA = ua.includes('watch') || ua.includes('wear') || (window.innerWidth <= 450 && window.innerHeight <= 450 && window.innerWidth === window.innerHeight);
+        
+        if (isWatchUA) selectDevice('watch');
+        else if (!/mobile|android|iphone|ipad/i.test(ua) && window.innerWidth >= 800) selectDevice('standard');
+        else {
+            const isSmallScreen = window.innerWidth <= 450 && window.innerHeight <= 450;
+            if (isSmallScreen) document.getElementById('device-watch-btn').classList.add('highlight');
+            else document.getElementById('device-pc-btn').classList.add('highlight');
+            document.getElementById('device-selector-overlay').style.display = 'flex';
+        }
     };
 
     function selectDevice(mode) {
@@ -609,8 +636,6 @@
         if (mode === 'watch') {
             isWatchMode = true;
             document.body.classList.add('watch-mode', 'intense-mode');
-            // 显示手表的专属按钮，隐藏PC的
-            document.querySelector('.footer button:nth-child(6)').style.display = 'flex';
         }
         initAuth(); 
     }
@@ -618,7 +643,10 @@
     async function initAuth() {
         const { data: { session } } = await supabase.auth.getSession();
         if (session && session.user) loginSuccess(session.user);
-        else document.getElementById('auth-overlay').style.display = 'flex';
+        else {
+            document.getElementById('auth-overlay').style.display = 'flex';
+            document.getElementById('auth-overlay').classList.add('active-flex');
+        }
         
         allowDblClickClear = localStorage.getItem('allow_dblclick') !== 'false';
         document.getElementById('dblclick-toggle').checked = allowDblClickClear;
@@ -644,11 +672,11 @@
     // ======= 手表专用书写范式 =======
     function enterWatchWriting() {
         document.body.classList.add('is-writing');
-        setTimeout(() => { initCanvas(); }, 50); // 延迟重绘确保宽高已 100% 展开
+        setTimeout(() => { initCanvas(); }, 50); 
     }
     function exitWatchWriting() {
         document.body.classList.remove('is-writing');
-        setTimeout(() => { initCanvas(); }, 50); // 恢复原有比例
+        setTimeout(() => { initCanvas(); }, 50); 
     }
 
     // ======= Auth =======
@@ -746,7 +774,10 @@
     }
 
     function loginSuccess(user) {
-        currentUser = user; document.getElementById('auth-overlay').style.display = 'none';
+        currentUser = user; 
+        document.getElementById('auth-overlay').style.display = 'none';
+        document.getElementById('auth-overlay').classList.remove('active-flex');
+
         let displayEmail = user.email;
         if (displayEmail === 'admin@yanye.com') displayEmail = '🌟 管理员 (Admin)';
         else if (displayEmail.endsWith('@yanye.local')) displayEmail = '👤 ' + displayEmail.replace('@yanye.local', '');
@@ -900,7 +931,7 @@
         if(isWatchMode) exitWatchWriting();
         clearBoard(); current = pool[Math.floor(Math.random() * pool.length)];
         const qEl = document.getElementById('q-text'); qEl.innerText = current.q; qEl.className = current.q.length > 12 ? 'long' : '';
-        document.getElementById('watch-q-watermark').innerText = current.q; // 腕表水印
+        document.getElementById('watch-q-watermark').innerText = current.q;
         document.getElementById('q-cat').innerText = `${(current.cat || 'COMMON').toUpperCase()} · 共 ${current.a ? current.a.length : 0} 字`; 
         document.getElementById('ans-text').innerText = current.a || '';
         document.getElementById('ans-pop').classList.remove('timeout-state');
@@ -921,7 +952,7 @@
     function handleTimeUp() {
         playSFX('no');
         document.getElementById('ans-pop').classList.add('timeout-state'); 
-        document.getElementById('ans-text').innerHTML = current.a + '<br><span style="color:var(--color-red); font-size:14px; display:block; margin-top:10px;">⏳ 超时自动跳过</span>';
+        document.getElementById('ans-text').innerHTML = current.a + '<br><span style="color:var(--color-red); font-size:14px; display:block; margin-top:10px;">⏳ 超时跳过</span>';
         showAns(true); autoNextTimeout = setTimeout(() => { document.getElementById('ans-pop').classList.remove('timeout-state'); mark(false); }, 1500);
     }
 
@@ -944,9 +975,11 @@
             const timeUsed = Math.floor((Date.now() - sessionStartTime) / 1000);
             const accuracy = (sCorrect + sWrong) > 0 ? Math.round((sCorrect / (sCorrect + sWrong)) * 100) : 0;
             iconEl.innerText = '⚡'; titleEl.innerText = '挑战结束'; 
-            zenEl.innerText = `「 命中率: ${accuracy}% | 总耗时: ${timeUsed}s 」\n高速流转，完成重载。`; zenEl.style.fontFamily = "'Courier New', monospace"; zenEl.style.whiteSpace = "pre-wrap"; 
+            zenEl.innerText = `「 命中率: ${accuracy}% | 总耗时: ${timeUsed}s 」`; zenEl.style.fontFamily = "'Courier New', monospace"; zenEl.style.whiteSpace = "pre-wrap"; 
         } 
         else { iconEl.innerText = '🉑'; titleEl.innerText = '洗练完成'; zenEl.innerText = "「 行到水穷处，坐看云起时。 」"; zenEl.style.fontFamily = '"KaiTi", serif'; setTimeout(fireConfetti, 100); }
+        
+        if(isWatchMode) exitWatchWriting();
         document.getElementById('finish-overlay').style.display = 'flex';
     }
 
@@ -976,8 +1009,8 @@
         if(!input) return alert("请粘贴 JSON");
         try {
             const data = JSON.parse(input).map(item => ({ ...item, group_name: groupName, user_id: currentUser.id }));
-            if(mode === 'cover') { if(!confirm("确定清空你云端当前的【该分组所有词条】并覆盖？")) return; await supabase.from('dictation_items').delete().eq('user_id', currentUser.id).eq('group_name', groupName); }
-            await supabase.from('dictation_items').insert(data); alert("词库同步成功！"); document.getElementById('jsonInput').value = ""; toggleSettings(false); sync();
+            if(mode === 'cover') { if(!confirm("确定清空云端【该分组所有词条】并覆盖？")) return; await supabase.from('dictation_items').delete().eq('user_id', currentUser.id).eq('group_name', groupName); }
+            await supabase.from('dictation_items').insert(data); alert("同步成功！"); document.getElementById('jsonInput').value = ""; toggleSettings(false); sync();
         } catch(e) { alert("失败: " + e.message); }
     }
     
