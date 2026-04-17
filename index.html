@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>言叶之庭 - 词库主题版</title>
-    <!-- 引入 Supabase 和 reCAPTCHA v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
     <script src="https://recaptcha.net/recaptcha/api.js" async defer></script>
     <style>
@@ -68,28 +67,41 @@
         }
         body.no-glass * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 
+        /* ================= 设备模式检测层 ================= */
+        #device-selector-overlay {
+            position: fixed; inset: 0; background: var(--bg); z-index: 20000;
+            display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;
+        }
+        .device-btn {
+            width: 100%; max-width: 320px; padding: 25px; margin: 12px 0; border-radius: 24px;
+            background: var(--card); border: 2px solid var(--border); font-size: 20px; font-weight: bold; color: var(--text);
+            box-shadow: var(--shadow); transition: 0.3s; display: flex; flex-direction: column; gap: 8px; align-items: center;
+        }
+        .device-btn span { font-size: 13px; color: var(--sub); font-weight: normal; }
+        .device-btn.highlight { border-color: var(--color-green); background: rgba(90, 130, 90, 0.1); transform: scale(1.02); }
+
         /* ================= 基础与动效 ================= */
         * { box-sizing: border-box; transition: background-color 0.4s, color 0.4s, border-color 0.4s, box-shadow 0.3s, border-radius 0.3s; }
-        body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; }
 
         .main-card { width: 95%; max-width: 460px; background: var(--card); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border-radius: var(--ui-radius); box-shadow: var(--shadow); overflow: hidden; position: relative; z-index: 10; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.3); }
         body.intense-mode .main-card, body[data-theme="github"] .main-card { border: 1px solid var(--border); }
         
-        .progress-wrap { width: 100%; height: 4px; background: var(--border); }
+        .progress-wrap { width: 100%; height: 4px; background: var(--border); flex-shrink: 0; }
         #progress-bar { height: 100%; width: 0%; background: var(--color-green); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        .nav { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); font-size: 11px; color: var(--sub); letter-spacing: 1px; }
+        .nav { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); font-size: 11px; color: var(--sub); letter-spacing: 1px; flex-shrink: 0; }
         .nav span { cursor: pointer; padding: 6px 10px; border-radius: var(--ui-radius); transition: background 0.2s; }
         .nav span:hover { background: var(--border); color: var(--text); }
         #mode-toggle-btn { font-weight: bold; background: var(--border); color: var(--text); }
         #mode-toggle-btn.locked { opacity: 0.2; pointer-events: none; }
 
-        .quiz-box { padding: 35px 20px; text-align: center; min-height: 150px; display: flex; flex-direction: column; justify-content: center; }
-        #q-cat { font-size: 11px; color: var(--color-red); margin-bottom: 10px; font-weight: bold; letter-spacing: 2px; }
-        #q-text { font-size: 1.7rem; font-weight: 600; line-height: 1.5; word-break: break-all; text-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .quiz-box { padding: 25px 20px; text-align: center; min-height: 140px; display: flex; flex-direction: column; justify-content: center; flex: 1; }
+        #q-cat { font-size: 11px; color: var(--color-red); margin-bottom: 8px; font-weight: bold; letter-spacing: 2px; }
+        #q-text { font-size: 1.7rem; font-weight: 600; line-height: 1.5; word-break: break-all; text-shadow: 0 2px 4px rgba(0,0,0,0.02); margin:0; }
         #q-text.long { font-size: 1.25rem; }
 
-        .canvas-area { position: relative; width: 100%; height: 320px; background: transparent; border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); overflow: hidden; }
+        .canvas-area { position: relative; width: 100%; height: 300px; background: transparent; border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); overflow: hidden; flex-shrink: 0; }
         .grid-bg { position: absolute; inset: 0; opacity: 0.05; background-image: linear-gradient(var(--text) 1px, transparent 1px), linear-gradient(90deg, var(--text) 1px, transparent 1px); background-size: 50% 50%; background-position: center; pointer-events: none; }
         body.intense-mode .grid-bg { opacity: 0.15; background-image: linear-gradient(var(--color-red) 1px, transparent 1px), linear-gradient(90deg, var(--color-red) 1px, transparent 1px); }
         #board { position: relative; z-index: 5; touch-action: none; cursor: crosshair; }
@@ -119,7 +131,7 @@
         #wrong-list { flex: 1; overflow-y: auto; margin: 20px 0; font-size: 14px; padding-right: 10px; }
         .wrong-item { padding: 15px 0; border-bottom: 1px dashed var(--border); }
 
-        /* ================= 按钮控件 (新增撤销按钮的 5列网格) ================= */
+        /* ================= 按钮控件 ================= */
         button { cursor: pointer; border: none; font-family: inherit; background: transparent; transition: all 0.2s; outline: none; }
         button:active { transform: scale(0.96); }
         .judge-btn { width: 100%; padding: 16px; margin-bottom: 12px; border-radius: 12px; font-weight: bold; font-size: 15px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -129,8 +141,7 @@
         body[data-theme="github"] .btn-yes { background: var(--color-green); box-shadow: none; }
         body[data-theme="github"] .btn-no { background: var(--color-red); box-shadow: none; }
         
-        /* 实用升级：改为5列布局加入撤销功能 */
-        .footer { display: grid; grid-template-columns: 1fr 1fr 1fr 1.5fr 1fr; background: transparent; gap: 6px; padding: 10px; }
+        .footer { display: grid; grid-template-columns: 1fr 1fr 1fr 1.5fr 1fr; background: transparent; gap: 6px; padding: 10px; flex-shrink: 0; }
         .footer button { padding: 16px 0; background: var(--border); border-radius: var(--ui-radius); font-size: 12px; font-weight: bold; color: var(--text); white-space: nowrap;}
         .footer button:hover { filter: brightness(0.95); }
         .btn-main { background: var(--text) !important; color: var(--bg) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 13px !important;}
@@ -189,6 +200,49 @@
 
         #admin-panel { background: rgba(255, 165, 0, 0.05); border: 1px dashed orange; border-radius: 16px; padding: 20px; margin-bottom: 25px; display: none; }
         body[data-theme="github"] #admin-panel { border-radius: 6px; }
+
+        /* ================= 专属适配：Oppo Watch X (46mm) ================= */
+        body.watch-mode {
+            clip-path: circle(50%); /* 强制物理裁切，模拟圆屏边缘防越界 */
+            background: #000 !important;
+            /* 强制重写深色变量，适配手表高对比OLED */
+            --bg: #000; --card: #000; --text: #fff; --sub: #aaa; --border: #333;
+            --glass-blur: none; --ui-radius: 0;
+        }
+        body.watch-mode .main-card, 
+        body.watch-mode .auth-card, 
+        body.watch-mode .set-box {
+            background: transparent !important; border: none !important; box-shadow: none !important;
+            padding: 40px 15px; max-width: 100%; height: 100%; border-radius: 0; justify-content: center;
+        }
+        
+        body.watch-mode .nav { padding: 5px 15px 10px; border-bottom: 1px solid #222; }
+        body.watch-mode .nav span { font-size: 14px; padding: 6px 12px; background: #1a1a1a; border-radius: 12px; }
+        body.watch-mode #count-info { display: none; } /* 隐藏非必要字数以省空间 */
+        body.watch-mode #hint-btn { display: none; } /* 缩小导航菜单宽度 */
+        
+        body.watch-mode .quiz-box { padding: 5px; }
+        body.watch-mode #q-text { font-size: 1.6rem; }
+        body.watch-mode .canvas-area { height: 150px; border-color: #222; margin-top: 5px; }
+        
+        body.watch-mode .footer { grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 15px; }
+        body.watch-mode .footer button { font-size: 14px; padding: 12px 0; border-radius: 16px; background: #222; }
+        body.watch-mode .footer .btn-main { grid-column: 1 / -1; font-size: 15px !important; background: var(--color-green) !important; color: white !important;}
+        body.watch-mode .footer button:nth-child(2) { display: none; } /* 隐藏撤销功能避免拥挤 */
+
+        body.watch-mode .full-overlay { padding: 50px 15px 70px 15px; } /* 上下增加边距避开圆弧裁切 */
+        body.watch-mode .set-box { padding-bottom: 80px; }
+        
+        body.watch-mode #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(1) !important; width: 80%; background: #111; border: 1px solid #333; }
+        body.watch-mode #ans-text { font-size: 1.8rem; }
+        body.watch-mode .judge-btn { padding: 12px; font-size: 16px; }
+
+        body.watch-mode .auth-tabs { flex-direction: column; gap: 5px; background: transparent; }
+        body.watch-mode .auth-tab { background: #222; border-radius: 12px; }
+        body.watch-mode .auth-tab.active { background: var(--color-green); }
+        body.watch-mode #recaptcha-container { transform: scale(0.7); transform-origin: top center; margin-bottom: 0; }
+        
+        body.watch-mode .hide-on-watch { display: none !important; }
         
         @media (max-width: 1000px) {
             #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(0.9) !important; width: 85%; }
@@ -197,6 +251,19 @@
     </style>
 </head>
 <body data-theme="default">
+
+<!-- ================= 设备模式选择层 ================= -->
+<div id="device-selector-overlay">
+    <h2 style="margin-bottom:30px; font-family:'KaiTi',serif; color:var(--text); font-size:28px;">接入终端验证</h2>
+    <div class="device-btn" id="device-pc-btn" onclick="selectDevice('standard')">
+        💻 手机 / 电脑 / 平板
+        <span>标准宽屏沉浸体验</span>
+    </div>
+    <div class="device-btn" id="device-watch-btn" onclick="selectDevice('watch')">
+        ⌚ 智能手表 (Oppo Watch X)
+        <span>圆形表盘极简适配，禁用音效</span>
+    </div>
+</div>
 
 <!-- ================= 登录验证浮层 (reCAPTCHA v2) ================= -->
 <div id="auth-overlay">
@@ -212,9 +279,9 @@
         <input type="password" id="auth-pwd" class="auth-input" placeholder="设置密码（至少6位）">
         <input type="text" id="auth-invite" class="auth-input" placeholder="输入收到的邀请码" style="display:none; border-color: orange;">
         
-        <!-- reCAPTCHA v2 组件 (已绑定你提供的 Site Key) -->
+        <!-- reCAPTCHA v2 组件 -->
         <div id="recaptcha-container" style="display:none; margin: 0 auto 15px auto; transform: scale(0.95); transform-origin: center;">
-            <div class="g-recaptcha" data-sitekey="6LdjI7MsAAAAAKdB1F1MLbTAtYwzwBGVvNXk5khz"></div>
+            <div class="g-recaptcha" data-sitekey="6Ldjl7MsAAAAAKdB1F1MLbTAtYwzwBGVvNXk5khz"></div>
         </div>
 
         <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">登 录</button>
@@ -239,10 +306,9 @@
         <button onclick="toggleSidebar()" style="background:none; font-size:28px; color:var(--text);">×</button>
     </div>
     <div id="wrong-list"></div>
-    <!-- 新增功能：错题导出与清空并行 -->
-    <div style="display:flex; gap:10px;">
+    <div style="display:flex; gap:10px; flex-shrink: 0;">
         <button onclick="clearWrongs()" style="flex:1; padding:14px; background:var(--border); border-radius:12px; font-size:13px; font-weight:bold; color:var(--text)">清空记录</button>
-        <button onclick="exportWrongs()" style="flex:1; padding:14px; background:var(--color-green); border-radius:12px; font-size:13px; font-weight:bold; color:white">📤 导出文本</button>
+        <button onclick="exportWrongs()" class="hide-on-watch" style="flex:1; padding:14px; background:var(--color-green); border-radius:12px; font-size:13px; font-weight:bold; color:white">📤 导出文本</button>
     </div>
 </div>
 
@@ -278,7 +344,6 @@
         <canvas id="board"></canvas>
     </div>
 
-    <!-- 新增功能：5列网格，加入无限撤销按钮 -->
     <div class="footer">
         <button onclick="clearBoard()" style="color:var(--sub);">🗑️ 清空</button>
         <button onclick="undoDraw()" style="color:var(--sub);">↩️ 撤销</button>
@@ -339,11 +404,10 @@
             <button onclick="toggleSettings(false)" style="background:none; font-size:28px; color:var(--text);">×</button>
         </div>
         
-        <!-- 管理员专属：邀请码引擎 -->
         <div id="admin-panel">
             <h4 style="margin:0 0 15px 0; color: orange; font-size: 16px;">👑 邀请码 & 账号管理中心</h4>
             <div style="display:flex; gap:10px; margin-bottom: 15px;">
-                <button onclick="generateInviteCodeToDB()" style="flex:1; padding:12px; background:orange; color:white; border-radius:10px; font-weight:bold;">生成 1 个邀请码</button>
+                <button onclick="generateInviteCodeToDB()" style="flex:1; padding:12px; background:orange; color:white; border-radius:10px; font-weight:bold;">生成 1 个</button>
                 <button onclick="fetchInviteCodesAdmin()" style="padding:12px; background:var(--card); border: 1px solid var(--border); border-radius:10px; color: var(--text);">🔄 刷新</button>
             </div>
             <div id="admin-codes" style="font-size:12px; max-height: 180px; overflow-y: auto; color: var(--text); padding-right: 5px;"></div>
@@ -357,22 +421,21 @@
             </div>
         </div>
         
-        <!-- 新增功能：沉浸全屏模式切换 -->
-        <button onclick="toggleFullScreen()" style="width:100%; padding:14px; background:rgba(0,0,0,0.05); border:2px solid var(--border); color:var(--text); border-radius:14px; font-weight:bold; font-size: 15px; margin-bottom: 15px;">🔲 开启/退出沉浸全屏</button>
+        <button onclick="toggleFullScreen()" class="hide-on-watch" style="width:100%; padding:14px; background:rgba(0,0,0,0.05); border:2px solid var(--border); color:var(--text); border-radius:14px; font-weight:bold; font-size: 15px; margin-bottom: 15px;">🔲 开启/退出沉浸全屏</button>
         <button onclick="toggleResourceCenter(true)" style="width:100%; padding:16px; background:var(--text); color:var(--bg); border-radius:14px; font-weight:bold; font-size: 15px; margin-bottom: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">🌐 进入共享资源中心</button>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-            <span style="font-size:14px; font-weight:bold;">✨ 开启毛玻璃特效 (卡顿可关)</span>
+        <div class="hide-on-watch" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+            <span style="font-size:14px; font-weight:bold;">✨ 开启毛玻璃特效</span>
             <label class="switch"><input type="checkbox" id="glass-toggle" onchange="toggleGlass()"><span class="slider"></span></label>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <div class="hide-on-watch" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
             <span style="font-size:14px; font-weight:bold;">🎵 沉浸背景音乐</span>
             <label class="switch"><input type="checkbox" id="bgm-toggle" onchange="toggleBGM()"><span class="slider"></span></label>
         </div>
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <span style="font-size:14px; font-weight:bold;">👆 双击/双指清空画板</span>
+            <span style="font-size:14px; font-weight:bold;">👆 双击画板清空</span>
             <label class="switch"><input type="checkbox" id="dblclick-toggle" onchange="toggleDblClick()"><span class="slider"></span></label>
         </div>
 
@@ -387,11 +450,11 @@
             <option value="github">🐙 极客 (GitHub 极简扁平)</option>
         </select>
 
-        <label class="set-label">⚡ 激烈模式 (每题限时自动切题)</label>
+        <label class="set-label">⚡ 激烈模式 (每题限时)</label>
         <select id="time-limit" onchange="restartSession()">
-            <option value="5">每题 5 秒 (极致反应)</option>
-            <option value="8" selected>每题 8 秒 (考前突击)</option>
-            <option value="12">每题 12 秒 (常规小测)</option>
+            <option value="5">每题 5 秒</option>
+            <option value="8" selected>每题 8 秒</option>
+            <option value="12">每题 12 秒</option>
         </select>
 
         <div style="height:1px; background:var(--border); margin:25px 0;"></div>
@@ -411,7 +474,7 @@
         <div style="height:1px; background:var(--border); margin:25px 0;"></div>
 
         <label class="set-label">☁️ 导入新数据 (私密隔离)</label>
-        <p style="font-size:11px; color:var(--sub); margin:0 0 8px 0; line-height: 1.5;">分组名(Group)由下方决定，JSON内填题目、答案和类型细分(cat)：<br><code>[{"q":"题目","a":"答案","cat":"古诗/字词/课文"}]</code></p>
+        <p style="font-size:11px; color:var(--sub); margin:0 0 8px 0; line-height: 1.5;">分组名由下方决定，JSON内填：<br><code>[{"q":"题目","a":"答案","cat":"古诗/字词/课文"}]</code></p>
         <input type="text" id="upload-group" placeholder="输入分组名，如：期中考试词汇" value="默认分组">
         <textarea id="jsonInput" rows="4" placeholder='复制你的 JSON 数据粘贴到这里...'></textarea>
         
@@ -430,26 +493,19 @@
     let all = [], filtered = [], pool = [], current = null, wrongs = [];
     let sCorrect = 0, sWrong = 0;
     
-    // 激烈模式重构参数
     let isIntenseMode = false, isSessionActive = false;
-    let prepInterval = null;
-    let qTimerInterval = null; 
-    let qTimeLeft = 8;
-    let sessionStartTime = 0;
-    let autoNextTimeout = null;
+    let prepInterval = null, qTimerInterval = null, qTimeLeft = 8, sessionStartTime = 0, autoNextTimeout = null;
 
     let audioInitialized = false;
-    let currentUser = null;
-    let authType = 'email'; 
-    let isRegisterMode = false;
-    let pendingAuthEmail = ""; 
+    let currentUser = null, authType = 'email', isRegisterMode = false, pendingAuthEmail = ""; 
     let wrongStorageKey = 'wrongs_v11'; 
-    let allowDblClickClear = true;
-    let isGlassOn = true;
+    let allowDblClickClear = true, isGlassOn = true;
+    let isWatchMode = false; // 新增：腕表模式判定标识
 
-    // 音效系统
+    // 音效系统 (腕表模式将被拦截)
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSFX(type) {
+        if(isWatchMode) return; // 腕表模式禁音
         if(audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
@@ -465,31 +521,42 @@
         }
     }
 
-    // 新增实用功能：全屏切换
+    // 实用功能：全屏
     function toggleFullScreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => { alert(`全屏请求被拒绝: ${err.message}`); });
-        } else {
-            if (document.exitFullscreen) document.exitFullscreen();
-        }
+        if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(err => { alert(`全屏失败: ${err.message}`); }); } 
+        else { if (document.exitFullscreen) document.exitFullscreen(); }
         toggleSettings(false);
     }
 
-    // 新增实用功能：导出错题本 (TXT)
+    // 实用功能：错题导出
     function exportWrongs() {
         if (wrongs.length === 0) return alert("错题本空空如也，无需导出！");
         let content = "言叶之庭 - 个人错题本导出\n==========================\n\n";
-        wrongs.forEach((w, index) => {
-            content += `[${index + 1}] 类别: ${w.cat || '综合'}\n题目: ${w.q}\n答案: ${w.a}\n--------------------------\n`;
-        });
+        wrongs.forEach((w, index) => { content += `[${index + 1}] 类别: ${w.cat || '综合'}\n题目: ${w.q}\n答案: ${w.a}\n--------------------------\n`; });
         const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url; a.download = "我的错题本_言叶之庭.txt";
+        const a = document.createElement("a"); a.href = url; a.download = "我的错题本_言叶之庭.txt";
         a.click(); URL.revokeObjectURL(url);
     }
 
     window.onload = async () => {
+        // 第一步：判断显示模式（腕表 vs 宽屏）
+        const isSmallScreen = window.innerWidth <= 450 && window.innerHeight <= 450;
+        if (isSmallScreen) document.getElementById('device-watch-btn').classList.add('highlight');
+        else document.getElementById('device-pc-btn').classList.add('highlight');
+        document.getElementById('device-selector-overlay').style.display = 'flex';
+    };
+
+    function selectDevice(mode) {
+        document.getElementById('device-selector-overlay').style.display = 'none';
+        if (mode === 'watch') {
+            isWatchMode = true;
+            document.body.classList.add('watch-mode', 'intense-mode'); // 腕表强制暗黑模式 + 裁切
+        }
+        initAuth(); // 进入账号认证阶段
+    }
+
+    async function initAuth() {
         const { data: { session } } = await supabase.auth.getSession();
         if (session && session.user) loginSuccess(session.user);
         else document.getElementById('auth-overlay').style.display = 'flex';
@@ -497,12 +564,15 @@
         allowDblClickClear = localStorage.getItem('allow_dblclick') !== 'false';
         document.getElementById('dblclick-toggle').checked = allowDblClickClear;
 
-        isGlassOn = localStorage.getItem('glass_fx') !== 'false';
-        document.getElementById('glass-toggle').checked = isGlassOn;
-        if(!isGlassOn) document.body.classList.add('no-glass');
-    };
+        if(!isWatchMode) {
+            isGlassOn = localStorage.getItem('glass_fx') !== 'false';
+            document.getElementById('glass-toggle').checked = isGlassOn;
+            if(!isGlassOn) document.body.classList.add('no-glass');
+        }
+    }
 
     function toggleGlass() {
+        if(isWatchMode) return;
         isGlassOn = document.getElementById('glass-toggle').checked;
         localStorage.setItem('glass_fx', isGlassOn);
         document.body.classList.toggle('no-glass', !isGlassOn);
@@ -512,12 +582,12 @@
         localStorage.setItem('allow_dblclick', allowDblClickClear);
     }
 
-    // ======= 邀请码 + reCAPTCHA v2 账号系统 =======
+    // ======= Auth =======
     function switchAuthType(type) {
         authType = type;
         document.getElementById('tab-email').className = `auth-tab ${type === 'email' ? 'active' : ''}`;
         document.getElementById('tab-user').className = `auth-tab ${type === 'username' ? 'active' : ''}`;
-        document.getElementById('auth-account').placeholder = type === 'email' ? '输入邮箱 (或管理员 admin)' : '输入纯数字或字母的用户名';
+        document.getElementById('auth-account').placeholder = type === 'email' ? '输入邮箱 (或 admin)' : '输入纯数字/字母用户名';
         document.getElementById('auth-invite').style.display = (type === 'username' && isRegisterMode) ? 'block' : 'none';
     }
 
@@ -526,7 +596,6 @@
         document.getElementById('auth-title').innerText = isRegisterMode ? '加入言叶之庭' : '登录账号';
         document.getElementById('auth-submit-btn').innerText = isRegisterMode ? '注 册' : '登 录';
         document.getElementById('auth-toggle-btn').innerText = isRegisterMode ? '已有账号？点击登录' : '没有账号？点击注册';
-        
         document.getElementById('recaptcha-container').style.display = isRegisterMode ? 'block' : 'none';
         switchAuthType(authType);
     }
@@ -537,8 +606,6 @@
         const inviteCode = document.getElementById('auth-invite').value.trim();
 
         if (!account || !pwd) return alert("请填写账号和密码");
-
-        // 仅前端完成 reCAPTCHA 人机验证拦截 (Secret Key 请保留在后端使用)
         if (isRegisterMode && account.toLowerCase() !== 'admin') {
             const recaptchaResponse = window.grecaptcha ? grecaptcha.getResponse() : null;
             if (!recaptchaResponse) { alert("请先完成人机安全验证！"); return; }
@@ -573,7 +640,6 @@
                     const { data: codeData, error: codeErr } = await supabase.from('invitation_codes').select('*').eq('code', inviteCode).single();
                     if (codeErr || !codeData || codeData.is_used) throw new Error("邀请码无效或已被使用");
                 }
-
                 const { data, error } = await supabase.auth.signUp({ email: finalEmail, password: pwd });
                 if (error) throw error;
 
@@ -590,8 +656,7 @@
                 if (error) throw error; loginSuccess(data.user);
             }
         } catch (e) {
-            alert("操作失败：" + e.message);
-            document.getElementById('auth-submit-btn').innerText = isRegisterMode ? '注 册' : '登 录';
+            alert("操作失败：" + e.message); document.getElementById('auth-submit-btn').innerText = isRegisterMode ? '注 册' : '登 录';
             if(window.grecaptcha) grecaptcha.reset(); 
         }
     }
@@ -607,40 +672,24 @@
     }
 
     function cancelOtpMode() {
-        document.getElementById('otp-auth-card').style.display = 'none';
-        document.getElementById('main-auth-card').style.display = 'block';
-        document.getElementById('auth-submit-btn').innerText = '注 册'; 
+        document.getElementById('otp-auth-card').style.display = 'none'; document.getElementById('main-auth-card').style.display = 'block'; document.getElementById('auth-submit-btn').innerText = '注 册'; 
         if(window.grecaptcha) grecaptcha.reset();
     }
 
     function loginSuccess(user) {
-        currentUser = user;
-        document.getElementById('auth-overlay').style.display = 'none';
-        
+        currentUser = user; document.getElementById('auth-overlay').style.display = 'none';
         let displayEmail = user.email;
-        if (displayEmail === 'admin@yanye.com') displayEmail = '🌟 超级管理员 (Admin)';
+        if (displayEmail === 'admin@yanye.com') displayEmail = '🌟 管理员 (Admin)';
         else if (displayEmail.endsWith('@yanye.local')) displayEmail = '👤 ' + displayEmail.replace('@yanye.local', '');
-        
         document.getElementById('user-info-text').innerText = `已连接账号: ${displayEmail}`;
-        
-        if (user.email === 'admin@yanye.com') {
-            document.getElementById('admin-panel').style.display = 'block';
-            fetchInviteCodesAdmin();
-        }
-
-        wrongStorageKey = `wrongs_v11_${user.id}`;
-        wrongs = JSON.parse(localStorage.getItem(wrongStorageKey) || '[]');
+        if (user.email === 'admin@yanye.com') { document.getElementById('admin-panel').style.display = 'block'; fetchInviteCodesAdmin(); }
+        wrongStorageKey = `wrongs_v11_${user.id}`; wrongs = JSON.parse(localStorage.getItem(wrongStorageKey) || '[]');
         initGame();
     }
 
-    // ======= Admin 邀请码管理 =======
     async function generateInviteCodeToDB() {
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-        let code = ''; for(let i=0; i<6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-        try {
-            const { error } = await supabase.from('invitation_codes').insert({ code, created_by: currentUser.id });
-            if (error) throw error; fetchInviteCodesAdmin();
-        } catch (e) { alert("生成失败: " + e.message); }
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = ''; for(let i=0; i<6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+        try { const { error } = await supabase.from('invitation_codes').insert({ code, created_by: currentUser.id }); if (error) throw error; fetchInviteCodesAdmin(); } catch (e) { alert("生成失败: " + e.message); }
     }
 
     async function fetchInviteCodesAdmin() {
@@ -650,10 +699,7 @@
             if (error) throw error;
             div.innerHTML = data.map(c => `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 5px; border-bottom:1px dashed var(--border);">
-                    <div>
-                        <strong style="color:${c.is_used ? 'var(--sub)' : 'var(--color-green)'}; letter-spacing:1px; font-size:14px;">${c.code}</strong>
-                        <div style="font-size:11px; margin-top:4px; color:var(--sub);">${c.is_used ? ('已用: ' + c.used_by) : '✨ 全新可用'}</div>
-                    </div>
+                    <div><strong style="color:${c.is_used ? 'var(--sub)' : 'var(--color-green)'}; letter-spacing:1px; font-size:14px;">${c.code}</strong><div style="font-size:11px; margin-top:4px; color:var(--sub);">${c.is_used ? ('已用: ' + c.used_by) : '✨ 全新可用'}</div></div>
                     <button onclick="invalidateInviteCode('${c.code}', '${c.used_by || ''}')" style="background:var(--color-red); color:white; border-radius:8px; padding:6px 12px; font-size:11px; font-weight:bold;">作废/封号</button>
                 </div>
             `).join('');
@@ -662,32 +708,16 @@
 
     async function invalidateInviteCode(code, usedBy) {
         if(!confirm(`⚠️ 危险操作：\n作废该邀请码将导致：\n1. 邀请码失效\n2. 使用此码注册的用户(${usedBy || '无'})会被【连根拔除】(包含题库和资源)！\n\n确定执行？`)) return;
-        try {
-            const { error } = await supabase.rpc('admin_delete_invite_and_user', { target_code: code, target_username: usedBy });
-            if (error) throw error;
-            alert("执行成功！相关痕迹已被彻底抹除。");
-            fetchInviteCodesAdmin();
-        } catch(e) { alert("销毁失败: " + e.message); }
+        try { const { error } = await supabase.rpc('admin_delete_invite_and_user', { target_code: code, target_username: usedBy }); if (error) throw error; alert("执行成功！相关痕迹已被彻底抹除。"); fetchInviteCodesAdmin(); } catch(e) { alert("销毁失败: " + e.message); }
     }
 
     async function logoutAccount() {
-        try {
-            document.getElementById('user-info-text').innerText = "正在切断连接...";
-            await supabase.auth.signOut();
-            for (let key in localStorage) { if (key.startsWith('sb-')) localStorage.removeItem(key); }
-            window.location.replace(window.location.href.split('?')[0]);
-        } catch (error) { window.location.reload(); }
+        try { document.getElementById('user-info-text').innerText = "正在切断连接..."; await supabase.auth.signOut(); for (let key in localStorage) { if (key.startsWith('sb-')) localStorage.removeItem(key); } window.location.replace(window.location.href.split('?')[0]); } catch (error) { window.location.reload(); }
     }
-
     async function deleteAccount() {
-        const c1 = confirm("⚠️ 危险警告\n注销账号将永久销毁您的所有云端词库、错题本，此操作不可逆！\n\n确定要继续吗？");
-        if (!c1) return;
-        const c2 = prompt("请输入【确认注销】四个字以执行自毁程序：");
-        if (c2 !== "确认注销") return alert("自毁程序已中止。");
-        try {
-            const { error } = await supabase.rpc('delete_user');
-            if (error) throw error; alert("账号数据已彻底化为尘埃。有缘再见。"); await logoutAccount();
-        } catch (e) { alert("注销失败：" + e.message); }
+        const c1 = confirm("⚠️ 危险警告\n注销账号将永久销毁您的所有云端词库、错题本，此操作不可逆！\n\n确定要继续吗？"); if (!c1) return;
+        const c2 = prompt("请输入【确认注销】四个字以执行自毁程序："); if (c2 !== "确认注销") return alert("自毁程序已中止。");
+        try { const { error } = await supabase.rpc('delete_user'); if (error) throw error; alert("账号数据已彻底化为尘埃。有缘再见。"); await logoutAccount(); } catch (e) { alert("注销失败：" + e.message); }
     }
 
     // ======= 资源中心 =======
@@ -697,34 +727,23 @@
         document.getElementById('upload-modal').style.display = show ? 'block' : 'none'; 
         if(!show) {
             document.getElementById('rc-up-file').value = ""; document.getElementById('rc-up-cover-base64').value = "";
-            document.getElementById('rc-up-file-label').innerText = "📸 点击此处选择本地图片";
-            document.getElementById('rc-up-file-label').style.borderColor = "var(--border)"; document.getElementById('rc-up-file-label').style.color = "var(--sub)";
+            document.getElementById('rc-up-file-label').innerText = "📸 点击此处选择本地图片"; document.getElementById('rc-up-file-label').style.borderColor = "var(--border)"; document.getElementById('rc-up-file-label').style.color = "var(--sub)";
         }
     }
     function handleLocalImage(e) {
-        const file = e.target.files[0]; if(!file) return;
-        const reader = new FileReader();
+        const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
         reader.onload = (event) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-                let width = img.width, height = img.height;
-                if (width > height && width > 500) { height *= 500 / width; width = 500; }
-                else if (height > 500) { width *= 500 / height; height = 500; }
-                canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height);
-                document.getElementById('rc-up-cover-base64').value = canvas.toDataURL('image/jpeg', 0.8);
-                const label = document.getElementById('rc-up-file-label');
-                label.innerText = `✅ 图片已就绪 (${file.name})`;
-                label.style.borderColor = "var(--color-green)"; label.style.color = "var(--color-green)";
+            const img = new Image(); img.onload = () => {
+                const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d'); let width = img.width, height = img.height;
+                if (width > height && width > 500) { height *= 500 / width; width = 500; } else if (height > 500) { width *= 500 / height; height = 500; }
+                canvas.width = width; canvas.height = height; ctx.drawImage(img, 0, 0, width, height); document.getElementById('rc-up-cover-base64').value = canvas.toDataURL('image/jpeg', 0.8);
+                const label = document.getElementById('rc-up-file-label'); label.innerText = `✅ 图片已就绪 (${file.name})`; label.style.borderColor = "var(--color-green)"; label.style.color = "var(--color-green)";
             }; img.src = event.target.result;
         }; reader.readAsDataURL(file);
     }
     async function fetchResources() {
         const listDiv = document.getElementById('rc-list'); listDiv.innerHTML = '<p style="color:var(--sub); font-size:14px; grid-column:1/-1; text-align:center;">连接资源卫星中...</p>';
-        try {
-            const { data, error } = await supabase.from('resource_center').select('*').order('created_at', { ascending: false });
-            if (error) throw error; resourceData = data || []; renderResources();
-        } catch(e) { listDiv.innerHTML = `<p style="color:red; font-size:14px; grid-column:1/-1; text-align:center;">卫星连接失败: ${e.message}</p>`; }
+        try { const { data, error } = await supabase.from('resource_center').select('*').order('created_at', { ascending: false }); if (error) throw error; resourceData = data || []; renderResources(); } catch(e) { listDiv.innerHTML = `<p style="color:red; font-size:14px; grid-column:1/-1; text-align:center;">卫星连接失败: ${e.message}</p>`; }
     }
     function renderResources() {
         const listDiv = document.getElementById('rc-list');
@@ -736,65 +755,42 @@
             if(res.uploader_email === 'admin@yanye.com') displayAuthor = '👑 官方精选';
             const cover = res.cover_url || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><rect width="100%" height="100%" fill="%23e2dfd6"/><text x="50%" y="50%" fill="%238b979f" font-size="14" font-family="sans-serif" text-anchor="middle" dominant-baseline="middle">言叶之庭</text></svg>';
             return `
-            <div class="rc-item">
-                <img src="${cover}" class="rc-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100%\\' height=\\'100%\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23e2dfd6\\'/><text x=\\'50%\\' y=\\'50%\\' fill=\\'%238b979f\\' font-size=\\'14\\' text-anchor=\\'middle\\' dominant-baseline=\\'middle\\'>载入失败</text></svg>'">
-                <div class="rc-info">
-                    <h4 class="rc-title">${res.title}</h4>
-                    <div class="rc-author">${displayAuthor}</div>
-                    <p class="rc-desc">${res.description || '暂无简介'}</p>
-                </div>
-                <div class="rc-actions">
-                    <button class="rc-btn rc-btn-dl" onclick="downloadResource('${res.id}')">📥 下载</button>
-                    ${canDelete ? `<button class="rc-btn rc-btn-del" onclick="deleteResource('${res.id}')">🗑️</button>` : ''}
-                </div>
+            <div class="rc-item"><img src="${cover}" class="rc-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100%\\' height=\\'100%\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23e2dfd6\\'/><text x=\\'50%\\' y=\\'50%\\' fill=\\'%238b979f\\' font-size=\\'14\\' text-anchor=\\'middle\\' dominant-baseline=\\'middle\\'>载入失败</text></svg>'"><div class="rc-info"><h4 class="rc-title">${res.title}</h4><div class="rc-author">${displayAuthor}</div><p class="rc-desc">${res.description || '暂无简介'}</p></div>
+                <div class="rc-actions"><button class="rc-btn rc-btn-dl" onclick="downloadResource('${res.id}')">📥 下载</button>${canDelete ? `<button class="rc-btn rc-btn-del" onclick="deleteResource('${res.id}')">🗑️</button>` : ''}</div>
             </div>`;
         }).join('');
     }
     async function submitResource() {
         const title = document.getElementById('rc-up-title').value.trim(); const desc = document.getElementById('rc-up-desc').value.trim();
         const cover = document.getElementById('rc-up-cover-base64').value; const jsonText = document.getElementById('rc-up-json').value.trim();
-        if(!title || !jsonText) return alert("标题和 JSON 数据为必填项！");
-        let jsonData = [];
+        if(!title || !jsonText) return alert("标题和 JSON 数据为必填项！"); let jsonData = [];
         try { jsonData = JSON.parse(jsonText); if(!Array.isArray(jsonData)) throw new Error("JSON 必须是数组格式 [ { ... } ]"); } catch(e) { return alert("JSON 格式有误: " + e.message); }
-        try {
-            document.getElementById('rc-up-title').value = '正在上传数据流...';
-            const { error } = await supabase.from('resource_center').insert({ title, description: desc, cover_url: cover, json_data: jsonData, uploader_id: currentUser.id, uploader_email: currentUser.email });
-            if (error) throw error; alert("发布成功！感谢您的无私分享。");
-            document.getElementById('rc-up-title').value = ''; document.getElementById('rc-up-desc').value = ''; document.getElementById('rc-up-json').value = '';
-            toggleUploadModal(false); fetchResources();
-        } catch(e) { alert("发布失败: " + e.message); document.getElementById('rc-up-title').value = title; }
+        try { document.getElementById('rc-up-title').value = '正在上传数据流...'; const { error } = await supabase.from('resource_center').insert({ title, description: desc, cover_url: cover, json_data: jsonData, uploader_id: currentUser.id, uploader_email: currentUser.email }); if (error) throw error; alert("发布成功！感谢您的无私分享。"); document.getElementById('rc-up-title').value = ''; document.getElementById('rc-up-desc').value = ''; document.getElementById('rc-up-json').value = ''; toggleUploadModal(false); fetchResources(); } catch(e) { alert("发布失败: " + e.message); document.getElementById('rc-up-title').value = title; }
     }
     async function downloadResource(id) {
         const res = resourceData.find(r => r.id === id); if(!res) return;
         const groupName = prompt(`你要将【${res.title}】下载到本地的哪个分组中？\n(支持直接输入新分组名或现有分组名)`, res.title); if(!groupName) return;
-        try {
-            const dataToInsert = res.json_data.map(item => {
-                const cleanItem = { ...item, group_name: groupName, user_id: currentUser.id };
-                delete cleanItem.id; delete cleanItem.created_at; return cleanItem;
-            });
-            const { error } = await supabase.from('dictation_items').insert(dataToInsert);
-            if (error) throw error; alert(`成功！${dataToInsert.length} 个词条已落入您的【${groupName}】分组！`);
-            sync(); toggleResourceCenter(false);
-        } catch (e) { alert("下载失败：" + e.message); }
+        try { const dataToInsert = res.json_data.map(item => { const cleanItem = { ...item, group_name: groupName, user_id: currentUser.id }; delete cleanItem.id; delete cleanItem.created_at; return cleanItem; }); const { error } = await supabase.from('dictation_items').insert(dataToInsert); if (error) throw error; alert(`成功！${dataToInsert.length} 个词条已落入您的【${groupName}】分组！`); sync(); toggleResourceCenter(false); } catch (e) { alert("下载失败：" + e.message); }
     }
     async function deleteResource(id) {
-        if(!confirm("确定要从全网资源中心彻底抹除这个分享吗？")) return;
+        if(!confirm("确定要彻底抹除这个分享吗？")) return;
         try { const { error } = await supabase.from('resource_center').delete().eq('id', id); if (error) throw error; fetchResources(); } catch(e) { alert("删除失败: " + e.message); }
     }
 
-    // ======= 核心系统与特效 =======
+    // ======= 核心系统 =======
     function initGame() { initCanvas(); sync(); initBGM(); renderWrongs(); loadTheme(); }
     function changeTheme() {
-        const t = document.getElementById('theme-select').value;
-        document.body.setAttribute('data-theme', t); localStorage.setItem('app_theme', t); initCanvas(); 
+        if(isWatchMode) return; // 腕表强制黑色
+        const t = document.getElementById('theme-select').value; document.body.setAttribute('data-theme', t); localStorage.setItem('app_theme', t); initCanvas(); 
     }
     function loadTheme() {
-        const saved = localStorage.getItem('app_theme') || 'default';
-        document.getElementById('theme-select').value = saved; document.body.setAttribute('data-theme', saved);
+        if(isWatchMode) return;
+        const saved = localStorage.getItem('app_theme') || 'default'; document.getElementById('theme-select').value = saved; document.body.setAttribute('data-theme', saved);
     }
     function toggleAppMode() {
         if (isSessionActive) return; isIntenseMode = !isIntenseMode;
-        document.body.classList.toggle('intense-mode', isIntenseMode); document.getElementById('mode-toggle-btn').innerText = isIntenseMode ? '⚡ 激烈' : '🌸 休闲';
+        if(!isWatchMode) document.body.classList.toggle('intense-mode', isIntenseMode); 
+        document.getElementById('mode-toggle-btn').innerText = isIntenseMode ? '⚡ 激烈' : '🌸 休闲';
         resetEraser(); initCanvas(); playBGM(true); restartSession();
     }
     function restartSession() {
@@ -809,10 +805,7 @@
         if (isIntenseMode) startPrepCountdown(); else { if (pool.length > 0) nextQ(); else document.getElementById('q-text').innerText = "该分组下暂无题目"; }
     }
     async function sync() { const { data } = await supabase.from('dictation_items').select('*'); all = data || []; updateGroupSelect(); applyRule(); }
-    function updateGroupSelect() {
-        const groups = [...new Set(all.map(i => i.group_name || '默认分组'))]; const select = document.getElementById('group-select');
-        select.innerHTML = `<option value="ALL">全部词库总合</option>` + groups.map(g => `<option value="${g}">${g}</option>`).join('');
-    }
+    function updateGroupSelect() { const groups = [...new Set(all.map(i => i.group_name || '默认分组'))]; const select = document.getElementById('group-select'); select.innerHTML = `<option value="ALL">全部词库总合</option>` + groups.map(g => `<option value="${g}">${g}</option>`).join(''); }
     function applyRule() {
         const m = document.getElementById('mode').value; const g = document.getElementById('group-select').value;
         let baseList = all; if (g !== 'ALL') baseList = all.filter(i => (i.group_name || '默认分组') === g);
@@ -820,16 +813,15 @@
         document.getElementById('count-info').innerText = `${filtered.length} ITEMS`; restartSession();
     }
 
-    // 激烈模式：单题限时逻辑
     function startPrepCountdown() {
-        let prepTime = 12; const timerEl = document.getElementById('intense-timer'); timerEl.classList.add('prep'); timerEl.innerText = prepTime;
+        let prepTime = isWatchMode ? 5 : 12; // 腕表模式准备时间缩短
+        const timerEl = document.getElementById('intense-timer'); timerEl.classList.add('prep'); timerEl.innerText = prepTime;
         document.getElementById('q-text').innerText = "准备迎接极限考验..."; document.getElementById('q-cat').innerText = "PREPARING";
         prepInterval = setInterval(() => { prepTime--; timerEl.innerText = prepTime; if (prepTime <= 0) { clearInterval(prepInterval); timerEl.classList.remove('prep'); beginIntenseChallenge(); } }, 1000);
     }
 
     function beginIntenseChallenge() {
-        isSessionActive = true; document.getElementById('mode-toggle-btn').classList.add('locked');
-        sessionStartTime = Date.now();
+        isSessionActive = true; document.getElementById('mode-toggle-btn').classList.add('locked'); sessionStartTime = Date.now();
         if (pool.length > 0) nextQ();
     }
 
@@ -845,16 +837,10 @@
             document.getElementById('intense-timer').innerText = qTimeLeft;
             clearInterval(qTimerInterval);
             qTimerInterval = setInterval(() => {
-                qTimeLeft--;
-                document.getElementById('intense-timer').innerText = qTimeLeft;
+                qTimeLeft--; document.getElementById('intense-timer').innerText = qTimeLeft;
                 if (qTimeLeft <= 3 && qTimeLeft > 0) document.getElementById('intense-timer').classList.add('urgent');
                 else document.getElementById('intense-timer').classList.remove('urgent');
-
-                if (qTimeLeft <= 0) {
-                    clearInterval(qTimerInterval);
-                    document.getElementById('intense-timer').classList.remove('urgent');
-                    handleTimeUp();
-                }
+                if (qTimeLeft <= 0) { clearInterval(qTimerInterval); document.getElementById('intense-timer').classList.remove('urgent'); handleTimeUp(); }
             }, 1000);
         }
     }
@@ -863,11 +849,7 @@
         playSFX('no');
         document.getElementById('ans-pop').classList.add('timeout-state'); 
         document.getElementById('ans-text').innerHTML = current.a + '<br><span style="color:var(--color-red); font-size:14px; display:block; margin-top:10px;">⏳ 超时自动跳过</span>';
-        showAns(true);
-        autoNextTimeout = setTimeout(() => {
-            document.getElementById('ans-pop').classList.remove('timeout-state');
-            mark(false);
-        }, 1500);
+        showAns(true); autoNextTimeout = setTimeout(() => { document.getElementById('ans-pop').classList.remove('timeout-state'); mark(false); }, 1500);
     }
 
     function mark(isOk) {
@@ -885,19 +867,18 @@
     function showFinish(isTimeout) {
         isSessionActive = false; document.getElementById('mode-toggle-btn').classList.remove('locked'); document.getElementById('session-stats').innerText = `正确 ${sCorrect} | 错误 ${sWrong}`;
         const zenEl = document.getElementById('zen-quote-text'), iconEl = document.getElementById('finish-icon'), titleEl = document.getElementById('finish-title');
-        
         if (isIntenseMode) { 
             const timeUsed = Math.floor((Date.now() - sessionStartTime) / 1000);
             const accuracy = (sCorrect + sWrong) > 0 ? Math.round((sCorrect / (sCorrect + sWrong)) * 100) : 0;
             iconEl.innerText = '⚡'; titleEl.innerText = '挑战结束'; 
-            zenEl.innerText = `「 命中率: ${accuracy}% | 总耗时: ${timeUsed}s 」\n高速流转，完成重载。`; 
-            zenEl.style.fontFamily = "'Courier New', monospace"; zenEl.style.whiteSpace = "pre-wrap"; 
+            zenEl.innerText = `「 命中率: ${accuracy}% | 总耗时: ${timeUsed}s 」\n高速流转，完成重载。`; zenEl.style.fontFamily = "'Courier New', monospace"; zenEl.style.whiteSpace = "pre-wrap"; 
         } 
         else { iconEl.innerText = '🉑'; titleEl.innerText = '洗练完成'; zenEl.innerText = "「 行到水穷处，坐看云起时。 」"; zenEl.style.fontFamily = '"KaiTi", serif'; setTimeout(fireConfetti, 100); }
         document.getElementById('finish-overlay').style.display = 'flex';
     }
 
     function fireConfetti() {
+        if(isWatchMode) return; // 腕表禁用繁重特效
         const canvas = document.getElementById('confetti-canvas'); const ctx = canvas.getContext('2d'); canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         const pieces = []; const colors = ['#d15147', '#5a825a', '#ff9f0a', '#00b4d8', '#ec407a'];
         for(let i=0; i<100; i++) pieces.push({ x: canvas.width/2, y: canvas.height/2 + 100, vx: (Math.random()-0.5)*20, vy: (Math.random()-1)*20, size: Math.random()*10+5, color: colors[Math.floor(Math.random()*colors.length)], rot: Math.random()*360, rotS: (Math.random()-0.5)*10 });
@@ -912,7 +893,7 @@
     }
     
     function initBGM() { document.getElementById('bgm-toggle').checked = localStorage.getItem('bgm_enabled') !== 'false'; document.body.addEventListener('click', () => { if (!audioInitialized) { playBGM(); audioInitialized = true; } }, { once: true }); }
-    function playBGM(forceRestart = false) { const n = document.getElementById('bg-music'), i = document.getElementById('bg-music-intense'); n.pause(); i.pause(); if (document.getElementById('bgm-toggle').checked) { const active = isIntenseMode ? i : n; if (forceRestart) active.currentTime = 0; active.play().catch(() => {}); } }
+    function playBGM(forceRestart = false) { if(isWatchMode) return; const n = document.getElementById('bg-music'), i = document.getElementById('bg-music-intense'); n.pause(); i.pause(); if (document.getElementById('bgm-toggle').checked) { const active = isIntenseMode ? i : n; if (forceRestart) active.currentTime = 0; active.play().catch(() => {}); } }
     function toggleBGM() { localStorage.setItem('bgm_enabled', document.getElementById('bgm-toggle').checked); playBGM(); }
     function toggleSidebar() { document.getElementById('wrong-sidebar').classList.toggle('active'); }
     function renderWrongs() { document.getElementById('wrong-list').innerHTML = wrongs.map(i => `<div class="wrong-item"><div style="font-weight:bold; color:var(--text); font-size:16px;">${i.a}</div><div style="font-size:12px; color:var(--sub); margin-top:6px;">${i.q}</div></div>`).join(''); }
@@ -927,45 +908,30 @@
         } catch(e) { alert("失败: " + e.message); }
     }
     
-    // ======= 新增功能：无限撤销画笔 =======
+    // ======= 画板 =======
     const canvas = document.getElementById('board'); const ctx = canvas.getContext('2d'); let drawing = false, isEraser = false, lastTap = 0;
-    let undoStack = []; // 撤销栈
-
-    function saveCanvasState() {
-        undoStack.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
-        if(undoStack.length > 20) undoStack.shift(); // 最多保存 20 步
-    }
-
-    function undoDraw() {
-        if(undoStack.length > 0) ctx.putImageData(undoStack.pop(), 0, 0);
-    }
-
+    let undoStack = [];
+    function saveCanvasState() { undoStack.push(ctx.getImageData(0, 0, canvas.width, canvas.height)); if(undoStack.length > 20) undoStack.shift(); }
+    function undoDraw() { if(undoStack.length > 0) ctx.putImageData(undoStack.pop(), 0, 0); }
     function initCanvas() { const rect = canvas.parentNode.getBoundingClientRect(); canvas.width = rect.width; canvas.height = rect.height; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; applyBrushStyle(); }
-    function toggleEraser() { isEraser = !isEraser; const btn = document.getElementById('eraser-btn'); btn.innerText = isEraser ? '🧽 橡皮' : '✏️ 画笔'; btn.style.color = isEraser ? 'var(--color-red)' : 'var(--sub)'; applyBrushStyle(); }
-    function resetEraser() { isEraser = false; const btn = document.getElementById('eraser-btn'); if (btn) { btn.innerText = '✏️ 画笔'; btn.style.color = 'var(--sub)'; } applyBrushStyle(); }
+    function toggleEraser() { isEraser = !isEraser; const btn = document.getElementById('eraser-btn'); btn.innerText = isEraser ? '🧽' : '✏️'; btn.style.color = isEraser ? 'var(--color-red)' : 'var(--sub)'; applyBrushStyle(); }
+    function resetEraser() { isEraser = false; const btn = document.getElementById('eraser-btn'); if (btn) { btn.innerText = isWatchMode ? '✏️' : '✏️ 画笔'; btn.style.color = 'var(--sub)'; } applyBrushStyle(); }
     function applyBrushStyle() { if (isEraser) { ctx.globalCompositeOperation = 'destination-out'; ctx.lineWidth = 28; } else { ctx.globalCompositeOperation = 'source-over'; ctx.lineWidth = 4; ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--text').trim(); } }
     const getPos = (e) => { const rect = canvas.getBoundingClientRect(); const cx = e.touches ? e.touches[0].clientX : e.clientX; const cy = e.touches ? e.touches[0].clientY : e.clientY; return { x: cx - rect.left, y: cy - rect.top }; };
     
     canvas.addEventListener('touchstart', (e) => { 
-        e.preventDefault(); 
-        const currentTime = new Date().getTime(); const tapLength = currentTime - lastTap; 
-        if (tapLength < 300 && tapLength > 0 && allowDblClickClear) { clearBoard(); return; } 
-        lastTap = currentTime;
-        saveCanvasState(); 
-        drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); 
+        e.preventDefault(); const currentTime = new Date().getTime(); const tapLength = currentTime - lastTap; 
+        if (tapLength < 300 && tapLength > 0 && allowDblClickClear) { clearBoard(); return; } lastTap = currentTime;
+        saveCanvasState(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); 
     }, {passive:false});
     
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if(drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } }, {passive:false}); window.addEventListener('touchend', () => drawing = false);
     canvas.addEventListener('mousedown', (e) => { saveCanvasState(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); }); 
     canvas.addEventListener('mousemove', (e) => { if(drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } }); window.addEventListener('mouseup', () => drawing = false);
-    
     canvas.addEventListener('dblclick', () => { if(allowDblClickClear) clearBoard(); });
     function clearBoard() { saveCanvasState(); ctx.clearRect(0,0,canvas.width,canvas.height); }
     
-    function showAns(s) { 
-        if (s && isIntenseMode) clearInterval(qTimerInterval); 
-        document.getElementById('ans-pop').classList.toggle('active', s); 
-    }
+    function showAns(s) { if (s && isIntenseMode) clearInterval(qTimerInterval); document.getElementById('ans-pop').classList.toggle('active', s); }
     function updateProgress() { document.getElementById('progress-bar').style.width = (filtered.length === 0 ? 0 : ((filtered.length - pool.length) / filtered.length) * 100) + '%'; }
     function peekHint() { const h = document.getElementById('ghost-hint'); h.innerText = current.a; h.classList.add('show'); setTimeout(() => h.classList.remove('show'), 1000); }
     function skipQ() { if(pool.length > 1) { clearInterval(qTimerInterval); nextQ(); } }
