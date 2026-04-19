@@ -68,22 +68,16 @@
         }
         body.no-glass * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 
-        /* ================= 设备模式检测层 ================= */
-        #device-selector-overlay {
-            position: fixed; inset: 0; background: var(--bg); z-index: 20000;
-            display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;
-        }
-        .device-btn {
-            width: 100%; max-width: 320px; padding: 25px; margin: 12px 0; border-radius: 24px;
-            background: var(--card); border: 2px solid var(--border); font-size: 20px; font-weight: bold; color: var(--text);
-            box-shadow: var(--shadow); transition: 0.3s; display: flex; flex-direction: column; gap: 8px; align-items: center; cursor: pointer;
-        }
-        .device-btn span { font-size: 13px; color: var(--sub); font-weight: normal; }
-        .device-btn.highlight { border-color: var(--color-green); background: rgba(90, 130, 90, 0.1); transform: scale(1.02); }
+        /* ================= 全局加载动画 ================= */
+        #global-loader { position: fixed; inset: 0; background: var(--bg); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s; }
+        .loader-spinner { width: 50px; height: 50px; border: 4px solid var(--border); border-top-color: var(--color-green); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loader-text { font-size: 14px; font-weight: bold; color: var(--text); letter-spacing: 2px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
         /* ================= 基础与动效 ================= */
         * { box-sizing: border-box; transition: background-color 0.4s, color 0.4s, border-color 0.4s, box-shadow 0.3s, border-radius 0.3s; }
-        body { font-family: "OPPO Sans", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; }
+        body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; }
 
         .main-card { width: 95%; max-width: 460px; background: var(--card); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border-radius: var(--ui-radius); box-shadow: var(--shadow); overflow: hidden; position: relative; z-index: 10; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.3); }
         body.intense-mode .main-card, body[data-theme="github"] .main-card { border: 1px solid var(--border); }
@@ -92,7 +86,7 @@
         #progress-bar { height: 100%; width: 0%; background: var(--color-green); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 
         .nav { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); font-size: 11px; color: var(--sub); letter-spacing: 1px; flex-shrink: 0; }
-        .nav span { cursor: pointer; padding: 6px 10px; border-radius: var(--ui-radius); transition: background 0.2s; }
+        .nav span { cursor: pointer; padding: 6px 10px; border-radius: 12px; transition: background 0.2s; }
         .nav span:hover { background: var(--border); color: var(--text); }
         #mode-toggle-btn { font-weight: bold; background: var(--border); color: var(--text); }
         #mode-toggle-btn.locked { opacity: 0.2; pointer-events: none; }
@@ -144,15 +138,15 @@
         body[data-theme="github"] .btn-no { background: var(--color-red); box-shadow: none; }
         
         .footer { display: grid; grid-template-columns: 1fr 1fr 1fr 1.5fr 1fr; background: transparent; gap: 6px; padding: 10px; flex-shrink: 0; }
-        .footer button { padding: 16px 0; background: var(--border); border-radius: var(--ui-radius); font-size: 12px; font-weight: bold; color: var(--text); white-space: nowrap;}
+        .footer button { padding: 16px 0; background: var(--border); border-radius: 12px; font-size: 12px; font-weight: bold; color: var(--text); white-space: nowrap;}
         .footer button:hover { filter: brightness(0.95); }
         .btn-main { background: var(--text) !important; color: var(--bg) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 13px !important;}
         body[data-theme="github"] .btn-main { box-shadow: none; }
 
-        textarea, select, input[type="text"], input[type="email"], input[type="password"], input[type="number"] { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid transparent; background: rgba(0,0,0,0.04); color: var(--text); margin-bottom: 15px; font-size: 14px; outline: none; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); }
-        textarea:focus, select:focus, input:focus { border-color: var(--color-green); background: transparent; box-shadow: 0 0 0 4px rgba(90, 130, 90, 0.1); }
-        body.intense-mode textarea, body.intense-mode input, body.intense-mode select { background: rgba(255,255,255,0.05); }
-        body[data-theme="github"] textarea, body[data-theme="github"] input, body[data-theme="github"] select { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; box-shadow: none; }
+        textarea, input[type="text"], input[type="email"], input[type="password"], input[type="number"] { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid transparent; background: rgba(0,0,0,0.04); color: var(--text); margin-bottom: 15px; font-size: 14px; outline: none; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); }
+        textarea:focus, input:focus { border-color: var(--color-green); background: transparent; box-shadow: 0 0 0 4px rgba(90, 130, 90, 0.1); }
+        body.intense-mode textarea, body.intense-mode input { background: rgba(255,255,255,0.05); }
+        body[data-theme="github"] textarea, body[data-theme="github"] input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; box-shadow: none; }
 
         .switch { position: relative; display: inline-block; width: 48px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -161,16 +155,45 @@
         input:checked + .slider { background-color: var(--color-green); }
         input:checked + .slider:before { transform: translateX(22px); }
 
+        /* ================= 自定义下拉菜单 (替换原生 select) ================= */
+        .custom-select-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
+        .custom-select-display { width: 100%; padding: 15px; border-radius: 12px; background: rgba(0,0,0,0.04); color: var(--text); font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 2px solid transparent; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); user-select: none; }
+        .custom-select-display:hover { background: rgba(0,0,0,0.08); }
+        .custom-select-display.open { border-color: var(--color-green); background: transparent; box-shadow: 0 0 0 4px rgba(90, 130, 90, 0.1); }
+        .custom-select-display::after { content: '▼'; font-size: 10px; transition: transform 0.3s; color: var(--sub); }
+        .custom-select-display.open::after { transform: rotate(180deg); }
+        .custom-select-dropdown { position: absolute; top: calc(100% + 5px); left: 0; right: 0; background: var(--card); backdrop-filter: var(--glass-blur); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); max-height: 200px; overflow-y: auto; z-index: 5000; opacity: 0; pointer-events: none; transform: translateY(-10px); transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        .custom-select-dropdown.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        .custom-option { padding: 12px 15px; font-size: 14px; color: var(--text); cursor: pointer; transition: background 0.2s; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .custom-option:last-child { border-bottom: none; }
+        .custom-option:hover { background: rgba(0,0,0,0.05); color: var(--color-green); }
+        .custom-option.selected { color: var(--color-green); font-weight: bold; background: rgba(90,130,90,0.05); }
+        body.intense-mode .custom-select-display { background: rgba(255,255,255,0.05); }
+        body[data-theme="github"] .custom-select-display { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; box-shadow: none; }
+        body[data-theme="github"] .custom-select-dropdown { border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+        /* ================= 词库复选框 (多选) ================= */
+        .cb-group-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 10px; margin-bottom: 15px; max-height: 200px; overflow-y: auto; }
+        .cb-item { display: flex; align-items: center; padding: 10px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+        .cb-item:hover { background: rgba(0,0,0,0.05); }
+        .cb-item input { display: none; }
+        .cb-checkmark { width: 22px; height: 22px; border: 2px solid var(--sub); border-radius: 6px; margin-right: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .cb-item input:checked + .cb-checkmark { background: var(--color-green); border-color: var(--color-green); }
+        .cb-item input:checked + .cb-checkmark::after { content: '✔'; color: white; font-size: 14px; font-weight: bold; }
+        .cb-label { font-size: 14px; color: var(--text); flex: 1; word-break: break-all; }
+        body[data-theme="github"] .cb-group-container { border-radius: 6px; background: var(--bg); }
+        body[data-theme="github"] .cb-checkmark { border-radius: 4px; }
+
         /* ================= 菜单、登录、资源 ================= */
         .full-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; display: none; overflow-y: auto; padding: 40px 20px; }
         body.no-glass .full-overlay { background: rgba(0,0,0,0.7); }
         .set-box { background: var(--card); backdrop-filter: var(--glass-blur); border: 1px solid rgba(255,255,255,0.4); border-radius: var(--ui-radius); padding: 35px; max-width: 480px; margin: 0 auto; box-shadow: 0 25px 50px rgba(0,0,0,0.15); animation: slideUp 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
-        body[data-theme="github"] .set-box { border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        body[data-theme="github"] .set-box { border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 6px; }
         @keyframes slideUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
 
         #auth-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: none; overflow-y: auto; padding: 40px 20px; flex-direction: column; justify-content: center; align-items: center; }
         .auth-card { background: var(--card); backdrop-filter: var(--glass-blur); border: 1px solid rgba(255,255,255,0.4); width: 100%; max-width: 400px; border-radius: var(--ui-radius); padding: 40px 35px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); text-align: center; margin: auto; }
-        body[data-theme="github"] .auth-card { border: 1px solid var(--border); box-shadow: none; }
+        body[data-theme="github"] .auth-card { border: 1px solid var(--border); box-shadow: none; border-radius: 6px;}
         
         .auth-tabs { display: flex; background: rgba(0,0,0,0.05); border-radius: 12px; margin-bottom: 20px; overflow: hidden; }
         .auth-tab { flex: 1; padding: 12px; font-size: 14px; font-weight: bold; cursor: pointer; color: var(--sub); transition: 0.3s; }
@@ -178,7 +201,7 @@
         
         .auth-btn { width: 100%; padding: 16px; background: var(--text); color: var(--bg); border-radius: 12px; font-weight: bold; font-size: 16px; margin-top: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
         .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(0,0,0,0.15); }
-        body[data-theme="github"] .auth-btn { box-shadow: none; }
+        body[data-theme="github"] .auth-btn { box-shadow: none; border-radius: 6px; }
 
         .rc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 25px; }
         .rc-item { background: var(--bg); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s, box-shadow 0.3s; }
@@ -202,118 +225,6 @@
 
         #admin-panel { background: rgba(255, 165, 0, 0.05); border: 1px dashed orange; border-radius: 16px; padding: 20px; margin-bottom: 25px; display: none; }
         body[data-theme="github"] #admin-panel { border-radius: 6px; }
-
-        /* ================= 专属适配：Oppo Watch X (46mm BoxInsetLayout 等效) ================= */
-        /* 手表专属的占位与触发按钮 */
-        .watch-start-write { display: none; }
-        .watch-q-overlay { display: none; }
-        
-        body.watch-mode {
-            clip-path: circle(50%); /* 强制物理圆裁切防越界 */
-            background: #000 !important;
-            /* 覆写为 OLED 黑与高对比蓝/绿/红 */
-            --bg: #000000; --card: #1A1A1A; --text: #FFFFFF; --sub: #8A8A8F; --border: #333333;
-            --color-red: #FF3B30; --color-green: #00C853; --color-brand: #0094FF;
-            --glass-blur: none; --ui-radius: 16px; --shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        body.watch-mode .main-card {
-            border: none !important; box-shadow: none !important; border-radius: 0;
-            justify-content: center; position: absolute; inset: 0; max-width: 100%; width: 100vw; height: 100vh;
-        }
-
-        /* 手表按钮统一重塑 */
-        body.watch-mode .btn-main, body.watch-mode .watch-start-write, body.watch-mode .auth-btn {
-            background: var(--color-brand) !important; color: #FFFFFF !important;
-            border-radius: 16px; font-size: 16px; font-weight: bold; min-height: 48px; box-shadow: none;
-        }
-
-        /* 手表闲置态 (读题模式) */
-        body.watch-mode .nav {
-            position: absolute; top: 15%; width: 100%; justify-content: space-around;
-            padding: 0 40px; border: none; z-index: 20;
-        }
-        body.watch-mode .nav span { font-size: 24px; padding: 10px; background: transparent; border-radius: 50%; }
-        body.watch-mode #count-info, body.watch-mode #mode-toggle-btn { display: none; }
-        
-        body.watch-mode .quiz-box { position: absolute; top: 35%; width: 100%; z-index: 10; padding: 0 20px; }
-        body.watch-mode #q-text { font-size: 1.8rem; margin-bottom: 10px; line-height: 1.3; }
-
-        /* 呼出画板的巨型按钮 */
-        body.watch-mode .watch-start-write {
-            position: absolute; bottom: 12%; left: 50%; transform: translateX(-50%);
-            padding: 12px 30px; border-radius: 24px; z-index: 20; display: block; white-space: nowrap;
-        }
-
-        /* --- 手表书写态 (全屏画板模式) --- */
-        body.watch-mode .canvas-area {
-            position: absolute; inset: 0; height: 100%; width: 100%; border: none;
-            z-index: 50; display: none; background: #000; margin: 0;
-        }
-        body.watch-mode.is-writing .canvas-area { display: block; }
-        
-        body.watch-mode.is-writing .nav,
-        body.watch-mode.is-writing .quiz-box,
-        body.watch-mode.is-writing .watch-start-write { display: none !important; }
-
-        /* 悬浮在画板上的题目水印 */
-        body.watch-mode .watch-q-overlay {
-            position: absolute; top: 12%; width: 70%; left: 15%; text-align: center;
-            color: rgba(255,255,255,0.3); font-size: 14px; pointer-events: none; z-index: 55;
-            line-height: 1.2; font-weight: bold;
-        }
-        body.watch-mode.is-writing .watch-q-overlay { display: block; }
-
-        /* 画板周围的悬浮按钮 (精确避开圆屏裁切) */
-        body.watch-mode .footer {
-            position: absolute; inset: 0; height: 100%; display: none; z-index: 60; pointer-events: none; padding: 0; background: transparent;
-        }
-        body.watch-mode.is-writing .footer { display: block; }
-        
-        body.watch-mode .footer button { 
-            pointer-events: auto; position: absolute; background: #1A1A1A; 
-            border-radius: 50%; width: 48px; height: 48px; padding: 0; color: #fff; border: 1px solid #333; 
-            display: flex; align-items: center; justify-content: center; font-size: 18px;
-        }
-        body.watch-mode .footer button:nth-child(1) { top: 40px; left: 30px; } /* 🗑️ 清空 */
-        body.watch-mode .footer button:nth-child(2) { top: 40px; right: 30px; } /* ↩️ 撤销 */
-        body.watch-mode .footer button:nth-child(6) { bottom: 40px; left: 30px; } /* ❌ 退出 */
-        body.watch-mode .footer button:nth-child(4) { /* ✅ 核对 (主按钮) */ 
-            bottom: 25px; left: 50%; transform: translateX(-50%); 
-            background: var(--color-brand) !important; font-size: 16px; padding: 0 24px; 
-            width: auto; height: 48px; border-radius: 24px; border: none;
-        } 
-        body.watch-mode .footer button:nth-child(3), body.watch-mode .footer button:nth-child(5) { display: none; } 
-
-        /* ====== 手表模态框与列表深度适配 (上下大留白) ====== */
-        body.watch-mode .full-overlay,
-        body.watch-mode #auth-overlay { 
-            padding: 80px 20px !important; align-items: flex-start; /* 让内容在圆内可滚动浏览 */
-            display: none; 
-        }
-        body.watch-mode #auth-overlay.active-flex { display: block; } /* 覆盖 Flex 导致无法滚动的 Bug */
-        
-        body.watch-mode .set-box, body.watch-mode .auth-card { 
-            padding: 0; width: 100%; background: transparent; border: none; box-shadow: none; 
-        }
-        body.watch-mode #wrong-sidebar { width: 100%; height: 100%; transform: translateY(100%); padding: 0; }
-        body.watch-mode #wrong-sidebar.active { transform: translateY(0); }
-        body.watch-mode #wrong-sidebar-inner { padding: 80px 25px; height: 100%; overflow-y: auto; }
-        
-        body.watch-mode #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(1) !important; width: 80%; background: #1A1A1A; border: 1px solid #333; padding: 20px; }
-        body.watch-mode #ans-text { font-size: 1.8rem; margin-bottom: 15px; }
-        body.watch-mode .judge-btn { padding: 14px; font-size: 14px; margin-bottom: 8px; border-radius: 12px; }
-        body.watch-mode .btn-yes { background: var(--color-green); }
-        body.watch-mode .btn-no { background: var(--color-red); }
-
-        body.watch-mode .auth-tabs { flex-direction: column; gap: 8px; background: transparent; margin-bottom: 15px; }
-        body.watch-mode .auth-tab { background: #1A1A1A; border-radius: 12px; padding: 12px; border: 1px solid #333; }
-        body.watch-mode .auth-tab.active { background: var(--color-brand); border-color: var(--color-brand); }
-        body.watch-mode .auth-input { padding: 14px; margin-bottom: 12px; background: #000; border: 1px solid #333; border-radius: 12px; text-align: center; }
-        body.watch-mode #recaptcha-container { transform: scale(0.65); transform-origin: top center; margin-bottom: -15px; }
-        
-        /* 隐藏非必需项 */
-        body.watch-mode .hide-on-watch { display: none !important; }
         
         @media (max-width: 1000px) {
             #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(0.9) !important; width: 85%; }
@@ -323,20 +234,13 @@
 </head>
 <body data-theme="default">
 
-<!-- ================= 设备模式选择层 ================= -->
-<div id="device-selector-overlay">
-    <h2 style="margin-bottom:30px; font-family:'KaiTi',serif; color:var(--text); font-size:28px;">接入终端验证</h2>
-    <div class="device-btn" id="device-pc-btn" onclick="selectDevice('standard')">
-        💻 手机 / 电脑 / 平板
-        <span>标准宽屏沉浸体验</span>
-    </div>
-    <div class="device-btn" id="device-watch-btn" onclick="selectDevice('watch')">
-        ⌚ 智能腕表 (圆屏)
-        <span>专属沉浸式单开书写，防裁切优化</span>
-    </div>
+<!-- 全局加载动画 -->
+<div id="global-loader">
+    <div class="loader-spinner"></div>
+    <div class="loader-text" id="loader-text">载入中...</div>
 </div>
 
-<!-- ================= 登录验证浮层 (reCAPTCHA v2) ================= -->
+<!-- ================= 登录验证浮层 ================= -->
 <div id="auth-overlay">
     <div class="auth-card" id="main-auth-card">
         <h2 id="auth-title" style="margin-bottom:20px;">言叶之庭</h2>
@@ -350,8 +254,8 @@
         <input type="password" id="auth-pwd" class="auth-input" placeholder="设置密码（至少6位）">
         <input type="text" id="auth-invite" class="auth-input" placeholder="输入收到的邀请码" style="display:none; border-color: orange;">
         
-        <!-- reCAPTCHA v2 组件 (已绑定更新的 Site Key) -->
-        <div id="recaptcha-container" style="display:none;">
+        <!-- reCAPTCHA v2 组件 -->
+        <div id="recaptcha-container" style="display:none; margin: 0 auto 15px auto; transform: scale(0.95); transform-origin: center;">
             <div class="g-recaptcha" data-sitekey="6LdjI7MsAAAAAKdB1F1MLbTAtYwzwBGVvNXk5khz"></div>
         </div>
 
@@ -380,7 +284,7 @@
         <div id="wrong-list"></div>
         <div style="display:flex; gap:10px; flex-shrink: 0; flex-direction: column;">
             <button onclick="clearWrongs()" style="width:100%; padding:14px; background:var(--border); border-radius:12px; font-size:14px; font-weight:bold; color:var(--text)">🗑️ 清空记录</button>
-            <button onclick="exportWrongs()" class="hide-on-watch" style="width:100%; padding:14px; background:var(--color-green); border-radius:12px; font-size:14px; font-weight:bold; color:white">📤 导出为文本 (.txt)</button>
+            <button onclick="exportWrongs()" style="width:100%; padding:14px; background:var(--color-green); border-radius:12px; font-size:14px; font-weight:bold; color:white">📤 导出为文本 (.txt)</button>
         </div>
     </div>
 </div>
@@ -398,11 +302,11 @@
     </div>
 
     <div class="nav">
-        <span onclick="toggleSidebar()">📓</span>
+        <span onclick="toggleSidebar()">📓 记录</span>
         <span id="mode-toggle-btn" onclick="toggleAppMode()">🌸 休闲</span>
         <span id="count-info">0 ITEMS</span>
-        <span id="hint-btn" onclick="peekHint()">💡</span>
-        <span onclick="toggleSettings(true)">⚙️</span>
+        <span id="hint-btn" onclick="peekHint()">💡 窥探</span>
+        <span onclick="toggleSettings(true)">⚙️ 设置</span>
     </div>
 
     <div class="quiz-box">
@@ -410,11 +314,7 @@
         <div id="q-text">等待开始...</div>
     </div>
 
-    <!-- 腕表呼出画板按键 -->
-    <button class="watch-start-write" onclick="enterWatchWriting()">✏️ 开始书写</button>
-
     <div class="canvas-area">
-        <div class="watch-q-overlay" id="watch-q-watermark"></div>
         <div class="grid-bg"></div>
         <div id="ghost-hint"></div>
         <div id="intense-timer"></div>
@@ -427,8 +327,6 @@
         <button id="eraser-btn" onclick="toggleEraser()" style="color:var(--sub);">✏️ 画笔</button>
         <button class="btn-main" onclick="showAns(true)">核对答案</button>
         <button onclick="skipQ()">跳过</button>
-        <!-- 仅手表模式显示的返回按钮 -->
-        <button onclick="exitWatchWriting()" style="display:none; color:var(--color-red);">❌</button>
     </div>
 </div>
 
@@ -477,13 +375,13 @@
 
 <!-- ================= 设置面板 ================= -->
 <div id="settings" class="full-overlay">
-    <div class="set-box">
+    <div class="set-box" id="settings-box">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h3 style="margin:0; font-size:20px;">系统设定</h3>
             <button onclick="toggleSettings(false)" style="background:none; font-size:28px; color:var(--text);">×</button>
         </div>
         
-        <div id="admin-panel" class="hide-on-watch">
+        <div id="admin-panel">
             <h4 style="margin:0 0 15px 0; color: orange; font-size: 16px;">👑 邀请码 & 账号管理</h4>
             <div style="display:flex; gap:10px; margin-bottom: 15px;">
                 <button onclick="generateInviteCodeToDB()" style="flex:1; padding:12px; background:orange; color:white; border-radius:10px; font-weight:bold;">生成 1 个</button>
@@ -494,21 +392,21 @@
 
         <div style="text-align:center; padding-bottom: 20px; border-bottom: 1px dashed var(--border); margin-bottom: 20px;">
             <span id="user-info-text" style="font-size:13px; color:var(--sub); display:block; margin-bottom: 12px; font-weight:bold;">未登录</span>
-            <div style="display:flex; justify-content:center; gap: 12px; flex-direction: column;">
-                <button onclick="logoutAccount()" style="padding:12px 20px; border-radius:10px; border:2px solid var(--color-green); color:var(--color-green); font-size:14px; font-weight:bold;">安全登出</button>
-                <button onclick="deleteAccount()" style="padding:12px 20px; border-radius:10px; border:2px solid var(--color-red); color:var(--color-red); font-size:14px; font-weight:bold;">危险: 注销</button>
+            <div style="display:flex; justify-content:center; gap: 12px;">
+                <button onclick="logoutAccount()" style="padding:10px 20px; border-radius:10px; border:2px solid var(--color-green); color:var(--color-green); font-size:12px; font-weight:bold;">安全登出</button>
+                <button onclick="deleteAccount()" style="padding:10px 20px; border-radius:10px; border:2px solid var(--color-red); color:var(--color-red); font-size:12px; font-weight:bold;">危险: 注销</button>
             </div>
         </div>
         
-        <button onclick="toggleFullScreen()" class="hide-on-watch" style="width:100%; padding:14px; background:rgba(0,0,0,0.05); border:2px solid var(--border); color:var(--text); border-radius:14px; font-weight:bold; font-size: 15px; margin-bottom: 15px;">🔲 开启/退出沉浸全屏</button>
-        <button onclick="toggleResourceCenter(true)" class="hide-on-watch" style="width:100%; padding:16px; background:var(--text); color:var(--bg); border-radius:14px; font-weight:bold; font-size: 15px; margin-bottom: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">🌐 进入共享资源中心</button>
+        <button onclick="toggleFullScreen()" style="width:100%; padding:14px; background:rgba(0,0,0,0.05); border:2px solid var(--border); color:var(--text); border-radius:14px; font-weight:bold; font-size: 15px; margin-bottom: 15px;">🔲 开启/退出沉浸全屏</button>
+        <button onclick="toggleResourceCenter(true)" style="width:100%; padding:16px; background:var(--text); color:var(--bg); border-radius:14px; font-weight:bold; font-size: 15px; margin-bottom: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);">🌐 进入共享资源中心</button>
 
-        <div class="hide-on-watch" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
             <span style="font-size:14px; font-weight:bold;">✨ 开启毛玻璃特效</span>
             <label class="switch"><input type="checkbox" id="glass-toggle" onchange="toggleGlass()"><span class="slider"></span></label>
         </div>
 
-        <div class="hide-on-watch" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
             <span style="font-size:14px; font-weight:bold;">🎵 沉浸背景音乐</span>
             <label class="switch"><input type="checkbox" id="bgm-toggle" onchange="toggleBGM()"><span class="slider"></span></label>
         </div>
@@ -518,48 +416,70 @@
             <label class="switch"><input type="checkbox" id="dblclick-toggle" onchange="toggleDblClick()"><span class="slider"></span></label>
         </div>
 
-        <label class="set-label hide-on-watch">🎨 画面主题</label>
-        <select id="theme-select" class="hide-on-watch" onchange="changeTheme()">
-            <option value="default">🍵 抹茶 (默认绿)</option>
-            <option value="sakura">🌸 落樱 (粉红)</option>
-            <option value="sora">☁️ 晴空 (天蓝)</option>
-            <option value="yoru">🌙 夜色 (暗紫)</option>
-            <option value="aki">🍁 枫叶 (橙红)</option>
-            <option value="take">🎋 修竹 (深绿)</option>
-            <option value="github">🐙 极客 (GitHub 扁平)</option>
-        </select>
+        <!-- ================= 自定义 UI 控件区 ================= -->
+        <label class="set-label">🎨 画面主题</label>
+        <div class="custom-select-wrapper" id="cw-theme">
+            <div class="custom-select-display" onclick="toggleCustomSelect('cs-theme')">🍵 抹茶 (默认绿)</div>
+            <div class="custom-select-dropdown" id="cs-theme">
+                <div class="custom-option selected" onclick="selectOption('cw-theme', 'default', '🍵 抹茶 (默认绿)', changeTheme)">🍵 抹茶 (默认绿)</div>
+                <div class="custom-option" onclick="selectOption('cw-theme', 'sakura', '🌸 落樱 (粉红)', changeTheme)">🌸 落樱 (粉红)</div>
+                <div class="custom-option" onclick="selectOption('cw-theme', 'sora', '☁️ 晴空 (天蓝)', changeTheme)">☁️ 晴空 (天蓝)</div>
+                <div class="custom-option" onclick="selectOption('cw-theme', 'yoru', '🌙 夜色 (暗紫)', changeTheme)">🌙 夜色 (暗紫)</div>
+                <div class="custom-option" onclick="selectOption('cw-theme', 'aki', '🍁 枫叶 (橙红)', changeTheme)">🍁 枫叶 (橙红)</div>
+                <div class="custom-option" onclick="selectOption('cw-theme', 'take', '🎋 修竹 (深绿)', changeTheme)">🎋 修竹 (深绿)</div>
+                <div class="custom-option" onclick="selectOption('cw-theme', 'github', '🐙 极客 (GitHub 扁平)', changeTheme)">🐙 极客 (GitHub 扁平)</div>
+            </div>
+            <input type="hidden" id="theme-val" value="default">
+        </div>
 
         <label class="set-label">⚡ 激烈模式 (每题限时)</label>
-        <select id="time-limit" onchange="restartSession()">
-            <option value="5">每题 5 秒</option>
-            <option value="8" selected>每题 8 秒</option>
-            <option value="12">每题 12 秒</option>
-        </select>
+        <div class="custom-select-wrapper" id="cw-time">
+            <div class="custom-select-display" onclick="toggleCustomSelect('cs-time')">每题 8 秒</div>
+            <div class="custom-select-dropdown" id="cs-time">
+                <div class="custom-option" onclick="selectOption('cw-time', '5', '每题 5 秒', restartSession)">每题 5 秒</div>
+                <div class="custom-option selected" onclick="selectOption('cw-time', '8', '每题 8 秒', restartSession)">每题 8 秒</div>
+                <div class="custom-option" onclick="selectOption('cw-time', '12', '每题 12 秒', restartSession)">每题 12 秒</div>
+            </div>
+            <input type="hidden" id="time-val" value="8">
+        </div>
 
         <div style="height:1px; background:var(--border); margin:25px 0;"></div>
 
-        <label class="set-label">📚 本地分组选择 (Group)</label>
-        <select id="group-select" onchange="applyRule()"></select>
+        <!-- 本地词库复选框多选区 -->
+        <label class="set-label">📚 本地词库多选混合 (Group)</label>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <button onclick="checkAllGroups(true)" style="padding:6px 12px; background:rgba(0,0,0,0.05); border-radius:6px; font-size:12px; color:var(--text);">全选</button>
+            <button onclick="checkAllGroups(false)" style="padding:6px 12px; background:rgba(0,0,0,0.05); border-radius:6px; font-size:12px; color:var(--text);">全不选</button>
+        </div>
+        <div class="cb-group-container" id="cb-group-list">
+            <!-- JS 渲染复选框 -->
+        </div>
+        <!-- 删除本地词库按钮 -->
+        <button onclick="deleteLocalGroups()" style="width:100%; padding:10px; border:1px solid var(--color-red); color:var(--color-red); border-radius:10px; font-weight:bold; font-size: 13px; margin-bottom: 15px;">🗑️ 永久删除选中的词库</button>
 
-        <label class="set-label">🎯 分组内类型 (Cat)</label>
-        <select id="mode" onchange="applyRule()">
-            <option value="all">随机全部 (当前分组)</option>
-            <option value="wrong">仅限错题本 (答对移出)</option>
-            <option value="word">仅单纯字词</option>
-            <option value="note">仅文言注释</option>
-            <option value="poem">仅古诗长句</option>
-        </select>
+        <label class="set-label">🎯 组内类型过滤 (Cat)</label>
+        <div class="custom-select-wrapper" id="cw-mode">
+            <div class="custom-select-display" onclick="toggleCustomSelect('cs-mode')">随机全部 (选中分组)</div>
+            <div class="custom-select-dropdown" id="cs-mode">
+                <div class="custom-option selected" onclick="selectOption('cw-mode', 'all', '随机全部 (选中分组)', applyRule)">随机全部 (选中分组)</div>
+                <div class="custom-option" onclick="selectOption('cw-mode', 'wrong', '仅限错题本 (答对移出)', applyRule)">仅限错题本 (答对移出)</div>
+                <div class="custom-option" onclick="selectOption('cw-mode', 'word', '仅单纯字词', applyRule)">仅单纯字词</div>
+                <div class="custom-option" onclick="selectOption('cw-mode', 'note', '仅文言注释', applyRule)">仅文言注释</div>
+                <div class="custom-option" onclick="selectOption('cw-mode', 'poem', '仅古诗长句', applyRule)">仅古诗长句</div>
+            </div>
+            <input type="hidden" id="mode-val" value="all">
+        </div>
 
-        <div class="hide-on-watch" style="height:1px; background:var(--border); margin:25px 0;"></div>
+        <div style="height:1px; background:var(--border); margin:25px 0;"></div>
 
-        <label class="set-label hide-on-watch">☁️ 导入新数据</label>
-        <p class="hide-on-watch" style="font-size:11px; color:var(--sub); margin:0 0 8px 0; line-height: 1.5;">JSON格式：<br><code>[{"q":"题目","a":"答案","cat":"古诗"}]</code></p>
-        <input type="text" id="upload-group" class="hide-on-watch" placeholder="输入分组名" value="默认分组">
-        <textarea id="jsonInput" class="hide-on-watch" rows="4" placeholder='复制 JSON 数据...'></textarea>
+        <label class="set-label">☁️ 导入新数据 (私密隔离)</label>
+        <p style="font-size:11px; color:var(--sub); margin:0 0 8px 0; line-height: 1.5;">分组名由下方决定，JSON内填：<br><code>[{"q":"题目","a":"答案","cat":"古诗/字词/课文"}]</code></p>
+        <input type="text" id="upload-group" placeholder="输入分组名，如：期中考试词汇" value="默认分组">
+        <textarea id="jsonInput" rows="4" placeholder='复制你的 JSON 数据粘贴到这里...'></textarea>
         
-        <div class="hide-on-watch" style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <button onclick="upload('merge')" style="background:var(--text); color:var(--bg); padding:14px; border-radius:10px; font-weight:bold;">增量合并</button>
-            <button onclick="upload('cover')" style="background:var(--color-red); color:white; padding:14px; border-radius:10px; font-weight:bold;">清空覆盖(当前组)</button>
+            <button onclick="upload('cover')" style="background:var(--color-red); color:white; padding:14px; border-radius:10px; font-weight:bold;">清空覆盖(此名组)</button>
         </div>
     </div>
 </div>
@@ -579,12 +499,21 @@
     let currentUser = null, authType = 'email', isRegisterMode = false, pendingAuthEmail = ""; 
     let wrongStorageKey = 'wrongs_v11'; 
     let allowDblClickClear = true, isGlassOn = true;
-    let isWatchMode = false; 
+
+    // 全局 Loading 控制
+    function showLoading(text = '载入中...') {
+        document.getElementById('loader-text').innerText = text;
+        document.getElementById('global-loader').style.display = 'flex';
+        document.getElementById('global-loader').style.opacity = '1';
+    }
+    function hideLoading() {
+        document.getElementById('global-loader').style.opacity = '0';
+        setTimeout(() => { document.getElementById('global-loader').style.display = 'none'; }, 300);
+    }
 
     // 音效
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSFX(type) {
-        if(isWatchMode) return; 
         if(audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
@@ -617,49 +546,30 @@
     }
 
     window.onload = async () => {
-        // 检测设备类型
-        const ua = navigator.userAgent.toLowerCase();
-        const isWatchUA = ua.includes('watch') || ua.includes('wear') || (window.innerWidth <= 450 && window.innerHeight <= 450 && window.innerWidth === window.innerHeight);
-        
-        if (isWatchUA) selectDevice('watch');
-        else if (!/mobile|android|iphone|ipad/i.test(ua) && window.innerWidth >= 800) selectDevice('standard');
-        else {
-            const isSmallScreen = window.innerWidth <= 450 && window.innerHeight <= 450;
-            if (isSmallScreen) document.getElementById('device-watch-btn').classList.add('highlight');
-            else document.getElementById('device-pc-btn').classList.add('highlight');
-            document.getElementById('device-selector-overlay').style.display = 'flex';
-        }
-    };
-
-    function selectDevice(mode) {
-        document.getElementById('device-selector-overlay').style.display = 'none';
-        if (mode === 'watch') {
-            isWatchMode = true;
-            document.body.classList.add('watch-mode', 'intense-mode');
-        }
-        initAuth(); 
-    }
-
-    async function initAuth() {
         const { data: { session } } = await supabase.auth.getSession();
         if (session && session.user) loginSuccess(session.user);
         else {
+            hideLoading();
             document.getElementById('auth-overlay').style.display = 'flex';
-            document.getElementById('auth-overlay').classList.add('active-flex');
         }
         
         allowDblClickClear = localStorage.getItem('allow_dblclick') !== 'false';
         document.getElementById('dblclick-toggle').checked = allowDblClickClear;
 
-        if(!isWatchMode) {
-            isGlassOn = localStorage.getItem('glass_fx') !== 'false';
-            document.getElementById('glass-toggle').checked = isGlassOn;
-            if(!isGlassOn) document.body.classList.add('no-glass');
-        }
-    }
+        isGlassOn = localStorage.getItem('glass_fx') !== 'false';
+        document.getElementById('glass-toggle').checked = isGlassOn;
+        if(!isGlassOn) document.body.classList.add('no-glass');
+
+        // 点击外部关闭自定义下拉菜单
+        document.addEventListener('click', (e) => {
+            if(!e.target.closest('.custom-select-wrapper')) {
+                document.querySelectorAll('.custom-select-dropdown').forEach(el => el.classList.remove('open'));
+                document.querySelectorAll('.custom-select-display').forEach(el => el.classList.remove('open'));
+            }
+        });
+    };
 
     function toggleGlass() {
-        if(isWatchMode) return;
         isGlassOn = document.getElementById('glass-toggle').checked;
         localStorage.setItem('glass_fx', isGlassOn);
         document.body.classList.toggle('no-glass', !isGlassOn);
@@ -669,14 +579,32 @@
         localStorage.setItem('allow_dblclick', allowDblClickClear);
     }
 
-    // ======= 手表专用书写范式 =======
-    function enterWatchWriting() {
-        document.body.classList.add('is-writing');
-        setTimeout(() => { initCanvas(); }, 50); 
+    // ======= 自定义下拉组件逻辑 =======
+    function toggleCustomSelect(id) {
+        const drop = document.getElementById(id);
+        const display = drop.previousElementSibling;
+        const isOpen = drop.classList.contains('open');
+        // 关闭所有
+        document.querySelectorAll('.custom-select-dropdown').forEach(el => el.classList.remove('open'));
+        document.querySelectorAll('.custom-select-display').forEach(el => el.classList.remove('open'));
+        if(!isOpen) {
+            drop.classList.add('open');
+            display.classList.add('open');
+        }
     }
-    function exitWatchWriting() {
-        document.body.classList.remove('is-writing');
-        setTimeout(() => { initCanvas(); }, 50); 
+    function selectOption(wrapperId, val, text, callback) {
+        const wrapper = document.getElementById(wrapperId);
+        wrapper.querySelector('.custom-select-display').innerText = text;
+        wrapper.querySelector('input[type="hidden"]').value = val;
+        
+        const dropdown = wrapper.querySelector('.custom-select-dropdown');
+        dropdown.querySelectorAll('.custom-option').forEach(el => el.classList.remove('selected'));
+        event.target.classList.add('selected');
+        
+        dropdown.classList.remove('open');
+        wrapper.querySelector('.custom-select-display').classList.remove('open');
+        
+        if(callback) callback();
     }
 
     // ======= Auth =======
@@ -708,7 +636,7 @@
             if (!recaptchaResponse) { alert("请先完成人机安全验证！"); return; }
         }
 
-        document.getElementById('auth-submit-btn').innerText = '数据连接中...';
+        showLoading("身份核实中...");
 
         if (account.toLowerCase() === 'admin') {
             account = 'admin@yanye.com'; authType = 'email';
@@ -716,8 +644,9 @@
             if (error) {
                 const regRes = await supabase.auth.signUp({ email: account, password: pwd });
                 if (regRes.data?.session === null) {
+                    hideLoading();
                     alert("【官方拦截提示】\n检测到创建 admin 账号，但 Supabase 开启了邮箱验证。\n请先去后台暂时关闭【Confirm email】，再试一次！");
-                    document.getElementById('auth-submit-btn').innerText = '登 录'; return;
+                    return;
                 }
                 loginSuccess(regRes.data?.user); return;
             }
@@ -744,6 +673,7 @@
                     await supabase.from('invitation_codes').update({ is_used: true, used_by: account }).eq('code', inviteCode);
                     loginSuccess(data.user);
                 } else if (data.session === null) {
+                    hideLoading();
                     pendingAuthEmail = finalEmail;
                     document.getElementById('main-auth-card').style.display = 'none';
                     document.getElementById('otp-auth-card').style.display = 'block';
@@ -753,7 +683,8 @@
                 if (error) throw error; loginSuccess(data.user);
             }
         } catch (e) {
-            alert("操作失败：" + e.message); document.getElementById('auth-submit-btn').innerText = isRegisterMode ? '注 册' : '登 录';
+            hideLoading();
+            alert("操作失败：" + e.message); 
             if(window.grecaptcha) grecaptcha.reset(); 
         }
     }
@@ -761,35 +692,37 @@
     async function verifyOtpCode() {
         const token = document.getElementById('auth-otp-input').value.trim();
         if(!token || token.length < 5) return alert("请输入完整的验证码");
+        showLoading("核验代码...");
         try {
-            document.getElementById('otp-submit-btn').innerText = '验证中...';
             const { data, error } = await supabase.auth.verifyOtp({ email: pendingAuthEmail, token, type: 'signup' });
             if (error) throw error; loginSuccess(data.user);
-        } catch (e) { alert("验证失败: " + e.message); document.getElementById('otp-submit-btn').innerText = '验证并登入'; }
+        } catch (e) { hideLoading(); alert("验证失败: " + e.message); }
     }
 
     function cancelOtpMode() {
-        document.getElementById('otp-auth-card').style.display = 'none'; document.getElementById('main-auth-card').style.display = 'block'; document.getElementById('auth-submit-btn').innerText = '注 册'; 
+        document.getElementById('otp-auth-card').style.display = 'none'; document.getElementById('main-auth-card').style.display = 'block'; 
         if(window.grecaptcha) grecaptcha.reset();
     }
 
     function loginSuccess(user) {
         currentUser = user; 
         document.getElementById('auth-overlay').style.display = 'none';
-        document.getElementById('auth-overlay').classList.remove('active-flex');
-
+        
         let displayEmail = user.email;
         if (displayEmail === 'admin@yanye.com') displayEmail = '🌟 管理员 (Admin)';
         else if (displayEmail.endsWith('@yanye.local')) displayEmail = '👤 ' + displayEmail.replace('@yanye.local', '');
         document.getElementById('user-info-text').innerText = `已连接账号: ${displayEmail}`;
-        if (user.email === 'admin@yanye.com' && !isWatchMode) { document.getElementById('admin-panel').style.display = 'block'; fetchInviteCodesAdmin(); }
+        if (user.email === 'admin@yanye.com') { document.getElementById('admin-panel').style.display = 'block'; fetchInviteCodesAdmin(); }
         wrongStorageKey = `wrongs_v11_${user.id}`; wrongs = JSON.parse(localStorage.getItem(wrongStorageKey) || '[]');
+        
         initGame();
     }
 
     async function generateInviteCodeToDB() {
+        showLoading("生成中...");
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = ''; for(let i=0; i<6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
         try { const { error } = await supabase.from('invitation_codes').insert({ code, created_by: currentUser.id }); if (error) throw error; fetchInviteCodesAdmin(); } catch (e) { alert("生成失败: " + e.message); }
+        hideLoading();
     }
 
     async function fetchInviteCodesAdmin() {
@@ -808,16 +741,20 @@
 
     async function invalidateInviteCode(code, usedBy) {
         if(!confirm(`⚠️ 危险操作：\n作废该邀请码将导致：\n1. 邀请码失效\n2. 使用此码注册的用户(${usedBy || '无'})会被【连根拔除】(包含题库和资源)！\n\n确定执行？`)) return;
+        showLoading("销毁中...");
         try { const { error } = await supabase.rpc('admin_delete_invite_and_user', { target_code: code, target_username: usedBy }); if (error) throw error; alert("执行成功！相关痕迹已被彻底抹除。"); fetchInviteCodesAdmin(); } catch(e) { alert("销毁失败: " + e.message); }
+        hideLoading();
     }
 
     async function logoutAccount() {
-        try { document.getElementById('user-info-text').innerText = "正在切断连接..."; await supabase.auth.signOut(); for (let key in localStorage) { if (key.startsWith('sb-')) localStorage.removeItem(key); } window.location.replace(window.location.href.split('?')[0]); } catch (error) { window.location.reload(); }
+        showLoading("切断连接...");
+        try { await supabase.auth.signOut(); for (let key in localStorage) { if (key.startsWith('sb-')) localStorage.removeItem(key); } window.location.replace(window.location.href.split('?')[0]); } catch (error) { window.location.reload(); }
     }
     async function deleteAccount() {
         const c1 = confirm("⚠️ 危险警告\n注销账号将永久销毁您的所有云端词库、错题本，此操作不可逆！\n\n确定要继续吗？"); if (!c1) return;
         const c2 = prompt("请输入【确认注销】四个字以执行自毁程序："); if (c2 !== "确认注销") return alert("自毁程序已中止。");
-        try { const { error } = await supabase.rpc('delete_user'); if (error) throw error; alert("账号数据已彻底化为尘埃。有缘再见。"); await logoutAccount(); } catch (e) { alert("注销失败：" + e.message); }
+        showLoading("销毁中...");
+        try { const { error } = await supabase.rpc('delete_user'); if (error) throw error; alert("账号数据已彻底化为尘埃。有缘再见。"); await logoutAccount(); } catch (e) { alert("注销失败：" + e.message); hideLoading(); }
     }
 
     // ======= 资源中心 =======
@@ -865,31 +802,56 @@
         const cover = document.getElementById('rc-up-cover-base64').value; const jsonText = document.getElementById('rc-up-json').value.trim();
         if(!title || !jsonText) return alert("标题和 JSON 数据为必填项！"); let jsonData = [];
         try { jsonData = JSON.parse(jsonText); if(!Array.isArray(jsonData)) throw new Error("JSON 必须是数组格式 [ { ... } ]"); } catch(e) { return alert("JSON 格式有误: " + e.message); }
-        try { document.getElementById('rc-up-title').value = '正在上传数据流...'; const { error } = await supabase.from('resource_center').insert({ title, description: desc, cover_url: cover, json_data: jsonData, uploader_id: currentUser.id, uploader_email: currentUser.email }); if (error) throw error; alert("发布成功！感谢您的无私分享。"); document.getElementById('rc-up-title').value = ''; document.getElementById('rc-up-desc').value = ''; document.getElementById('rc-up-json').value = ''; toggleUploadModal(false); fetchResources(); } catch(e) { alert("发布失败: " + e.message); document.getElementById('rc-up-title').value = title; }
+        
+        showLoading("上传中...");
+        try { const { error } = await supabase.from('resource_center').insert({ title, description: desc, cover_url: cover, json_data: jsonData, uploader_id: currentUser.id, uploader_email: currentUser.email }); if (error) throw error; alert("发布成功！感谢您的无私分享。"); document.getElementById('rc-up-title').value = ''; document.getElementById('rc-up-desc').value = ''; document.getElementById('rc-up-json').value = ''; toggleUploadModal(false); fetchResources(); } catch(e) { alert("发布失败: " + e.message); document.getElementById('rc-up-title').value = title; }
+        hideLoading();
     }
     async function downloadResource(id) {
         const res = resourceData.find(r => r.id === id); if(!res) return;
         const groupName = prompt(`你要将【${res.title}】下载到本地的哪个分组中？\n(支持直接输入新分组名或现有分组名)`, res.title); if(!groupName) return;
+        
+        showLoading("合并词条中...");
         try { const dataToInsert = res.json_data.map(item => { const cleanItem = { ...item, group_name: groupName, user_id: currentUser.id }; delete cleanItem.id; delete cleanItem.created_at; return cleanItem; }); const { error } = await supabase.from('dictation_items').insert(dataToInsert); if (error) throw error; alert(`成功！${dataToInsert.length} 个词条已落入您的【${groupName}】分组！`); sync(); toggleResourceCenter(false); } catch (e) { alert("下载失败：" + e.message); }
+        hideLoading();
     }
     async function deleteResource(id) {
         if(!confirm("确定要彻底抹除这个分享吗？")) return;
+        showLoading("抹除中...");
         try { const { error } = await supabase.from('resource_center').delete().eq('id', id); if (error) throw error; fetchResources(); } catch(e) { alert("删除失败: " + e.message); }
+        hideLoading();
     }
 
     // ======= 核心系统 =======
-    function initGame() { initCanvas(); sync(); initBGM(); renderWrongs(); loadTheme(); }
+    function initGame() { 
+        initCanvas(); 
+        sync(); 
+        initBGM(); 
+        renderWrongs(); 
+        loadTheme(); 
+    }
     function changeTheme() {
-        if(isWatchMode) return; 
-        const t = document.getElementById('theme-select').value; document.body.setAttribute('data-theme', t); localStorage.setItem('app_theme', t); initCanvas(); 
+        const t = document.getElementById('theme-val').value; 
+        document.body.setAttribute('data-theme', t); 
+        localStorage.setItem('app_theme', t); 
+        initCanvas(); 
     }
     function loadTheme() {
-        if(isWatchMode) return;
-        const saved = localStorage.getItem('app_theme') || 'default'; document.getElementById('theme-select').value = saved; document.body.setAttribute('data-theme', saved);
+        const saved = localStorage.getItem('app_theme') || 'default'; 
+        
+        // 同步 UI 控件
+        const optionsMap = {
+            'default': '🍵 抹茶 (默认绿)', 'sakura': '🌸 落樱 (粉红)', 'sora': '☁️ 晴空 (天蓝)',
+            'yoru': '🌙 夜色 (暗紫)', 'aki': '🍁 枫叶 (橙红)', 'take': '🎋 修竹 (深绿)', 'github': '🐙 极客 (GitHub 扁平)'
+        };
+        document.getElementById('theme-val').value = saved;
+        document.querySelector('#cw-theme .custom-select-display').innerText = optionsMap[saved] || optionsMap['default'];
+        
+        document.body.setAttribute('data-theme', saved);
     }
     function toggleAppMode() {
         if (isSessionActive) return; isIntenseMode = !isIntenseMode;
-        if(!isWatchMode) document.body.classList.toggle('intense-mode', isIntenseMode); 
+        document.body.classList.toggle('intense-mode', isIntenseMode); 
         document.getElementById('mode-toggle-btn').innerText = isIntenseMode ? '⚡ 激烈' : '🌸 休闲';
         resetEraser(); initCanvas(); playBGM(true); restartSession();
     }
@@ -900,22 +862,87 @@
         const cCtx = document.getElementById('confetti-canvas').getContext('2d'); cCtx.clearRect(0,0,window.innerWidth,window.innerHeight);
         document.getElementById('ans-pop').classList.remove('timeout-state');
         
-        if(isWatchMode) exitWatchWriting();
         resetEraser(); pool = [...filtered]; sCorrect = 0; sWrong = 0; updateProgress();
         if (audioInitialized) playBGM(true);
         if (isIntenseMode) startPrepCountdown(); else { if (pool.length > 0) nextQ(); else document.getElementById('q-text').innerText = "该分组下暂无题目"; }
     }
-    async function sync() { const { data } = await supabase.from('dictation_items').select('*'); all = data || []; updateGroupSelect(); applyRule(); }
-    function updateGroupSelect() { const groups = [...new Set(all.map(i => i.group_name || '默认分组'))]; const select = document.getElementById('group-select'); select.innerHTML = `<option value="ALL">全部词库总合</option>` + groups.map(g => `<option value="${g}">${g}</option>`).join(''); }
+
+    // 复选框词库逻辑
+    async function sync() { 
+        showLoading("同步词库数据...");
+        const { data } = await supabase.from('dictation_items').select('*'); 
+        all = data || []; 
+        updateGroupSelect(); 
+        applyRule(); 
+        hideLoading();
+    }
+    
+    function updateGroupSelect() { 
+        const groups = [...new Set(all.map(i => i.group_name || '默认分组'))]; 
+        const container = document.getElementById('cb-group-list');
+        
+        // 保留之前的选中状态
+        const previouslyChecked = Array.from(container.querySelectorAll('input:checked')).map(el => el.value);
+        
+        if(groups.length === 0) {
+            container.innerHTML = '<p style="font-size:12px; color:var(--sub); padding:10px;">暂无本地词库</p>';
+            return;
+        }
+
+        container.innerHTML = groups.map(g => {
+            const isChecked = (previouslyChecked.length === 0 && groups.length > 0) ? 'checked' : (previouslyChecked.includes(g) ? 'checked' : '');
+            return `
+            <label class="cb-item">
+                <input type="checkbox" value="${g}" ${isChecked} onchange="applyRule()">
+                <div class="cb-checkmark"></div>
+                <div class="cb-label">${g}</div>
+            </label>`;
+        }).join('');
+    }
+
+    function checkAllGroups(check) {
+        document.querySelectorAll('#cb-group-list input').forEach(el => el.checked = check);
+        applyRule();
+    }
+
+    async function deleteLocalGroups() {
+        const selected = Array.from(document.querySelectorAll('#cb-group-list input:checked')).map(el => el.value);
+        if(selected.length === 0) return alert("请先勾选要删除的词库");
+        if(!confirm(`⚠️ 警告：\n确定要从您的账号彻底删除以下 ${selected.length} 个词库吗？\n（${selected.join(', ')}）`)) return;
+
+        showLoading("清理词库中...");
+        try {
+            const { error } = await supabase.from('dictation_items').delete().eq('user_id', currentUser.id).in('group_name', selected);
+            if(error) throw error;
+            alert("词库已删除！");
+            sync();
+        } catch(e) {
+            alert("删除失败：" + e.message);
+        }
+        hideLoading();
+    }
+
     function applyRule() {
-        const m = document.getElementById('mode').value; const g = document.getElementById('group-select').value;
-        let baseList = all; if (g !== 'ALL') baseList = all.filter(i => (i.group_name || '默认分组') === g);
-        if(m === 'all') filtered = baseList; else if(m === 'wrong') filtered = wrongs; else if(m === 'poem') filtered = baseList.filter(i => /(诗|句)/.test(i.cat || '')); else if(m === 'note') filtered = baseList.filter(i => /(注|释|文)/.test(i.cat || '')); else if(m === 'word') filtered = baseList.filter(i => !/(诗|句|注|释|文)/.test(i.cat || ''));
-        document.getElementById('count-info').innerText = `${filtered.length} ITEMS`; restartSession();
+        const m = document.getElementById('mode-val').value; 
+        const selectedGroups = Array.from(document.querySelectorAll('#cb-group-list input:checked')).map(el => el.value);
+
+        let baseList = [];
+        if (selectedGroups.length > 0) {
+            baseList = all.filter(i => selectedGroups.includes(i.group_name || '默认分组'));
+        }
+
+        if(m === 'all') filtered = baseList; 
+        else if(m === 'wrong') filtered = wrongs; 
+        else if(m === 'poem') filtered = baseList.filter(i => /(诗|句)/.test(i.cat || '')); 
+        else if(m === 'note') filtered = baseList.filter(i => /(注|释|文)/.test(i.cat || '')); 
+        else if(m === 'word') filtered = baseList.filter(i => !/(诗|句|注|释|文)/.test(i.cat || ''));
+        
+        document.getElementById('count-info').innerText = `${filtered.length} ITEMS`; 
+        restartSession();
     }
 
     function startPrepCountdown() {
-        let prepTime = isWatchMode ? 5 : 12; 
+        let prepTime = 12; 
         const timerEl = document.getElementById('intense-timer'); timerEl.classList.add('prep'); timerEl.innerText = prepTime;
         document.getElementById('q-text').innerText = "准备迎接极限考验..."; document.getElementById('q-cat').innerText = "PREPARING";
         prepInterval = setInterval(() => { prepTime--; timerEl.innerText = prepTime; if (prepTime <= 0) { clearInterval(prepInterval); timerEl.classList.remove('prep'); beginIntenseChallenge(); } }, 1000);
@@ -928,16 +955,14 @@
 
     function nextQ() {
         if(!pool.length) return; 
-        if(isWatchMode) exitWatchWriting();
         clearBoard(); current = pool[Math.floor(Math.random() * pool.length)];
         const qEl = document.getElementById('q-text'); qEl.innerText = current.q; qEl.className = current.q.length > 12 ? 'long' : '';
-        document.getElementById('watch-q-watermark').innerText = current.q;
         document.getElementById('q-cat').innerText = `${(current.cat || 'COMMON').toUpperCase()} · 共 ${current.a ? current.a.length : 0} 字`; 
         document.getElementById('ans-text').innerText = current.a || '';
         document.getElementById('ans-pop').classList.remove('timeout-state');
 
         if (isIntenseMode) {
-            qTimeLeft = parseInt(document.getElementById('time-limit').value) || 8;
+            qTimeLeft = parseInt(document.getElementById('time-val').value) || 8;
             document.getElementById('intense-timer').innerText = qTimeLeft;
             clearInterval(qTimerInterval);
             qTimerInterval = setInterval(() => {
@@ -959,7 +984,7 @@
     function mark(isOk) {
         if(isOk) {
             sCorrect++; playSFX('yes');
-            if (document.getElementById('mode').value === 'wrong') { wrongs = wrongs.filter(i => i.q !== current.q); localStorage.setItem(wrongStorageKey, JSON.stringify(wrongs)); renderWrongs(); document.getElementById('count-info').innerText = `${pool.length - 1} ITEMS`; }
+            if (document.getElementById('mode-val').value === 'wrong') { wrongs = wrongs.filter(i => i.q !== current.q); localStorage.setItem(wrongStorageKey, JSON.stringify(wrongs)); renderWrongs(); document.getElementById('count-info').innerText = `${pool.length - 1} ITEMS`; }
         } else {
             sWrong++; if(!isIntenseMode) playSFX('no'); 
             if(!wrongs.find(i => i.q === current.q)) { wrongs.push(current); localStorage.setItem(wrongStorageKey, JSON.stringify(wrongs)); renderWrongs(); }
@@ -975,16 +1000,13 @@
             const timeUsed = Math.floor((Date.now() - sessionStartTime) / 1000);
             const accuracy = (sCorrect + sWrong) > 0 ? Math.round((sCorrect / (sCorrect + sWrong)) * 100) : 0;
             iconEl.innerText = '⚡'; titleEl.innerText = '挑战结束'; 
-            zenEl.innerText = `「 命中率: ${accuracy}% | 总耗时: ${timeUsed}s 」`; zenEl.style.fontFamily = "'Courier New', monospace"; zenEl.style.whiteSpace = "pre-wrap"; 
+            zenEl.innerText = `「 命中率: ${accuracy}% | 总耗时: ${timeUsed}s 」\n高速流转，完成重载。`; zenEl.style.fontFamily = "'Courier New', monospace"; zenEl.style.whiteSpace = "pre-wrap"; 
         } 
         else { iconEl.innerText = '🉑'; titleEl.innerText = '洗练完成'; zenEl.innerText = "「 行到水穷处，坐看云起时。 」"; zenEl.style.fontFamily = '"KaiTi", serif'; setTimeout(fireConfetti, 100); }
-        
-        if(isWatchMode) exitWatchWriting();
         document.getElementById('finish-overlay').style.display = 'flex';
     }
 
     function fireConfetti() {
-        if(isWatchMode) return; 
         const canvas = document.getElementById('confetti-canvas'); const ctx = canvas.getContext('2d'); canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         const pieces = []; const colors = ['#d15147', '#5a825a', '#ff9f0a', '#00b4d8', '#ec407a'];
         for(let i=0; i<100; i++) pieces.push({ x: canvas.width/2, y: canvas.height/2 + 100, vx: (Math.random()-0.5)*20, vy: (Math.random()-1)*20, size: Math.random()*10+5, color: colors[Math.floor(Math.random()*colors.length)], rot: Math.random()*360, rotS: (Math.random()-0.5)*10 });
@@ -999,19 +1021,22 @@
     }
     
     function initBGM() { document.getElementById('bgm-toggle').checked = localStorage.getItem('bgm_enabled') !== 'false'; document.body.addEventListener('click', () => { if (!audioInitialized) { playBGM(); audioInitialized = true; } }, { once: true }); }
-    function playBGM(forceRestart = false) { if(isWatchMode) return; const n = document.getElementById('bg-music'), i = document.getElementById('bg-music-intense'); n.pause(); i.pause(); if (document.getElementById('bgm-toggle').checked) { const active = isIntenseMode ? i : n; if (forceRestart) active.currentTime = 0; active.play().catch(() => {}); } }
+    function playBGM(forceRestart = false) { const n = document.getElementById('bg-music'), i = document.getElementById('bg-music-intense'); n.pause(); i.pause(); if (document.getElementById('bgm-toggle').checked) { const active = isIntenseMode ? i : n; if (forceRestart) active.currentTime = 0; active.play().catch(() => {}); } }
     function toggleBGM() { localStorage.setItem('bgm_enabled', document.getElementById('bgm-toggle').checked); playBGM(); }
     function toggleSidebar() { document.getElementById('wrong-sidebar').classList.toggle('active'); }
     function renderWrongs() { document.getElementById('wrong-list').innerHTML = wrongs.map(i => `<div class="wrong-item"><div style="font-weight:bold; color:var(--text); font-size:16px;">${i.a}</div><div style="font-size:12px; color:var(--sub); margin-top:6px;">${i.q}</div></div>`).join(''); }
     function clearWrongs() { if(confirm("清空本地记录？")) { wrongs=[]; localStorage.setItem(wrongStorageKey,'[]'); renderWrongs(); applyRule(); } }
+    
     async function upload(mode) {
         const input = document.getElementById('jsonInput').value; const groupName = document.getElementById('upload-group').value || '默认分组';
         if(!input) return alert("请粘贴 JSON");
         try {
             const data = JSON.parse(input).map(item => ({ ...item, group_name: groupName, user_id: currentUser.id }));
             if(mode === 'cover') { if(!confirm("确定清空云端【该分组所有词条】并覆盖？")) return; await supabase.from('dictation_items').delete().eq('user_id', currentUser.id).eq('group_name', groupName); }
+            
+            showLoading("上传解析中...");
             await supabase.from('dictation_items').insert(data); alert("同步成功！"); document.getElementById('jsonInput').value = ""; toggleSettings(false); sync();
-        } catch(e) { alert("失败: " + e.message); }
+        } catch(e) { hideLoading(); alert("失败: " + e.message); }
     }
     
     // ======= 画板 =======
@@ -1020,8 +1045,8 @@
     function saveCanvasState() { undoStack.push(ctx.getImageData(0, 0, canvas.width, canvas.height)); if(undoStack.length > 20) undoStack.shift(); }
     function undoDraw() { if(undoStack.length > 0) ctx.putImageData(undoStack.pop(), 0, 0); }
     function initCanvas() { const rect = canvas.parentNode.getBoundingClientRect(); canvas.width = rect.width; canvas.height = rect.height; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; applyBrushStyle(); }
-    function toggleEraser() { isEraser = !isEraser; const btn = document.getElementById('eraser-btn'); btn.innerText = isEraser ? '🧽' : '✏️'; btn.style.color = isEraser ? 'var(--color-red)' : 'var(--sub)'; applyBrushStyle(); }
-    function resetEraser() { isEraser = false; const btn = document.getElementById('eraser-btn'); if (btn) { btn.innerText = isWatchMode ? '✏️' : '✏️ 画笔'; btn.style.color = 'var(--sub)'; } applyBrushStyle(); }
+    function toggleEraser() { isEraser = !isEraser; const btn = document.getElementById('eraser-btn'); btn.innerText = isEraser ? '🧽 橡皮' : '✏️ 画笔'; btn.style.color = isEraser ? 'var(--color-red)' : 'var(--sub)'; applyBrushStyle(); }
+    function resetEraser() { isEraser = false; const btn = document.getElementById('eraser-btn'); if (btn) { btn.innerText = '✏️ 画笔'; btn.style.color = 'var(--sub)'; } applyBrushStyle(); }
     function applyBrushStyle() { if (isEraser) { ctx.globalCompositeOperation = 'destination-out'; ctx.lineWidth = 28; } else { ctx.globalCompositeOperation = 'source-over'; ctx.lineWidth = 4; ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--text').trim(); } }
     const getPos = (e) => { const rect = canvas.getBoundingClientRect(); const cx = e.touches ? e.touches[0].clientX : e.clientX; const cy = e.touches ? e.touches[0].clientY : e.clientY; return { x: cx - rect.left, y: cy - rect.top }; };
     
