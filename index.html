@@ -22,20 +22,28 @@
             --dot-inactive: #e0e0dd;
             --btn-main: #1c1c1e;
             --border: #d1d1d1;
+            /* 高级砖红与沉绿 */
+            --color-red: #c94f4f; 
+            --color-green: #52825c;
             --font-sans: -apple-system, BlinkMacSystemFont, Inter, Roboto, sans-serif;
             --font-serif: "Noto Serif SC", serif;
             --font-title: Georgia, "Noto Serif SC", serif;
+            --shadow: 0 8px 30px rgba(0,0,0,0.06);
+        }
+
+        body.intense-mode {
+            --bg: #0f0a0a; --card: #1a1111; --text: #fdf5f5; --sub: #d66b6b; --border: #381c1c;
+            --color-red: #d94848; --color-green: #d6833c; --brand: #d6833c; --shadow: 0 8px 30px rgba(255, 0, 0, 0.25);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.2s, border-color 0.2s; }
         
         body {
             font-family: var(--font-sans); background-color: var(--bg); color: var(--text);
-            min-height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: flex-start;
-            overflow-x: hidden;
+            height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
         }
 
-        /* 隐藏滚动条但保留滚动功能 */
         ::-webkit-scrollbar { width: 0px; background: transparent; }
 
         /* ================= 核心容器 ================= */
@@ -44,23 +52,27 @@
             padding: 40px 20px; position: relative; z-index: 10;
         }
 
+        /* 居中固定卡片 (用于学习界面) */
+        .main-card { 
+            width: 95%; max-width: 460px; background: var(--card); border-radius: 24px; box-shadow: var(--shadow); 
+            overflow: hidden; position: relative; z-index: 10; display: none; flex-direction: column; border: 1px solid var(--border); 
+        }
+
         /* ================= 头部：星星 + 标题 ================= */
         .header { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 10px; }
         .claude-star { width: 36px; height: 36px; color: var(--brand); animation: claude-breathe 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; transform-origin: center; }
         @keyframes claude-breathe { 0%, 100% { opacity: 0.8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
         .title { font-family: var(--font-title); font-size: 26px; font-weight: 500; color: var(--title); }
 
-        /* ================= 欢迎区域 ================= */
+        /* ================= 欢迎区域与 Dashboard ================= */
         .welcome { text-align: center; }
         .welcome h2 { font-family: var(--font-serif); font-size: 32px; font-weight: 400; margin-bottom: 8px; color: var(--title); }
         .welcome p { font-size: 15px; color: var(--sub); }
 
-        /* ================= 统计卡片 ================= */
         .stats-card { background: var(--card); border-radius: 20px; padding: 20px; display: flex; justify-content: space-around; text-align: center; border: 1px solid var(--border); }
         .stat-item .num { font-size: 20px; font-weight: 600; color: var(--title); }
         .stat-item .label { font-size: 12px; color: var(--sub-light); margin-top: 4px; }
 
-        /* ================= 按钮组 ================= */
         .btn-group { display: flex; flex-direction: column; gap: 14px; }
         .btn { padding: 17px; border-radius: 28px; font-size: 16px; font-weight: 500; border: none; cursor: pointer; transition: all 0.2s; text-align: center; font-family: var(--font-sans); }
         .btn:active { transform: scale(0.98); }
@@ -68,13 +80,11 @@
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
         .btn-outline:hover { background: rgba(0,0,0,0.03); }
 
-        /* ================= 区块标题与列表 ================= */
         .section { display: flex; flex-direction: column; gap: 12px; }
         .section-title { font-size: 16px; font-weight: 500; color: var(--title); }
         .recent-item { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; font-size: 15px; color: var(--text); cursor: pointer; }
         .recent-item:hover { background: #fbfbfb; }
 
-        /* ================= 日历 ================= */
         .calendar { text-align: center; margin-top: 10px; }
         .calendar-title { font-size: 13px; color: var(--sub-light); margin-bottom: 14px; }
         .calendar-dots { display: flex; justify-content: center; gap: 9px; flex-wrap: wrap; }
@@ -88,8 +98,8 @@
         .loader-text { font-size: 14px; color: var(--sub); letter-spacing: 2px; }
 
         /* ================= 登录视图 ================= */
-        #auth-view { display: none; flex-direction: column; justify-content: center; min-height: 80vh; }
-        .auth-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 40px 30px; text-align: center; }
+        #auth-view { display: none; flex-direction: column; justify-content: center; align-items: center; position: absolute; inset: 0; background: var(--bg); z-index: 10000; }
+        .auth-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 40px 30px; text-align: center; width: 90%; max-width: 400px; }
         .auth-tabs { display: flex; background: var(--bg); border-radius: 12px; margin-bottom: 20px; overflow: hidden; border: 1px solid var(--border); }
         .auth-tab { flex: 1; padding: 12px; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--sub); }
         .auth-tab.active { background: var(--btn-main); color: #fff; }
@@ -98,7 +108,7 @@
         /* ================= 通用表单控件 ================= */
         input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea { width: 100%; padding: 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); margin-bottom: 15px; font-size: 15px; font-family: var(--font-sans); outline: none; }
         input:focus, textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(229, 124, 88, 0.1); }
-        .set-label { display: block; font-size: 13px; font-weight: 500; color: var(--sub); margin-bottom: 8px; }
+        .set-label { display: block; font-size: 13px; font-weight: 500; color: var(--sub); margin-bottom: 8px; text-align: left; }
 
         /* Switch 开关 */
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
@@ -114,6 +124,10 @@
         .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .panel-header h2 { margin: 0; font-size: 20px; color: var(--title); font-family: var(--font-serif); font-weight: 400; }
         .close-btn { background: none; border: none; font-size: 28px; color: var(--sub); cursor: pointer; font-weight: 300; }
+
+        /* 左侧滑出 (错题本专用) */
+        .side-panel.left-side { right: auto; left: 0; border-left: none; border-right: 1px solid var(--border); transform: translateX(-100%); }
+        .side-panel.left-side.open { transform: translateX(0); }
 
         /* 自定义下拉菜单 */
         .custom-select-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
@@ -139,9 +153,6 @@
         .cb-label { font-size: 14px; color: var(--text); flex: 1; }
 
         /* ================= 学习视图 (Learning View) ================= */
-        #learning-view { display: none; padding: 20px 0; }
-        .learn-card { background: var(--card); border-radius: 24px; border: 1px solid var(--border); display: flex; flex-direction: column; width: 100%; overflow: hidden; position: relative; }
-        
         .progress-wrap { width: 100%; height: 3px; background: var(--bg); position: relative; }
         #progress-bar { height: 100%; width: 0%; background: var(--brand); transition: width 0.3s; }
         #mastery-bar { height: 100%; width: 0%; background: rgba(229,124,88,0.3); position: absolute; top:0; left:0; }
@@ -152,11 +163,13 @@
         #mode-toggle-btn { font-weight: 500; background: var(--bg); color: var(--title); }
         
         .quiz-box { padding: 25px 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; min-height: 120px; }
-        #q-cat { font-size: 11px; color: var(--brand); margin-bottom: 8px; font-weight: 500; letter-spacing: 1px; }
-        #q-text { font-size: 24px; font-family: var(--font-serif); font-weight: 400; color: var(--title); line-height: 1.4; word-break: break-all; }
+        #q-cat { font-size: 11px; color: var(--brand); margin-bottom: 8px; font-weight: 500; letter-spacing: 1px; display: flex; justify-content: center; gap: 8px; align-items: center; }
+        #q-text { font-size: 26px; font-family: var(--font-serif); font-weight: 400; color: var(--title); line-height: 1.4; word-break: break-all; }
         
-        .canvas-area { position: relative; width: 100%; height: 280px; background: var(--card); border-bottom: 1px solid var(--bg); border-top: 1px solid var(--bg); }
-        .grid-bg { position: absolute; inset: 0; opacity: 0.3; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 33.33% 33.33%; background-position: center; pointer-events: none; }
+        .diff-badge { font-size: 10px; padding: 2px 8px; border-radius: 8px; font-weight: 500; letter-spacing: 0; border: 1px solid var(--border); }
+        
+        .canvas-area { position: relative; width: 100%; height: 300px; background: var(--card); border-bottom: 1px solid var(--bg); border-top: 1px solid var(--bg); }
+        .grid-bg { position: absolute; inset: 0; opacity: 0.4; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 33.33% 33.33%; background-position: center; pointer-events: none; }
         #board { position: relative; z-index: 5; touch-action: none; cursor: crosshair; }
         
         #intense-timer { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 100px; font-family: monospace; font-weight: bold; color: rgba(229,124,88,0.08); z-index: 1; pointer-events: none; }
@@ -165,24 +178,44 @@
         #ghost-hint.show { opacity: 0.15; }
 
         .learn-footer { display: grid; grid-template-columns: 1fr 1fr 1fr 1.5fr 1fr; gap: 8px; padding: 15px; }
-        .learn-footer button { padding: 14px 0; background: var(--bg); border-radius: 16px; font-size: 13px; font-weight: 500; color: var(--text); border: 1px solid transparent; }
+        .learn-footer button { padding: 14px 0; background: var(--bg); border-radius: 12px; font-size: 13px; font-weight: 500; color: var(--text); border: 1px solid transparent; cursor: pointer; }
         .learn-footer button:active { background: var(--border); }
         .learn-footer .btn-main { background: var(--btn-main) !important; color: #fff !important; }
 
-        /* ================= 答案比对弹窗 ================= */
-        #ans-pop { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.95); width: 280px; background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 24px; text-align: center; opacity: 0; pointer-events: none; z-index: 200; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
-        #ans-pop.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
-        #ans-text { font-size: 32px; font-family: var(--font-serif); color: var(--title); display: block; margin-bottom: 10px; line-height: 1.2; }
+        /* ================= 完美核对答案侧边弹窗 ================= */
+        #ans-pop { position: fixed; right: calc(50% - 480px); top: 50%; transform: translateY(-50%) scale(0.95); width: 280px; background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 24px; text-align: center; opacity: 0; pointer-events: none; z-index: 200; box-shadow: 0 10px 40px rgba(0,0,0,0.1); transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        #ans-pop.active { opacity: 1; pointer-events: auto; transform: translateY(-50%) scale(1); right: calc(50% - 540px); }
+        #ans-text { font-size: 36px; font-family: var(--font-serif); color: var(--title); display: block; margin-bottom: 10px; line-height: 1.2; }
+        
         .ans-btn-group { display: flex; gap: 10px; margin-top: 20px; }
         .judge-btn { flex: 1; padding: 14px; border-radius: 12px; font-weight: 500; font-size: 14px; color: #fff; cursor: pointer; border: none; }
-        .btn-yes { background: #4ca1af; }
-        .btn-no { background: #ff758c; }
-        #item-sr-stats { font-size: 11px; color: var(--sub); display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        .btn-yes { background: var(--color-green); }
+        .btn-no { background: var(--color-red); }
+        #ans-pop.timeout-state .ans-btn-group { display: none; }
+        #item-sr-stats { font-size: 11px; color: var(--sub); display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+        
+        @media (max-width: 1000px) {
+            #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(0.95) !important; width: 85%; }
+            #ans-pop.active { transform: translate(50%, -50%) scale(1) !important; }
+        }
 
         /* ================= 结束结算层 ================= */
         #finish-overlay { position: absolute; inset: 0; background: var(--bg); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
         #finish-overlay h2 { font-family: var(--font-serif); font-size: 28px; font-weight: 400; color: var(--title); margin: 15px 0; }
-        
+        .mastery-breakdown { width: 100%; max-width: 260px; margin: 12px auto 20px; }
+        .mb-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 11px; }
+        .mb-label { width: 50px; text-align: right; color: var(--sub); }
+        .mb-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+        .mb-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+        .mb-count { width: 24px; font-weight: bold; color: var(--text); }
+        #confetti-canvas { position: absolute; inset: 0; pointer-events: none; z-index: 99; }
+
+        /* ================= 错题本列表 ================= */
+        #wrong-list { flex: 1; margin: 20px 0; font-size: 14px; }
+        .wrong-item { padding: 15px 0; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 5px; }
+        .w-ans { font-weight: 600; color: var(--title); font-size: 18px; font-family: var(--font-serif); }
+        .w-q { color: var(--sub); font-size: 13px; }
+
         /* ================= 资源中心面板 ================= */
         .rc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
         .rc-item { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; }
@@ -207,7 +240,7 @@
 </div>
 
 <!-- ================= 登录视图 ================= -->
-<div class="container" id="auth-view">
+<div id="auth-view">
     <div class="header" style="margin-bottom: 30px;">
         <svg class="claude-star" viewBox="0 0 200 100" fill="currentColor">
             <path d="m19.6 66.5 19.7-11 .3-1-.3-.5h-1l-3.3-.2-11.2-.3L14 53l-9.5-.5-2.4-.5L0 49l.2-1.5 2-1.3 2.9.2 6.3.5 9.5.6 6.9.4L38 49.1h1.6l.2-.7-.5-.4-.4-.4L29 41l-10.6-7-5.6-4.1-3-2-1.5-2-.6-4.2 2.7-3 3.7.3.9.2 3.7 2.9 8 6.1L37 36l1.5 1.2.6-.4.1-.3-.7-1.1L33 25l-6-10.4-2.7-4.3-.7-2.6c-.3-1-.4-2-.4-3l3-4.2L28 0l4.2.6L33.8 2l2.6 6 4.1 9.3L47 29.9l2 3.8 1 3.4.3 1h.7v-.5l.5-7.2 1-8.7 1-11.2.3-3.2 1.6-3.8 3-2L61 2.6l2 2.9-.3 1.8-1.1 7.7L59 27.1l-1.5 8.2h.9l1-1.1 4.1-5.4 6.9-8.6 3-3.5L77 13l2.3-1.8h4.3l3.1 4.7-1.4 4.9-4.4 5.6-3.7 4.7-5.3 7.1-3.2 5.7.3.4h.7l12-2.6 6.4-1.1 7.6-1.3 3.5 1.6.4 1.6-1.4 3.4-8.2 2-9.6 2-14.3 3.3-.2.1.2.3 6.4.6 2.8.2h6.8l12.6 1 3.3 2 1.9 2.7-.3 2-5.1 2.6-6.8-1.6-16-3.8-5.4-1.3h-.8v.4l4.6 4.5 8.3 7.5L89 80.1l.5 2.4-1.3 2-1.4-.2-9.2-7-3.6-3-8-6.8h-.5v.7l1.8 2.7 9.8 14.7.5 4.5-.7 1.4-2.6 1-2.7-.6-5.8-8-6-9-4.7-8.2-.5.4-2.9 30.2-1.3 1.5-3 1.2-2.5-2-1.4-3 1.4-6.2 1.6-8 1.3-6.4 1.2-7.9.7-2.6v-.2H49L43 72l-9 12.3-7.2 7.6-1.7.7-3-1.5.3-2.8L24 86l10-12.8 6-7.9 4-4.6-.1-.5h-.3L17.2 77.4l-4.7.6-2-2 .2-3 1-1 8-5.5Z"></path>
@@ -217,11 +250,11 @@
     <div class="auth-card" id="main-auth-card">
         <div class="auth-tabs">
             <span class="auth-tab active" id="tab-email" onclick="switchAuthType('email')">邮箱验证</span>
-            <span class="auth-tab" id="tab-user" onclick="switchAuthType('username')">邀请码注册</span>
+            <span class="auth-tab" id="tab-user" onclick="switchAuthType('username')">邀请码</span>
         </div>
         <input type="text" id="auth-account" placeholder="输入邮箱 (或管理员 admin)">
         <input type="password" id="auth-pwd" placeholder="设置密码（至少6位）">
-        <input type="text" id="auth-invite" placeholder="输入收到的邀请码" style="display:none; border-color: var(--brand);">
+        <input type="text" id="auth-invite" placeholder="输入邀请码" style="display:none; border-color: var(--brand);">
         <div id="recaptcha-container" style="display:none; margin: 0 auto 15px auto; transform: scale(0.95); transform-origin: center;">
             <div class="g-recaptcha" data-sitekey="6LdjI7MsAAAAAKdB1F1MLbTAtYwzwBGVvNXk5khz"></div>
         </div>
@@ -231,7 +264,7 @@
     <div class="auth-card" id="otp-auth-card" style="display: none;">
         <h3 style="margin-bottom:10px;">信件验证</h3>
         <p style="font-size:12px; color:var(--sub); margin-bottom:20px;">已向该邮箱发送验证信件</p>
-        <input type="text" id="auth-otp-input" placeholder="输入邮件验证码" maxlength="10" style="text-align:center; font-size: 20px; letter-spacing: 4px; font-family: monospace;">
+        <input type="text" id="auth-otp-input" placeholder="输入验证码" maxlength="10" style="text-align:center; font-size: 20px; letter-spacing: 4px; font-family: monospace;">
         <button class="btn btn-primary" style="width:100%;" id="otp-submit-btn" onclick="verifyOtpCode()">验证并登入</button>
         <button class="auth-toggle" onclick="cancelOtpMode()">返回重试</button>
     </div>
@@ -250,13 +283,13 @@
     </div>
     
     <div class="welcome">
-        <h2>欢迎，<span id="home-username">Learner</span></h2>
-        <p>种一棵树最好的时间是十年前，其次是现在。</p>
+        <h2>欢迎回来，<span id="home-username">Learner</span></h2>
+        <p>静下心来，开启今日修习</p>
     </div>
 
     <div class="stats-card">
         <div class="stat-item"><div class="num" id="stat-streak">0</div><div class="label">连续天数</div></div>
-        <div class="stat-item"><div class="num" id="stat-total">0</div><div class="label">词库总数</div></div>
+        <div class="stat-item"><div class="num" id="stat-total">0</div><div class="label">题库总量</div></div>
         <div class="stat-item"><div class="num" id="stat-acc">0%</div><div class="label">正确率</div></div>
     </div>
 
@@ -281,18 +314,17 @@
 
 <!-- ================= 动态控件锚点存储 (配置卡/设置共用) ================= -->
 <div id="dynamic-controls-pool" style="display: none;">
-    <!-- 共享资源 -->
-    <button class="btn btn-outline" onclick="toggleResourceCenter(true)" style="width:100%; margin-bottom: 25px;">🌐 浏览共享资源中心</button>
+    <button class="btn btn-outline" onclick="toggleResourceCenter(true)" style="width:100%; margin-bottom: 25px;">浏览共享资源中心</button>
 
     <!-- SR 科学记忆模块 -->
     <div style="background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 20px;">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
-            <span style="font-weight:500; font-size:15px; color:var(--title);">🧠 间隔重复记忆算法</span>
-            <label class="switch" style="margin-left:auto;"><input type="checkbox" id="sr-toggle" onchange="toggleSR()"><span class="slider"></span></label>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+            <span style="font-weight:500; font-size:15px; color:var(--title);">间隔重复记忆</span>
+            <label class="switch"><input type="checkbox" id="sr-toggle" onchange="toggleSR()"><span class="slider"></span></label>
         </div>
         <p style="font-size:12px; color:var(--sub); margin: 0 0 14px 0; line-height:1.5;">开启后：错题高频复现。<br>掌握的词条会在今天隐身，明天重新浮现以检验长期记忆！</p>
         
-        <label class="set-label">🎯 掌握阈值</label>
+        <label class="set-label">掌握阈值</label>
         <div class="custom-select-wrapper" id="cw-mastery">
             <div class="custom-select-display" onclick="toggleCustomSelect('cs-mastery')">5 次连续正确</div>
             <div class="custom-select-dropdown" id="cs-mastery">
@@ -304,29 +336,29 @@
         </div>
 
         <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:10px; color:var(--sub);">
-            <span>🟢 掌握: <b id="sr-count-mastered" style="color:var(--text);">0</b></span>
-            <span>🔵 学习: <b id="sr-count-learning" style="color:var(--text);">0</b></span>
-            <span>🔴 强化: <b id="sr-count-hard" style="color:var(--text);">0</b></span>
+            <span>掌握: <b id="sr-count-mastered" style="color:var(--text);">0</b></span>
+            <span>学习: <b id="sr-count-learning" style="color:var(--text);">0</b></span>
+            <span>强化: <b id="sr-count-hard" style="color:var(--text);">0</b></span>
         </div>
-        <button onclick="resetAllSRStats()" style="width:100%; padding:10px; background:transparent; color:var(--sub); border-radius:10px; font-size:12px; margin-top:10px; text-decoration:underline;">清空所有记忆数据</button>
+        <button onclick="resetAllSRStats()" style="width:100%; padding:10px; background:transparent; color:var(--sub); border:none; font-size:12px; margin-top:10px; text-decoration:underline; cursor:pointer;">清空所有记忆数据</button>
     </div>
 
-    <label class="set-label">📚 本地词库多选混合</label>
+    <label class="set-label">选择词库</label>
     <div style="display:flex; gap:10px; margin-bottom:10px;">
         <button onclick="checkAllGroups(true)" style="padding:6px 12px; background:var(--card); border:1px solid var(--border); border-radius:6px; font-size:12px; color:var(--text); cursor:pointer;">全选</button>
         <button onclick="checkAllGroups(false)" style="padding:6px 12px; background:var(--card); border:1px solid var(--border); border-radius:6px; font-size:12px; color:var(--text); cursor:pointer;">全不选</button>
     </div>
     <div class="cb-group-container" id="cb-group-list"></div>
-    <button onclick="deleteLocalGroups()" style="width:100%; padding:10px; border:1px solid var(--border); background:transparent; color:var(--sub); border-radius:10px; font-size: 13px; margin-bottom: 15px; cursor:pointer;">🗑️ 删除选中的词库</button>
+    <button onclick="deleteLocalGroups()" style="width:100%; padding:10px; border:1px solid var(--border); background:transparent; color:var(--sub); border-radius:10px; font-size: 13px; margin-bottom: 15px; cursor:pointer;">删除选中的词库</button>
 
-    <label class="set-label">🎯 题型过滤</label>
+    <label class="set-label">题型过滤</label>
     <div class="custom-select-wrapper" id="cw-mode">
         <div class="custom-select-display" onclick="toggleCustomSelect('cs-mode')">随机全部 (选中分组)</div>
         <div class="custom-select-dropdown" id="cs-mode">
             <div class="custom-option selected" onclick="selectOption('cw-mode','all','随机全部 (选中分组)',null)">随机全部 (选中分组)</div>
             <div class="custom-option" onclick="selectOption('cw-mode','wrong','仅限错题本 (答对移出)',null)">仅限错题本 (答对移出)</div>
-            <div class="custom-option" onclick="selectOption('cw-mode','sr_hard','🔴 仅待强化 (记忆法)',null)">🔴 仅待强化 (记忆法)</div>
-            <div class="custom-option" onclick="selectOption('cw-mode','sr_mastered','🟢 仅已掌握词条',null)">🟢 仅已掌握词条</div>
+            <div class="custom-option" onclick="selectOption('cw-mode','sr_hard','仅待强化 (记忆法)',null)">仅待强化 (记忆法)</div>
+            <div class="custom-option" onclick="selectOption('cw-mode','sr_mastered','仅已掌握词条',null)">仅已掌握词条</div>
             <div class="custom-option" onclick="selectOption('cw-mode','word','仅单纯字词',null)">仅单纯字词</div>
             <div class="custom-option" onclick="selectOption('cw-mode','note','仅文言注释',null)">仅文言注释</div>
             <div class="custom-option" onclick="selectOption('cw-mode','poem','仅古诗长句',null)">仅古诗长句</div>
@@ -336,7 +368,7 @@
 
     <div style="height:1px; background:var(--border); margin:25px 0;"></div>
 
-    <label class="set-label">☁️ 导入新数据 (私密隔离)</label>
+    <label class="set-label">导入私密数据</label>
     <p style="font-size:11px; color:var(--sub); margin:0 0 8px 0; line-height: 1.5;">JSON格式：<code>[{"q":"题","a":"答","cat":"类"}]</code></p>
     <input type="text" id="upload-group" placeholder="输入分组名，如：期中考试词汇" value="默认分组">
     <textarea id="jsonInput" rows="4" placeholder='粘贴 JSON 数组...'></textarea>
@@ -357,12 +389,12 @@
 </div>
 
 <!-- ================= 错题本侧边栏 ================= -->
-<div class="side-panel" id="wrong-sidebar" style="left:0; right:auto; transform:translateX(-100%);">
+<div class="side-panel left-side" id="wrong-sidebar">
     <div class="panel-header">
         <h2>错题本</h2>
         <button class="close-btn" onclick="toggleSidebar()">×</button>
     </div>
-    <div style="flex: 1; overflow-y: auto; margin-bottom:20px;" id="wrong-list"></div>
+    <div id="wrong-list"></div>
     <div style="display:flex; flex-direction:column; gap:10px; flex-shrink: 0;">
         <button class="btn btn-outline" onclick="clearWrongs()" style="padding:12px; font-size:14px;">清空记录</button>
         <button class="btn btn-primary" onclick="exportWrongs()" style="padding:12px; font-size:14px;">导出为文本 (.txt)</button>
@@ -370,8 +402,8 @@
 </div>
 
 <!-- ================= 学习界面 (Learning View) ================= -->
-<div class="container" id="learning-view">
-    <div class="learn-card">
+<div id="learning-view" style="display:none; width:100vw; height:100vh; position:fixed; inset:0; align-items:center; justify-content:center; background:var(--bg); z-index:50;">
+    <div class="main-card" style="display:flex; height: 90vh;">
         <div class="progress-wrap">
             <div id="mastery-bar"></div>
             <div id="progress-bar"></div>
@@ -381,6 +413,7 @@
             <canvas id="confetti-canvas"></canvas>
             <h2 id="finish-title" style="margin-top:40px;">完成挑战</h2>
             <p id="session-stats" style="color:var(--sub); font-weight:500; font-size:15px; margin-bottom: 20px;">正确 0 | 错误 0</p>
+            <div class="mastery-breakdown" id="mastery-breakdown" style="display:none;"></div>
             <p id="zen-quote-text" style="font-family:var(--font-serif); color:var(--sub); padding:0 30px; line-height:1.6; margin-bottom:40px;">--</p>
             <div style="display:flex; flex-direction:column; gap:12px; width:80%; max-width:240px;">
                 <button class="btn btn-primary" onclick="restartSession()" style="padding:14px;">再来一轮</button>
@@ -388,10 +421,10 @@
             </div>
         </div>
 
-        <div class="learn-nav">
+        <div class="learn-nav nav">
             <span id="home-return-btn" onclick="pauseLearning()">← 首页</span>
             <span onclick="toggleSidebar()">错题</span>
-            <span id="mode-toggle-btn" onclick="toggleAppMode()">休闲模式</span>
+            <span id="mode-toggle-btn" onclick="toggleAppMode()">休闲</span>
             <span id="streak-badge">–</span>
             <span id="count-info">0</span>
             <span onclick="peekHint()">提示</span>
@@ -410,7 +443,7 @@
             <canvas id="board"></canvas>
         </div>
 
-        <div class="learn-footer">
+        <div class="learn-footer footer">
             <button onclick="clearBoard()">清空</button>
             <button onclick="undoDraw()">撤销</button>
             <button id="eraser-btn" onclick="toggleEraser()">画笔</button>
@@ -418,15 +451,16 @@
             <button onclick="skipQ()">跳过</button>
         </div>
     </div>
-</div>
 
-<div id="ans-pop">
-    <span style="font-size:12px; color:var(--sub-light); display:block; margin-bottom:10px;">核对结果</span>
-    <div id="ans-text">--</div>
-    <div id="item-sr-stats"></div>
-    <div class="ans-btn-group">
-        <button class="judge-btn btn-no" onclick="mark(false)">记错</button>
-        <button class="judge-btn btn-yes" onclick="mark(true)">正确</button>
+    <!-- 侧边完美弹窗 -->
+    <div id="ans-pop">
+        <span style="font-size:12px; color:var(--sub-light); display:block; margin-bottom:10px;">核对结果</span>
+        <div id="ans-text">--</div>
+        <div id="item-sr-stats"></div>
+        <div class="ans-btn-group">
+            <button class="judge-btn btn-no" onclick="mark(false)">记错</button>
+            <button class="judge-btn btn-yes" onclick="mark(true)">正确</button>
+        </div>
     </div>
 </div>
 
@@ -481,7 +515,7 @@
         <span id="user-info-text" style="font-size:13px; color:var(--sub); display:block; margin-bottom: 15px;">未登录</span>
         <div style="display:flex; gap: 10px;">
             <button class="btn btn-outline" onclick="logoutAccount()" style="flex:1; padding:12px; font-size:13px;">退出登录</button>
-            <button class="btn btn-outline" onclick="deleteAccount()" style="flex:1; padding:12px; font-size:13px; color:#ff3b30; border-color:#ff3b30;">注销账号</button>
+            <button class="btn btn-outline" onclick="deleteAccount()" style="flex:1; padding:12px; font-size:13px; color:#c94f4f; border-color:#c94f4f;">注销账号</button>
         </div>
     </div>
 
@@ -644,7 +678,6 @@
             container.innerHTML = html;
         }
 
-        // Recent groups
         const recentBox = document.getElementById('recent-groups-list');
         if(recentBox) {
             const recent = JSON.parse(localStorage.getItem(`recent_groups_${currentUser.id}`) || '[]');
@@ -660,8 +693,7 @@
         if(!currentUser || !groupNames || groupNames.length === 0) return;
         const groupStr = groupNames.join(' + ');
         let recent = JSON.parse(localStorage.getItem(`recent_groups_${currentUser.id}`) || '[]');
-        recent = recent.filter(r => r !== groupStr);
-        recent.unshift(groupStr);
+        recent = recent.filter(r => r !== groupStr); recent.unshift(groupStr);
         if(recent.length > 5) recent.pop();
         localStorage.setItem(`recent_groups_${currentUser.id}`, JSON.stringify(recent));
     }
@@ -788,7 +820,7 @@
         const token = document.getElementById('auth-otp-input').value.trim(); if (!token || token.length < 5) return alert("请输入完整的验证码");
         showLoading("核验代码..."); try { const { data, error } = await supabase.auth.verifyOtp({ email: pendingAuthEmail, token, type: 'signup' }); if (error) throw error; loginSuccess(data.user); } catch (e) { hideLoading(); alert("验证失败: " + e.message); }
     }
-    function cancelOtpMode() { const oac = document.getElementById('otp-auth-card'); if(oac) oac.style.display = 'none'; const mac = document.getElementById('main-auth-card'); if(mac) mac.style.display = 'block'; if (window.grecaptcha) grecaptcha.reset(); }
+    function cancelOtpMode() { document.getElementById('otp-auth-card').style.display = 'none'; document.getElementById('main-auth-card').style.display = 'block'; if (window.grecaptcha) grecaptcha.reset(); }
     
     function loginSuccess(user) {
         currentUser = user; 
@@ -861,7 +893,6 @@
     async function syncAndGoHome() {
         showLoading("同步词库数据...");
         const { data } = await supabase.from('dictation_items').select('*'); all = data || []; updateGroupSelect(); hideLoading();
-        const lv = document.getElementById('learning-view'); if(lv) lv.style.display = 'none';
         const hv = document.getElementById('home-view'); if(hv) hv.style.display = 'flex';
         updateHomeStats();
         const bRl = document.getElementById('btn-resume-learn'); if(bRl) bRl.style.display = activeSession ? 'block' : 'none';
@@ -886,16 +917,16 @@
         if(!s) { const st = document.getElementById('settings'); if(st) st.classList.remove('open'); }
         else openSettingsFromLearning(); 
     }
+    function toggleSidebar() { const ws = document.getElementById('wrong-sidebar'); if(ws) ws.classList.toggle('open'); }
 
     function startNewLearning() {
         closeSetupPanel(); activeSession = null;
         const hv = document.getElementById('home-view'); if(hv) hv.style.display = 'none';
         const lv = document.getElementById('learning-view'); if(lv) lv.style.display = 'flex';
+        const mc = document.querySelector('.main-card'); if(mc) mc.style.display = 'flex';
         
-        // 记录最近学习的组
         const selectedGroups = Array.from(document.querySelectorAll('#cb-group-list input:checked')).map(el => el.value);
         recordRecentGroup(selectedGroups);
-        
         applyRule(); 
     }
 
@@ -908,6 +939,7 @@
         
         isSessionActive = false;
         const lv = document.getElementById('learning-view'); if(lv) lv.style.display = 'none';
+        const mc = document.querySelector('.main-card'); if(mc) mc.style.display = 'none';
         const hv = document.getElementById('home-view'); if(hv) hv.style.display = 'flex';
         updateHomeStats();
     }
@@ -918,14 +950,15 @@
         
         const hv = document.getElementById('home-view'); if(hv) hv.style.display = 'none';
         const lv = document.getElementById('learning-view'); if(lv) lv.style.display = 'flex';
+        const mc = document.querySelector('.main-card'); if(mc) mc.style.display = 'flex';
         isSessionActive = true;
         
-        const mtb = document.getElementById('mode-toggle-btn'); if(mtb) mtb.innerText = isIntenseMode ? '激烈' : '休闲';
+        const mtb = document.getElementById('mode-toggle-btn'); if(mtb) mtb.innerText = isIntenseMode ? '激烈模式' : '休闲模式';
         const ss = document.getElementById('session-stats'); if(ss) ss.innerText = `正确 ${sCorrect} | 错误 ${sWrong}`;
         updateStreakBadge();
         
         const qEl = document.getElementById('q-text'); if(qEl) { qEl.innerText = current.q; qEl.className = current.q.length > 12 ? 'long' : ''; }
-        const qc = document.getElementById('q-cat'); if(qc) qc.innerText = `${(current.cat || 'COMMON').toUpperCase()} · 共 ${current.a ? current.a.length : 0} 字`; 
+        const qc = document.getElementById('q-cat'); if(qc) qc.innerText = `${(current.cat || 'COMMON').toUpperCase()}`; 
         const at = document.getElementById('ans-text'); if(at) at.innerText = current.a || '';
         const ap = document.getElementById('ans-pop'); if(ap) ap.classList.remove('active');
         
@@ -976,14 +1009,12 @@
 
     function toggleAppMode() {
         if (isSessionActive) return; isIntenseMode = !isIntenseMode;
-        document.body.classList.toggle('intense-mode', isIntenseMode);
-        const mtb = document.getElementById('mode-toggle-btn'); if(mtb) mtb.innerText = isIntenseMode ? '激烈' : '休闲';
+        const mtb = document.getElementById('mode-toggle-btn'); if(mtb) mtb.innerText = isIntenseMode ? '激烈模式' : '休闲模式';
         resetEraser(); initCanvas(); playBGM(true); restartSession();
     }
     function changeIntenseTime() { if(isIntenseMode) restartSession(); }
     function restartSession() {
         clearInterval(qTimerInterval); clearInterval(prepInterval); clearTimeout(autoNextTimeout); isSessionActive = false; sessionStreak = 0; updateStreakBadge();
-        const mtb = document.getElementById('mode-toggle-btn'); if(mtb) mtb.classList.remove('locked');
         const itm = document.getElementById('intense-timer'); if(itm) { itm.classList.remove('prep', 'urgent'); itm.innerText = ''; }
         const fov = document.getElementById('finish-overlay'); if(fov) fov.style.display = 'none';
         const cc = document.getElementById('confetti-canvas'); if(cc) { const cCtx = cc.getContext('2d'); cCtx.clearRect(0, 0, window.innerWidth, window.innerHeight); }
@@ -999,7 +1030,7 @@
         const qc = document.getElementById('q-cat'); if(qc) qc.innerText = "PREPARING";
         prepInterval = setInterval(() => { prepTime--; if(timerEl) timerEl.innerText = prepTime; if (prepTime <= 0) { clearInterval(prepInterval); if(timerEl) timerEl.classList.remove('prep'); beginIntenseChallenge(); } }, 1000);
     }
-    function beginIntenseChallenge() { isSessionActive = true; const mtb = document.getElementById('mode-toggle-btn'); if(mtb) mtb.classList.add('locked'); sessionStartTime = Date.now(); if (pool.length > 0) nextQ(); }
+    function beginIntenseChallenge() { isSessionActive = true; sessionStartTime = Date.now(); if (pool.length > 0) nextQ(); }
     function nextQ() {
         if (!pool.length) return; clearBoard(); current = weightedPick(pool);
         const qEl = document.getElementById('q-text'); if(qEl) { qEl.innerText = current.q; qEl.className = current.q.length > 12 ? 'long' : ''; }
@@ -1015,7 +1046,11 @@
         if (isIntenseMode) {
             const tv = document.getElementById('time-val'); qTimeLeft = parseInt(tv ? tv.value : '8') || 8;
             const itm = document.getElementById('intense-timer'); if(itm) itm.innerText = qTimeLeft; clearInterval(qTimerInterval);
-            qTimerInterval = setInterval(() => { qTimeLeft--; if(itm) itm.innerText = qTimeLeft; if (qTimeLeft <= 3 && qTimeLeft > 0) { if(itm) itm.classList.add('urgent'); } else { if(itm) itm.classList.remove('urgent'); } if (qTimeLeft <= 0) { clearInterval(qTimerInterval); if(itm) itm.classList.remove('urgent'); handleTimeUp(); } }, 1000);
+            qTimerInterval = setInterval(() => {
+                qTimeLeft--; if(itm) itm.innerText = qTimeLeft;
+                if (qTimeLeft <= 3 && qTimeLeft > 0) { if(itm) itm.classList.add('urgent'); } else { if(itm) itm.classList.remove('urgent'); }
+                if (qTimeLeft <= 0) { clearInterval(qTimerInterval); if(itm) itm.classList.remove('urgent'); handleTimeUp(); }
+            }, 1000);
         }
     }
     function handleTimeUp() {
@@ -1038,7 +1073,7 @@
         if (pool.length === 0) { clearInterval(qTimerInterval); showFinish(false); } else setTimeout(nextQ, 350);
     }
     function showFinish(isTimeout) {
-        isSessionActive = false; const mtb = document.getElementById('mode-toggle-btn'); if(mtb) mtb.classList.remove('locked');
+        isSessionActive = false;
         const ss = document.getElementById('session-stats'); if(ss) ss.innerText = `正确 ${sCorrect} | 错误 ${sWrong}`;
         const zenEl = document.getElementById('zen-quote-text'), iconEl = document.getElementById('finish-icon'), titleEl = document.getElementById('finish-title');
         const mbDiv = document.getElementById('mastery-breakdown');
@@ -1053,7 +1088,7 @@
             mbDiv.style.display = 'block'; let mastered = 0, hard = 0, learning = 0;
             filtered.forEach(item => { const s = getItemStats(item); if (s.consecutive_correct >= masteryThreshold) mastered++; else if (s.memory_weight > 150) hard++; else learning++; });
             const total = filtered.length; const bar = (val, color) => `<div class="mb-fill" style="background:${color}; width:${Math.round((val/total)*100)}%"></div>`;
-            mbDiv.innerHTML = `<div class="mb-row"><div class="mb-label">🟢掌握</div><div class="mb-track">${bar(mastered,'var(--color-green)')}</div><div class="mb-count">${mastered}</div></div><div class="mb-row"><div class="mb-label">🔵学习</div><div class="mb-track">${bar(learning,'#1e88e5')}</div><div class="mb-count">${learning}</div></div><div class="mb-row"><div class="mb-label">🔴强化</div><div class="mb-track">${bar(hard,'var(--color-red)')}</div><div class="mb-count">${hard}</div></div>`;
+            mbDiv.innerHTML = `<div class="mb-row"><div class="mb-label">掌握</div><div class="mb-track">${bar(mastered,'var(--color-green)')}</div><div class="mb-count">${mastered}</div></div><div class="mb-row"><div class="mb-label">学习</div><div class="mb-track">${bar(learning,'#1e88e5')}</div><div class="mb-count">${learning}</div></div><div class="mb-row"><div class="mb-label">强化</div><div class="mb-track">${bar(hard,'var(--color-red)')}</div><div class="mb-count">${hard}</div></div>`;
         } else if(mbDiv) { mbDiv.style.display = 'none'; }
         const fov = document.getElementById('finish-overlay'); if(fov) fov.style.display = 'flex'; renderSRStats();
     }
@@ -1063,22 +1098,7 @@
         for (let i = 0; i < 100; i++) pieces.push({ x: canvas.width/2, y: canvas.height/2+100, vx: (Math.random()-0.5)*20, vy: (Math.random()-1)*20, size: Math.random()*10+5, color: colors[Math.floor(Math.random()*colors.length)], rot: Math.random()*360, rotS: (Math.random()-0.5)*10 });
         function draw() { ctx.clearRect(0,0,canvas.width,canvas.height); let active = false; pieces.forEach(p => { p.x+=p.vx; p.y+=p.vy; p.vy+=0.5; p.rot+=p.rotS; if(p.y<canvas.height) active=true; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180); ctx.fillStyle=p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size); ctx.restore(); }); const fov = document.getElementById('finish-overlay'); if(active && fov && fov.style.display==='flex') requestAnimationFrame(draw); } draw();
     }
-    function initBGM() { const bt = document.getElementById('bgm-toggle'); if(bt) bt.checked = localStorage.getItem('bgm_enabled') !== 'false'; document.body.addEventListener('click', () => { if (!audioInitialized) { playBGM(); audioInitialized = true; } }, { once: true }); }
-    function playBGM(forceRestart = false) { const n = document.getElementById('bg-music'), i = document.getElementById('bg-music-intense'); if(!n || !i) return; n.pause(); i.pause(); const bt = document.getElementById('bgm-toggle'); if (bt && bt.checked) { const active = isIntenseMode ? i : n; if (forceRestart) active.currentTime = 0; active.play().catch(() => {}); } }
-    function toggleBGM() { const bt = document.getElementById('bgm-toggle'); if(bt) localStorage.setItem('bgm_enabled', bt.checked); playBGM(); }
-    function toggleSidebar() { const ws = document.getElementById('wrong-sidebar'); if(ws) ws.classList.toggle('open'); }
-    function renderWrongs() { const wl = document.getElementById('wrong-list'); if(wl) wl.innerHTML = wrongs.map(i => `<div class="wrong-item"><div style="font-weight:600;color:var(--text);font-size:16px;">${i.a}</div><div style="font-size:13px;color:var(--sub);margin-top:6px;">${i.q}</div></div>`).join(''); }
-    function clearWrongs() { if (confirm("清空本地错题记录？")) { wrongs = []; localStorage.setItem(wrongStorageKey, '[]'); renderWrongs(); applyRule(); } }
-    async function upload(mode) {
-        const jip = document.getElementById('jsonInput'); const ug = document.getElementById('upload-group'); if(!jip || !ug) return;
-        const input = jip.value, groupName = ug.value || '默认分组'; if (!input) return alert("请粘贴 JSON");
-        try {
-            const data = JSON.parse(input).map(item => ({ ...item, group_name: groupName, user_id: currentUser.id }));
-            if (mode === 'cover') { if (!confirm("确定清空云端【该分组所有词条】并覆盖？")) return; await supabase.from('dictation_items').delete().eq('user_id', currentUser.id).eq('group_name', groupName); }
-            showLoading("数据写入中..."); await supabase.from('dictation_items').insert(data); alert("同步成功！"); jip.value = ""; toggleSettings(false); sync();
-        } catch(e) { hideLoading(); alert("失败: " + e.message); }
-    }
-
+    
     // ======= 画板 =======
     const canvas = document.getElementById('board'); const ctx = canvas ? canvas.getContext('2d') : null;
     let drawing = false, isEraser = false, lastTap = 0, undoStack = [];
@@ -1087,7 +1107,7 @@
     function initCanvas() { if(!canvas || !ctx) return; const rect = canvas.parentNode.getBoundingClientRect(); canvas.width = rect.width; canvas.height = rect.height; ctx.lineCap='round'; ctx.lineJoin='round'; applyBrushStyle(); }
     function toggleEraser() { isEraser = !isEraser; const btn=document.getElementById('eraser-btn'); if(btn){ btn.innerText=isEraser?'橡皮':'画笔'; btn.style.color=isEraser?'var(--color-red)':'var(--sub)'; } applyBrushStyle(); }
     function resetEraser() { isEraser=false; const btn=document.getElementById('eraser-btn'); if(btn){btn.innerText='画笔'; btn.style.color='var(--sub)';} applyBrushStyle(); }
-    function applyBrushStyle() { if(!ctx) return; if(isEraser){ctx.globalCompositeOperation='destination-out'; ctx.lineWidth=32;}else{ctx.globalCompositeOperation='source-over'; ctx.lineWidth=4; ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--text').trim();} }
+    function applyBrushStyle() { if(!ctx) return; if(isEraser){ctx.globalCompositeOperation='destination-out'; ctx.lineWidth=32;}else{ctx.globalCompositeOperation='source-over'; ctx.lineWidth=4; ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--title').trim();} }
     const getPos = e => { if(!canvas) return {x:0,y:0}; const rect=canvas.getBoundingClientRect(), cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY; return {x:cx-rect.left, y:cy-rect.top}; };
     if(canvas) {
         canvas.addEventListener('touchstart', e => { e.preventDefault(); const t=new Date().getTime(), tl=t-lastTap; if(tl<300&&tl>0&&allowDblClickClear){clearBoard();return;} lastTap=t; saveCanvasState(); drawing=true; ctx.beginPath(); const p=getPos(e); ctx.moveTo(p.x,p.y); }, {passive:false});
