@@ -22,21 +22,31 @@
             --dot-inactive: #e0e0dd;
             --btn-main: #1c1c1e;
             --border: #d1d1d1;
-            /* 高级砖红与沉绿 */
+            /* 高级莫兰迪色系 */
             --color-red: #c94f4f; 
             --color-green: #52825c;
             --font-sans: -apple-system, BlinkMacSystemFont, Inter, Roboto, sans-serif;
             --font-serif: "Noto Serif SC", serif;
             --font-title: Georgia, "Noto Serif SC", serif;
             --shadow: 0 8px 30px rgba(0,0,0,0.06);
+            --ui-radius: 24px;
         }
 
         body.intense-mode {
-            --bg: #0f0a0a; --card: #1a1111; --text: #fdf5f5; --sub: #d66b6b; --border: #381c1c;
+            --bg: #0f0a0a; --card: #1a1111; --text: #fdf5f5; --sub: #8b979f; --border: #381c1c; --title: #ffffff;
             --color-red: #d94848; --color-green: #d6833c; --brand: #d6833c; --shadow: 0 8px 30px rgba(255, 0, 0, 0.25);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.2s, border-color 0.2s; }
+        body[data-theme="github"] {
+            --bg: #ffffff; --card: #f6f8fa; --text: #24292f; --title: #24292f; --sub: #57606a; --border: #d0d7de;
+            --color-red: #cf222e; --color-green: #2da44e; --brand: #2da44e; --shadow: none; --ui-radius: 8px;
+        }
+        body[data-theme="github"].intense-mode {
+            --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --title: #c9d1d9; --sub: #8b949e; --border: #30363d;
+            --color-red: #da3633; --color-green: #238636; --brand: #238636; --shadow: none; --ui-radius: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s, border-radius 0.2s; }
         
         body {
             font-family: var(--font-sans); background-color: var(--bg); color: var(--text);
@@ -52,10 +62,11 @@
             padding: 40px 20px; position: relative; z-index: 10;
         }
 
-        /* 居中固定卡片 (用于学习界面) */
+        /* 居中固定卡片 (用于学习界面，自然撑开高度) */
         .main-card { 
-            width: 95%; max-width: 460px; background: var(--card); border-radius: 24px; box-shadow: var(--shadow); 
-            overflow: hidden; position: relative; z-index: 10; display: none; flex-direction: column; border: 1px solid var(--border); 
+            width: 95%; max-width: 460px; max-height: 95vh; background: var(--card); border-radius: var(--ui-radius); 
+            box-shadow: var(--shadow); overflow: hidden; position: relative; z-index: 10; 
+            display: none; flex-direction: column; border: 1px solid var(--border); 
         }
 
         /* ================= 头部：星星 + 标题 ================= */
@@ -149,54 +160,64 @@
         .cb-item input { display: none; }
         .cb-checkmark { width: 20px; height: 20px; border: 1px solid var(--border); border-radius: 6px; margin-right: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .cb-item input:checked + .cb-checkmark { background: var(--brand); border-color: var(--brand); }
-        .cb-item input:checked + .cb-checkmark::after { content: '✔'; color: white; font-size: 12px; }
+        .cb-item input:checked + .cb-checkmark::after { content: ''; width: 5px; height: 10px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); margin-bottom: 2px; }
         .cb-label { font-size: 14px; color: var(--text); flex: 1; }
 
         /* ================= 学习视图 (Learning View) ================= */
-        .progress-wrap { width: 100%; height: 3px; background: var(--bg); position: relative; }
+        .progress-wrap { width: 100%; height: 3px; background: var(--bg); position: relative; flex-shrink: 0; }
         #progress-bar { height: 100%; width: 0%; background: var(--brand); transition: width 0.3s; }
         #mastery-bar { height: 100%; width: 0%; background: rgba(229,124,88,0.3); position: absolute; top:0; left:0; }
 
-        .learn-nav { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--bg); font-size: 12px; color: var(--sub); }
-        .learn-nav span { cursor: pointer; padding: 4px 8px; border-radius: 8px; }
+        .learn-nav { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--sub); flex-shrink: 0; }
+        .learn-nav span { cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: background 0.2s; }
         .learn-nav span:hover { background: var(--bg); color: var(--title); }
         #mode-toggle-btn { font-weight: 500; background: var(--bg); color: var(--title); }
-        
-        .quiz-box { padding: 25px 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; min-height: 120px; }
+        #home-return-btn { color: var(--title); font-weight: 500; }
+
+        /* Streak badge */
+        #streak-badge { font-weight: bold; background: transparent; color: var(--sub); transition: all 0.3s; }
+        #streak-badge.hot { background: var(--brand); color: white; animation: streakPop 0.4s cubic-bezier(0.18,0.89,0.32,1.28); }
+        @keyframes streakPop { 0%{transform:scale(0.7)} 100%{transform:scale(1)} }
+
+        .quiz-box { padding: 25px 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; min-height: 120px; flex-shrink: 0; }
         #q-cat { font-size: 11px; color: var(--brand); margin-bottom: 8px; font-weight: 500; letter-spacing: 1px; display: flex; justify-content: center; gap: 8px; align-items: center; }
-        #q-text { font-size: 26px; font-family: var(--font-serif); font-weight: 400; color: var(--title); line-height: 1.4; word-break: break-all; }
+        #q-text { font-size: 26px; font-family: var(--font-serif); font-weight: 400; color: var(--title); line-height: 1.4; word-break: break-all; margin:0; }
+        #q-text.long { font-size: 20px; }
         
-        .diff-badge { font-size: 10px; padding: 2px 8px; border-radius: 8px; font-weight: 500; letter-spacing: 0; border: 1px solid var(--border); }
+        .diff-badge { font-size: 10px; padding: 2px 8px; border-radius: 8px; font-weight: 500; letter-spacing: 0; border: 1px solid var(--border); color: var(--sub); }
         
-        .canvas-area { position: relative; width: 100%; height: 300px; background: var(--card); border-bottom: 1px solid var(--bg); border-top: 1px solid var(--bg); }
-        .grid-bg { position: absolute; inset: 0; opacity: 0.4; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 33.33% 33.33%; background-position: center; pointer-events: none; }
-        #board { position: relative; z-index: 5; touch-action: none; cursor: crosshair; }
+        /* 画板区域自适应撑开 */
+        .canvas-area { position: relative; width: 100%; height: 35vh; min-height: 250px; background: var(--card); border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); flex: 1; }
+        .grid-bg { position: absolute; inset: 0; opacity: 0.3; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 33.33% 33.33%; background-position: center; pointer-events: none; }
+        #board { position: relative; z-index: 5; touch-action: none; cursor: crosshair; display: block; }
         
         #intense-timer { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 100px; font-family: monospace; font-weight: bold; color: rgba(229,124,88,0.08); z-index: 1; pointer-events: none; }
         body.intense-mode #intense-timer { display: flex; }
         #ghost-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-serif); color: var(--title); opacity: 0; pointer-events: none; z-index: 4; font-size: 40px; }
         #ghost-hint.show { opacity: 0.15; }
 
-        .learn-footer { display: grid; grid-template-columns: 1fr 1fr 1fr 1.5fr 1fr; gap: 8px; padding: 15px; }
-        .learn-footer button { padding: 14px 0; background: var(--bg); border-radius: 12px; font-size: 13px; font-weight: 500; color: var(--text); border: 1px solid transparent; cursor: pointer; }
-        .learn-footer button:active { background: var(--border); }
+        .learn-footer { display: grid; grid-template-columns: 1fr 1fr 1fr 1.5fr 1fr; gap: 8px; padding: 15px; flex-shrink: 0; }
+        .learn-footer button { padding: 14px 0; background: var(--bg); border-radius: 16px; font-size: 13px; font-weight: 500; color: var(--text); border: 1px solid transparent; cursor: pointer; transition: background 0.2s; outline: none; }
+        .learn-footer button:active { background: var(--border); transform: scale(0.96); }
         .learn-footer .btn-main { background: var(--btn-main) !important; color: #fff !important; }
 
-        /* ================= 完美核对答案侧边弹窗 ================= */
-        #ans-pop { position: fixed; right: calc(50% - 480px); top: 50%; transform: translateY(-50%) scale(0.95); width: 280px; background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 24px; text-align: center; opacity: 0; pointer-events: none; z-index: 200; box-shadow: 0 10px 40px rgba(0,0,0,0.1); transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
-        #ans-pop.active { opacity: 1; pointer-events: auto; transform: translateY(-50%) scale(1); right: calc(50% - 540px); }
-        #ans-text { font-size: 36px; font-family: var(--font-serif); color: var(--title); display: block; margin-bottom: 10px; line-height: 1.2; }
+        /* ================= 答案比对侧滑弹窗 ================= */
+        #ans-pop { position: fixed; right: 0; top: 50%; transform: translateY(-50%) translateX(120%); width: 280px; background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 24px; text-align: center; opacity: 0; pointer-events: none; z-index: 200; box-shadow: -10px 0 40px rgba(0,0,0,0.1); transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        #ans-pop.active { opacity: 1; pointer-events: auto; transform: translateY(-50%) translateX(-20px); }
+        #ans-text { font-size: 32px; font-family: var(--font-serif); color: var(--title); display: block; margin-bottom: 10px; line-height: 1.2; }
         
         .ans-btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .judge-btn { flex: 1; padding: 14px; border-radius: 12px; font-weight: 500; font-size: 14px; color: #fff; cursor: pointer; border: none; }
+        .judge-btn { flex: 1; padding: 14px; border-radius: 12px; font-weight: 500; font-size: 14px; color: #fff; cursor: pointer; border: none; transition: transform 0.2s; }
+        .judge-btn:active { transform: scale(0.96); }
         .btn-yes { background: var(--color-green); }
         .btn-no { background: var(--color-red); }
         #ans-pop.timeout-state .ans-btn-group { display: none; }
         #item-sr-stats { font-size: 11px; color: var(--sub); display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-        
+        .sr-stat-chip { border: 1px solid var(--border); padding: 3px 8px; border-radius: 6px; }
+
         @media (max-width: 1000px) {
-            #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(0.95) !important; width: 85%; }
-            #ans-pop.active { transform: translate(50%, -50%) scale(1) !important; }
+            #ans-pop { right: 50%; transform: translate(50%, -50%) scale(0.95); width: 85%; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+            #ans-pop.active { transform: translate(50%, -50%) scale(1); }
         }
 
         /* ================= 结束结算层 ================= */
@@ -204,10 +225,10 @@
         #finish-overlay h2 { font-family: var(--font-serif); font-size: 28px; font-weight: 400; color: var(--title); margin: 15px 0; }
         .mastery-breakdown { width: 100%; max-width: 260px; margin: 12px auto 20px; }
         .mb-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 11px; }
-        .mb-label { width: 50px; text-align: right; color: var(--sub); }
+        .mb-label { width: 30px; text-align: right; color: var(--sub); }
         .mb-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
         .mb-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
-        .mb-count { width: 24px; font-weight: bold; color: var(--text); }
+        .mb-count { width: 24px; font-weight: 500; color: var(--text); }
         #confetti-canvas { position: absolute; inset: 0; pointer-events: none; z-index: 99; }
 
         /* ================= 错题本列表 ================= */
@@ -250,11 +271,11 @@
     <div class="auth-card" id="main-auth-card">
         <div class="auth-tabs">
             <span class="auth-tab active" id="tab-email" onclick="switchAuthType('email')">邮箱验证</span>
-            <span class="auth-tab" id="tab-user" onclick="switchAuthType('username')">邀请码</span>
+            <span class="auth-tab" id="tab-user" onclick="switchAuthType('username')">邀请码注册</span>
         </div>
         <input type="text" id="auth-account" placeholder="输入邮箱 (或管理员 admin)">
         <input type="password" id="auth-pwd" placeholder="设置密码（至少6位）">
-        <input type="text" id="auth-invite" placeholder="输入邀请码" style="display:none; border-color: var(--brand);">
+        <input type="text" id="auth-invite" placeholder="输入收到的邀请码" style="display:none; border-color: var(--brand);">
         <div id="recaptcha-container" style="display:none; margin: 0 auto 15px auto; transform: scale(0.95); transform-origin: center;">
             <div class="g-recaptcha" data-sitekey="6LdjI7MsAAAAAKdB1F1MLbTAtYwzwBGVvNXk5khz"></div>
         </div>
@@ -264,7 +285,7 @@
     <div class="auth-card" id="otp-auth-card" style="display: none;">
         <h3 style="margin-bottom:10px;">信件验证</h3>
         <p style="font-size:12px; color:var(--sub); margin-bottom:20px;">已向该邮箱发送验证信件</p>
-        <input type="text" id="auth-otp-input" placeholder="输入验证码" maxlength="10" style="text-align:center; font-size: 20px; letter-spacing: 4px; font-family: monospace;">
+        <input type="text" id="auth-otp-input" placeholder="输入邮件验证码" maxlength="10" style="text-align:center; font-size: 20px; letter-spacing: 4px; font-family: monospace;">
         <button class="btn btn-primary" style="width:100%;" id="otp-submit-btn" onclick="verifyOtpCode()">验证并登入</button>
         <button class="auth-toggle" onclick="cancelOtpMode()">返回重试</button>
     </div>
@@ -283,7 +304,7 @@
     </div>
     
     <div class="welcome">
-        <h2>欢迎回来，<span id="home-username">Learner</span></h2>
+        <h2>欢迎，<span id="home-username">Learner</span></h2>
         <p>静下心来，开启今日修习</p>
     </div>
 
@@ -322,7 +343,7 @@
             <span style="font-weight:500; font-size:15px; color:var(--title);">间隔重复记忆</span>
             <label class="switch"><input type="checkbox" id="sr-toggle" onchange="toggleSR()"><span class="slider"></span></label>
         </div>
-        <p style="font-size:12px; color:var(--sub); margin: 0 0 14px 0; line-height:1.5;">开启后：错题高频复现。<br>掌握的词条会在今天隐身，明天重新浮现以检验长期记忆！</p>
+        <p style="font-size:12px; color:var(--sub); margin: 0 0 14px 0; line-height:1.5;">开启后错题高频复现。<br>掌握的词条会在今日隐身，明日重新浮现以检验长期记忆。</p>
         
         <label class="set-label">掌握阈值</label>
         <div class="custom-select-wrapper" id="cw-mastery">
@@ -370,7 +391,7 @@
 
     <label class="set-label">导入私密数据</label>
     <p style="font-size:11px; color:var(--sub); margin:0 0 8px 0; line-height: 1.5;">JSON格式：<code>[{"q":"题","a":"答","cat":"类"}]</code></p>
-    <input type="text" id="upload-group" placeholder="输入分组名，如：期中考试词汇" value="默认分组">
+    <input type="text" id="upload-group" placeholder="输入分组名，如：期中考试" value="默认分组">
     <textarea id="jsonInput" rows="4" placeholder='粘贴 JSON 数组...'></textarea>
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
         <button onclick="upload('merge')" class="btn btn-outline" style="padding:12px; font-size:14px;">增量合并</button>
@@ -397,13 +418,14 @@
     <div id="wrong-list"></div>
     <div style="display:flex; flex-direction:column; gap:10px; flex-shrink: 0;">
         <button class="btn btn-outline" onclick="clearWrongs()" style="padding:12px; font-size:14px;">清空记录</button>
-        <button class="btn btn-primary" onclick="exportWrongs()" style="padding:12px; font-size:14px;">导出为文本 (.txt)</button>
+        <button class="btn btn-primary" onclick="exportWrongs()" style="padding:12px; font-size:14px;">导出为文本</button>
     </div>
 </div>
 
 <!-- ================= 学习界面 (Learning View) ================= -->
 <div id="learning-view" style="display:none; width:100vw; height:100vh; position:fixed; inset:0; align-items:center; justify-content:center; background:var(--bg); z-index:50;">
-    <div class="main-card" style="display:flex; height: 90vh;">
+    <!-- 取消强制 90vh，让其随内容自适应 -->
+    <div class="main-card" style="display:flex;">
         <div class="progress-wrap">
             <div id="mastery-bar"></div>
             <div id="progress-bar"></div>
@@ -424,7 +446,7 @@
         <div class="learn-nav nav">
             <span id="home-return-btn" onclick="pauseLearning()">← 首页</span>
             <span onclick="toggleSidebar()">错题</span>
-            <span id="mode-toggle-btn" onclick="toggleAppMode()">休闲</span>
+            <span id="mode-toggle-btn" onclick="toggleAppMode()">休闲模式</span>
             <span id="streak-badge">–</span>
             <span id="count-info">0</span>
             <span onclick="peekHint()">提示</span>
@@ -498,12 +520,12 @@
 <!-- ================= 设置面板 ================= -->
 <div class="side-panel" id="settings">
     <div class="panel-header">
-        <h2>系统全局设定</h2>
+        <h2>系统设定</h2>
         <button class="close-btn" onclick="toggleSettings(false)">×</button>
     </div>
     
     <div id="admin-panel" style="background: rgba(229,124,88,0.05); border: 1px dashed var(--brand); border-radius: 16px; padding: 20px; margin-bottom: 25px; display: none;">
-        <h4 style="margin:0 0 15px 0; color: var(--brand); font-weight:500;">👑 邀请码管理</h4>
+        <h4 style="margin:0 0 15px 0; color: var(--brand); font-weight:500;">邀请码管理</h4>
         <div style="display:flex; gap:10px; margin-bottom: 15px;">
             <button onclick="generateInviteCodeToDB()" class="btn btn-primary" style="flex:1; padding:10px; font-size:13px;">生成 1 个</button>
             <button onclick="fetchInviteCodesAdmin()" class="btn btn-outline" style="padding:10px; font-size:13px;">刷新</button>
@@ -511,26 +533,26 @@
         <div id="admin-codes" style="font-size:12px; max-height: 180px; overflow-y: auto;"></div>
     </div>
 
-    <div style="text-align:center; padding-bottom: 20px; border-bottom: 1px solid var(--bg); margin-bottom: 20px;">
+    <div style="text-align:center; padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 20px;">
         <span id="user-info-text" style="font-size:13px; color:var(--sub); display:block; margin-bottom: 15px;">未登录</span>
         <div style="display:flex; gap: 10px;">
             <button class="btn btn-outline" onclick="logoutAccount()" style="flex:1; padding:12px; font-size:13px;">退出登录</button>
-            <button class="btn btn-outline" onclick="deleteAccount()" style="flex:1; padding:12px; font-size:13px; color:#c94f4f; border-color:#c94f4f;">注销账号</button>
+            <button class="btn btn-outline" onclick="deleteAccount()" style="flex:1; padding:12px; font-size:13px; color:var(--color-red); border-color:var(--color-red);">注销账号</button>
         </div>
     </div>
 
     <button class="btn btn-outline" onclick="toggleFullScreen()" style="width:100%; margin-bottom: 25px;">开启全屏模式</button>
 
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-        <span style="font-size:14px; font-weight:500;">沉浸背景音乐</span>
+        <span style="font-size:14px; font-weight:500;">背景音乐</span>
         <label class="switch"><input type="checkbox" id="bgm-toggle" onchange="toggleBGM()"><span class="slider"></span></label>
     </div>
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <span style="font-size:14px; font-weight:500;">双击画板清空</span>
+        <span style="font-size:14px; font-weight:500;">双击清空画板</span>
         <label class="switch"><input type="checkbox" id="dblclick-toggle" onchange="toggleDblClick()"><span class="slider"></span></label>
     </div>
 
-    <label class="set-label">⚡ 激烈模式限时</label>
+    <label class="set-label">激烈模式限时</label>
     <div class="custom-select-wrapper" id="cw-time">
         <div class="custom-select-display" onclick="toggleCustomSelect('cs-time')">每题 8 秒</div>
         <div class="custom-select-dropdown" id="cs-time">
@@ -539,6 +561,21 @@
             <div class="custom-option" onclick="selectOption('cw-time','12','每题 12 秒',changeIntenseTime)">每题 12 秒</div>
         </div>
         <input type="hidden" id="time-val" value="8">
+    </div>
+    
+    <label class="set-label" style="margin-top: 20px;">画面主题</label>
+    <div class="custom-select-wrapper" id="cw-theme">
+        <div class="custom-select-display" onclick="toggleCustomSelect('cs-theme')">抹茶 (默认)</div>
+        <div class="custom-select-dropdown" id="cs-theme">
+            <div class="custom-option selected" onclick="selectOption('cw-theme','default','抹茶 (默认)',changeTheme)">抹茶 (默认)</div>
+            <div class="custom-option" onclick="selectOption('cw-theme','sakura','落樱',changeTheme)">落樱</div>
+            <div class="custom-option" onclick="selectOption('cw-theme','sora','晴空',changeTheme)">晴空</div>
+            <div class="custom-option" onclick="selectOption('cw-theme','yoru','夜色',changeTheme)">夜色</div>
+            <div class="custom-option" onclick="selectOption('cw-theme','aki','枫叶',changeTheme)">枫叶</div>
+            <div class="custom-option" onclick="selectOption('cw-theme','take','修竹',changeTheme)">修竹</div>
+            <div class="custom-option" onclick="selectOption('cw-theme','github','极客 (Github扁平)',changeTheme)">极客 (Github扁平)</div>
+        </div>
+        <input type="hidden" id="theme-val" value="default">
     </div>
     
     <div style="height:1px; background:var(--bg); margin:25px 0;"></div>
@@ -622,7 +659,7 @@
     }
     function updateMasteryThresh() { masteryThreshold = parseInt(document.getElementById('mastery-val').value) || 5; localStorage.setItem('mastery_thresh', masteryThreshold); renderSRStats(); }
     function toggleSR() { useSpacedRepetition = document.getElementById('sr-toggle').checked; localStorage.setItem('use_sr', useSpacedRepetition); renderSRStats(); }
-    function resetAllSRStats() { if (!confirm('⚠️ 清空所有记忆权重数据？')) return; memoryStats = {}; saveMemoryStats(); renderSRStats(); alert('记忆数据已归零。'); }
+    function resetAllSRStats() { if (!confirm('⚠️ 确定要清空记忆数据？')) return; memoryStats = {}; saveMemoryStats(); renderSRStats(); alert('数据已归零。'); }
     function updateStreakBadge() {
         const badge = document.getElementById('streak-badge'); if(!badge) return;
         if (sessionStreak >= 3) { badge.innerText = `🔥${sessionStreak}`; badge.className = 'hot'; } 
@@ -726,7 +763,7 @@
         }
     }
 
-    function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err => alert(`全屏失败: ${err.message}`)); else if (document.exitFullscreen) document.exitFullscreen(); toggleSettings(false); }
+    function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err => console.log(`全屏失败: ${err.message}`)); else if (document.exitFullscreen) document.exitFullscreen(); toggleSettings(false); }
     function exportWrongs() {
         if (wrongs.length === 0) return alert("错题本空空如也！");
         let content = "言叶之庭 - 个人错题本\n==========================\n\n";
@@ -796,7 +833,7 @@
     async function handleAuth() {
         let account = document.getElementById('auth-account').value.trim(); const pwd = document.getElementById('auth-pwd').value; const inviteCode = document.getElementById('auth-invite').value.trim();
         if (!account || !pwd) return alert("请填写账号和密码");
-        if (isRegisterMode && account.toLowerCase() !== 'admin') { const recaptchaResponse = window.grecaptcha ? grecaptcha.getResponse() : null; if (!recaptchaResponse) { alert("请先完成人机安全验证！"); return; } }
+        if (isRegisterMode && account.toLowerCase() !== 'admin') { const recaptchaResponse = window.grecaptcha ? grecaptcha.getResponse() : null; if (!recaptchaResponse) { alert("请先完成验证！"); return; } }
         showLoading("身份核实中...");
         if (account.toLowerCase() === 'admin') {
             account = 'admin@yanye.com'; authType = 'email';
@@ -827,7 +864,7 @@
         const av = document.getElementById('auth-view'); if(av) av.style.display = 'none';
         
         let displayEmail = user.email;
-        if (displayEmail === 'admin@yanye.com') displayEmail = '🌟 管理员 (Admin)';
+        if (displayEmail === 'admin@yanye.com') displayEmail = '管理员';
         else if (displayEmail.endsWith('@yanye.local')) displayEmail = displayEmail.replace('@yanye.local', '');
         
         const uit = document.getElementById('user-info-text'); if(uit) uit.innerText = `已连接账号: ${displayEmail}`;
@@ -842,11 +879,11 @@
         const masteryTexts = { '3': '3 次连续正确', '5': '5 次连续正确', '8': '8 次连续正确' }; 
         const cwMd = document.querySelector('#cw-mastery .custom-select-display'); if(cwMd) cwMd.innerText = masteryTexts[masteryThreshold] || '5 次连续正确';
         
-        loadMemoryStats(); syncAndGoHome();
+        loadTheme(); loadMemoryStats(); syncAndGoHome();
     }
     
     async function generateInviteCodeToDB() { showLoading("生成中..."); const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = ''; for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length)); try { const { error } = await supabase.from('invitation_codes').insert({ code, created_by: currentUser.id }); if (error) throw error; fetchInviteCodesAdmin(); } catch (e) { alert("生成失败: " + e.message); } hideLoading(); }
-    async function fetchInviteCodesAdmin() { const div = document.getElementById('admin-codes'); if(!div) return; div.innerHTML = "读取中..."; try { const { data, error } = await supabase.from('invitation_codes').select('*').order('created_at', { ascending: false }); if (error) throw error; div.innerHTML = data.map(c => `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 5px;border-bottom:1px dashed var(--border);"><div><strong style="color:${c.is_used?'var(--sub)':'var(--color-green)'};letter-spacing:1px;font-size:14px;">${c.code}</strong><div style="font-size:11px;margin-top:4px;color:var(--sub);">${c.is_used?('已用: '+c.used_by):'✨ 全新可用'}</div></div><button onclick="invalidateInviteCode('${c.code}','${c.used_by||''}')" style="background:transparent;border:1px solid var(--color-red);color:var(--color-red);border-radius:6px;padding:6px 12px;font-size:11px;">作废/封号</button></div>`).join(''); } catch (e) { div.innerHTML = "读取失败: " + e.message; } }
+    async function fetchInviteCodesAdmin() { const div = document.getElementById('admin-codes'); if(!div) return; div.innerHTML = "读取中..."; try { const { data, error } = await supabase.from('invitation_codes').select('*').order('created_at', { ascending: false }); if (error) throw error; div.innerHTML = data.map(c => `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 5px;border-bottom:1px dashed var(--border);"><div><strong style="color:${c.is_used?'var(--sub)':'var(--color-green)'};letter-spacing:1px;font-size:14px;">${c.code}</strong><div style="font-size:11px;margin-top:4px;color:var(--sub);">${c.is_used?('已用: '+c.used_by):'全新可用'}</div></div><button onclick="invalidateInviteCode('${c.code}','${c.used_by||''}')" style="background:transparent;border:1px solid var(--color-red);color:var(--color-red);border-radius:6px;padding:6px 12px;font-size:11px;">作废/封号</button></div>`).join(''); } catch (e) { div.innerHTML = "读取失败: " + e.message; } }
     async function invalidateInviteCode(code, usedBy) { if (!confirm(`⚠️ 危险操作：\n作废该邀请码将导致用户(${usedBy||'无'})被彻底删除！\n\n确定执行？`)) return; showLoading("销毁中..."); try { const { error } = await supabase.rpc('admin_delete_invite_and_user', { target_code: code, target_username: usedBy }); if (error) throw error; fetchInviteCodesAdmin(); } catch (e) { alert("销毁失败: " + e.message); } hideLoading(); }
     async function logoutAccount() { showLoading("切断..."); try { await supabase.auth.signOut(); for (let key in localStorage) { if (key.startsWith('sb-')) localStorage.removeItem(key); } window.location.reload(); } catch (error) { window.location.reload(); } }
     async function deleteAccount() { const c1 = confirm("⚠️ 危险警告\n注销账号将永久销毁您的所有数据，此操作不可逆！\n\n确定要继续吗？"); if (!c1) return; const c2 = prompt("请输入【确认注销】："); if (c2 !== "确认注销") return alert("已中止。"); showLoading("销毁中..."); try { const { error } = await supabase.rpc('delete_user'); if (error) throw error; alert("数据已抹除。"); await logoutAccount(); } catch (e) { alert("注销失败：" + e.message); hideLoading(); } }
@@ -855,7 +892,7 @@
     let resourceData = [];
     function toggleResourceCenter(show) { const rc = document.getElementById('resource-center'); if(rc) rc.classList.toggle('open', show); if (show) { closeSetupPanel(); fetchResources(); } }
     function toggleUploadModal(show) { const um = document.getElementById('upload-modal'); if(um) um.classList.toggle('open', show); if (!show) { const ruf = document.getElementById('rc-up-file'); if(ruf) ruf.value = ""; const rcb = document.getElementById('rc-up-cover-base64'); if(rcb) rcb.value = ""; const rcl = document.getElementById('rc-up-file-label'); if(rcl) { rcl.innerText = "点击选取图片"; } } }
-    function handleLocalImage(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (event) => { const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d'); let w = img.width, h = img.height; if (w > h && w > 500) { h *= 500/w; w = 500; } else if (h > 500) { w *= 500/h; h = 500; } canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h); const rcb = document.getElementById('rc-up-cover-base64'); if(rcb) rcb.value = canvas.toDataURL('image/jpeg', 0.8); const label = document.getElementById('rc-up-file-label'); if(label) { label.innerText = `✅ 图片已就绪 (${file.name})`; } }; img.src = event.target.result; }; reader.readAsDataURL(file); }
+    function handleLocalImage(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (event) => { const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d'); let w = img.width, h = img.height; if (w > h && w > 500) { h *= 500/w; w = 500; } else if (h > 500) { w *= 500/h; h = 500; } canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h); const rcb = document.getElementById('rc-up-cover-base64'); if(rcb) rcb.value = canvas.toDataURL('image/jpeg', 0.8); const label = document.getElementById('rc-up-file-label'); if(label) { label.innerText = `图片已就绪 (${file.name})`; } }; img.src = event.target.result; }; reader.readAsDataURL(file); }
     async function fetchResources() { const listDiv = document.getElementById('rc-list'); if(!listDiv) return; listDiv.innerHTML = '<p style="color:var(--sub);font-size:14px;grid-column:1/-1;text-align:center;">读取中...</p>'; try { const { data, error } = await supabase.from('resource_center').select('*').order('created_at', { ascending: false }); if (error) throw error; resourceData = data || []; renderResources(); } catch (e) { listDiv.innerHTML = `<p style="color:var(--color-red);font-size:14px;grid-column:1/-1;text-align:center;">连接失败: ${e.message}</p>`; } }
     function renderResources() {
         const listDiv = document.getElementById('rc-list'); if(!listDiv) return;
@@ -863,7 +900,7 @@
         const isAdmin = currentUser && currentUser.email === 'admin@yanye.com'; const localGroups = [...new Set(all.map(i => i.group_name || '默认分组'))];
         listDiv.innerHTML = resourceData.map(res => {
             const canDelete = currentUser && (res.uploader_id === currentUser.id || isAdmin);
-            let displayAuthor = res.uploader_email.endsWith('@yanye.local') ? '👤 ' + res.uploader_email.replace('@yanye.local', '') : res.uploader_email.split('@')[0]; if (res.uploader_email === 'admin@yanye.com') displayAuthor = '👑 官方精选';
+            let displayAuthor = res.uploader_email.endsWith('@yanye.local') ? res.uploader_email.replace('@yanye.local', '') : res.uploader_email.split('@')[0]; if (res.uploader_email === 'admin@yanye.com') displayAuthor = '官方';
             const coverHtml = (res.cover_url && res.cover_url.length > 20) ? `<img src="${res.cover_url}" class="rc-cover" onerror="this.outerHTML='<div class=\\'rc-cover-emoji\\'>📄</div>'">` : `<div class="rc-cover-emoji">📄</div>`;
             const isDownloaded = localGroups.includes(res.title);
             const dlBtnHtml = isDownloaded ? `<button class="btn btn-outline" style="flex:1; padding:8px; font-size:12px;" disabled>已下载</button>` : `<button class="btn btn-primary" style="flex:1; padding:8px; font-size:12px;" onclick="downloadResource('${res.id}')">下载</button>`;
@@ -893,6 +930,7 @@
     async function syncAndGoHome() {
         showLoading("同步词库数据...");
         const { data } = await supabase.from('dictation_items').select('*'); all = data || []; updateGroupSelect(); hideLoading();
+        const lv = document.getElementById('learning-view'); if(lv) lv.style.display = 'none';
         const hv = document.getElementById('home-view'); if(hv) hv.style.display = 'flex';
         updateHomeStats();
         const bRl = document.getElementById('btn-resume-learn'); if(bRl) bRl.style.display = activeSession ? 'block' : 'none';
@@ -927,6 +965,7 @@
         
         const selectedGroups = Array.from(document.querySelectorAll('#cb-group-list input:checked')).map(el => el.value);
         recordRecentGroup(selectedGroups);
+        
         applyRule(); 
     }
 
@@ -958,7 +997,7 @@
         updateStreakBadge();
         
         const qEl = document.getElementById('q-text'); if(qEl) { qEl.innerText = current.q; qEl.className = current.q.length > 12 ? 'long' : ''; }
-        const qc = document.getElementById('q-cat'); if(qc) qc.innerText = `${(current.cat || 'COMMON').toUpperCase()}`; 
+        const qc = document.getElementById('q-cat'); if(qc) qc.innerHTML = `<span>${(current.cat || '综合')}</span>`; 
         const at = document.getElementById('ans-text'); if(at) at.innerText = current.a || '';
         const ap = document.getElementById('ans-pop'); if(ap) ap.classList.remove('active');
         
@@ -1021,26 +1060,26 @@
         const ap = document.getElementById('ans-pop'); if(ap) ap.classList.remove('active', 'timeout-state');
         resetEraser(); pool = [...filtered]; sCorrect = 0; sWrong = 0; updateProgress();
         if (audioInitialized) playBGM(true);
-        if (isIntenseMode) startPrepCountdown(); else { if (pool.length > 0) nextQ(); else { const qt = document.getElementById('q-text'); if(qt) qt.innerText = "该筛选条件下暂无题目"; } }
+        if (isIntenseMode) startPrepCountdown(); else { if (pool.length > 0) nextQ(); else { const qt = document.getElementById('q-text'); if(qt) qt.innerText = "暂无题目"; } }
     }
 
     function startPrepCountdown() {
         let prepTime = 5; const timerEl = document.getElementById('intense-timer'); if(timerEl) { timerEl.classList.add('prep'); timerEl.innerText = prepTime; }
         const qt = document.getElementById('q-text'); if(qt) qt.innerText = "准备迎接..."; 
-        const qc = document.getElementById('q-cat'); if(qc) qc.innerText = "PREPARING";
+        const qc = document.getElementById('q-cat'); if(qc) qc.innerHTML = "<span>PREPARING</span>";
         prepInterval = setInterval(() => { prepTime--; if(timerEl) timerEl.innerText = prepTime; if (prepTime <= 0) { clearInterval(prepInterval); if(timerEl) timerEl.classList.remove('prep'); beginIntenseChallenge(); } }, 1000);
     }
     function beginIntenseChallenge() { isSessionActive = true; sessionStartTime = Date.now(); if (pool.length > 0) nextQ(); }
     function nextQ() {
         if (!pool.length) return; clearBoard(); current = weightedPick(pool);
         const qEl = document.getElementById('q-text'); if(qEl) { qEl.innerText = current.q; qEl.className = current.q.length > 12 ? 'long' : ''; }
-        const catEl = document.getElementById('q-cat'); const diffInfo = getDifficultyInfo(current); const catText = `${(current.cat || 'COMMON').toUpperCase()}`;
+        const catEl = document.getElementById('q-cat'); const diffInfo = getDifficultyInfo(current); const catText = `${(current.cat || '综合')}`;
         if(catEl) { if (diffInfo && useSpacedRepetition) { catEl.innerHTML = `<span>${catText}</span><span class="diff-badge ${diffInfo.cls}">${diffInfo.label}</span>`; } else { catEl.innerHTML = `<span>${catText}</span>`; } }
         const at = document.getElementById('ans-text'); if(at) at.innerText = current.a || '';
         const isr = document.getElementById('item-sr-stats');
         if (useSpacedRepetition && isr) {
             const stats = getItemStats(current); const daysSince = stats.last_seen ? Math.floor((Date.now() - stats.last_seen) / (1000*60*60*24)) : null;
-            isr.innerHTML = `<span class="sr-stat-chip">❌ ${stats.wrong_count} 次</span><span class="sr-stat-chip">✅ 连对 ${stats.consecutive_correct}</span><span class="sr-stat-chip">⚖️ 权重 ${stats.memory_weight}</span>${daysSince !== null ? `<span class="sr-stat-chip">🕐 ${daysSince === 0 ? '今天' : daysSince + '天前'}</span>` : '<span class="sr-stat-chip">🕐 初见</span>'}`;
+            isr.innerHTML = `<span class="sr-stat-chip">错 ${stats.wrong_count} 次</span><span class="sr-stat-chip">对 ${stats.consecutive_correct} 次</span><span class="sr-stat-chip">重 ${stats.memory_weight}</span>${daysSince !== null ? `<span class="sr-stat-chip">${daysSince === 0 ? '今天复习' : daysSince + '天前'}</span>` : '<span class="sr-stat-chip">初见</span>'}`;
         } else if(isr) { isr.innerHTML = ''; }
         const ap = document.getElementById('ans-pop'); if(ap) ap.classList.remove('active', 'timeout-state');
         if (isIntenseMode) {
@@ -1055,7 +1094,7 @@
     }
     function handleTimeUp() {
         playSFX('no'); const ap = document.getElementById('ans-pop'); if(ap) ap.classList.add('active', 'timeout-state');
-        const at = document.getElementById('ans-text'); if(at) at.innerHTML = current.a + '<br><span style="color:var(--color-red);font-size:14px;display:block;margin-top:10px;">⏳ 超时跳过</span>';
+        const at = document.getElementById('ans-text'); if(at) at.innerHTML = current.a + '<br><span style="color:var(--color-red);font-size:14px;display:block;margin-top:10px;">超时跳过</span>';
         autoNextTimeout = setTimeout(() => { if(ap) ap.classList.remove('timeout-state', 'active'); mark(false); }, 1500);
     }
     function mark(isOk) {
@@ -1098,6 +1137,21 @@
         for (let i = 0; i < 100; i++) pieces.push({ x: canvas.width/2, y: canvas.height/2+100, vx: (Math.random()-0.5)*20, vy: (Math.random()-1)*20, size: Math.random()*10+5, color: colors[Math.floor(Math.random()*colors.length)], rot: Math.random()*360, rotS: (Math.random()-0.5)*10 });
         function draw() { ctx.clearRect(0,0,canvas.width,canvas.height); let active = false; pieces.forEach(p => { p.x+=p.vx; p.y+=p.vy; p.vy+=0.5; p.rot+=p.rotS; if(p.y<canvas.height) active=true; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180); ctx.fillStyle=p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size); ctx.restore(); }); const fov = document.getElementById('finish-overlay'); if(active && fov && fov.style.display==='flex') requestAnimationFrame(draw); } draw();
     }
+    function initBGM() { const bt = document.getElementById('bgm-toggle'); if(bt) bt.checked = localStorage.getItem('bgm_enabled') !== 'false'; document.body.addEventListener('click', () => { if (!audioInitialized) { playBGM(); audioInitialized = true; } }, { once: true }); }
+    function playBGM(forceRestart = false) { const n = document.getElementById('bg-music'), i = document.getElementById('bg-music-intense'); if(!n || !i) return; n.pause(); i.pause(); const bt = document.getElementById('bgm-toggle'); if (bt && bt.checked) { const active = isIntenseMode ? i : n; if (forceRestart) active.currentTime = 0; active.play().catch(() => {}); } }
+    function toggleBGM() { const bt = document.getElementById('bgm-toggle'); if(bt) localStorage.setItem('bgm_enabled', bt.checked); playBGM(); }
+    function toggleSidebar() { const ws = document.getElementById('wrong-sidebar'); if(ws) ws.classList.toggle('open'); }
+    function renderWrongs() { const wl = document.getElementById('wrong-list'); if(wl) wl.innerHTML = wrongs.map(i => `<div class="wrong-item"><div class="w-ans">${i.a}</div><div class="w-q">${i.q}</div></div>`).join(''); }
+    function clearWrongs() { if (confirm("清空本地错题记录？")) { wrongs = []; localStorage.setItem(wrongStorageKey, '[]'); renderWrongs(); applyRule(); } }
+    async function upload(mode) {
+        const jip = document.getElementById('jsonInput'); const ug = document.getElementById('upload-group'); if(!jip || !ug) return;
+        const input = jip.value, groupName = ug.value || '默认分组'; if (!input) return alert("请粘贴 JSON");
+        try {
+            const data = JSON.parse(input).map(item => ({ ...item, group_name: groupName, user_id: currentUser.id }));
+            if (mode === 'cover') { if (!confirm("确定清空云端【该分组所有词条】并覆盖？")) return; await supabase.from('dictation_items').delete().eq('user_id', currentUser.id).eq('group_name', groupName); }
+            showLoading("数据写入中..."); await supabase.from('dictation_items').insert(data); alert("同步成功！"); jip.value = ""; toggleSettings(false); sync();
+        } catch(e) { hideLoading(); alert("失败: " + e.message); }
+    }
     
     // ======= 画板 =======
     const canvas = document.getElementById('board'); const ctx = canvas ? canvas.getContext('2d') : null;
@@ -1105,8 +1159,8 @@
     function saveCanvasState() { if(!ctx || !canvas) return; undoStack.push(ctx.getImageData(0,0,canvas.width,canvas.height)); if(undoStack.length>20) undoStack.shift(); }
     function undoDraw() { if(!ctx) return; if(undoStack.length>0) ctx.putImageData(undoStack.pop(),0,0); }
     function initCanvas() { if(!canvas || !ctx) return; const rect = canvas.parentNode.getBoundingClientRect(); canvas.width = rect.width; canvas.height = rect.height; ctx.lineCap='round'; ctx.lineJoin='round'; applyBrushStyle(); }
-    function toggleEraser() { isEraser = !isEraser; const btn=document.getElementById('eraser-btn'); if(btn){ btn.innerText=isEraser?'橡皮':'画笔'; btn.style.color=isEraser?'var(--color-red)':'var(--sub)'; } applyBrushStyle(); }
-    function resetEraser() { isEraser=false; const btn=document.getElementById('eraser-btn'); if(btn){btn.innerText='画笔'; btn.style.color='var(--sub)';} applyBrushStyle(); }
+    function toggleEraser() { isEraser = !isEraser; const btn=document.getElementById('eraser-btn'); if(btn){ btn.innerText=isEraser?'橡皮':'画笔'; } applyBrushStyle(); }
+    function resetEraser() { isEraser=false; const btn=document.getElementById('eraser-btn'); if(btn){btn.innerText='画笔'; } applyBrushStyle(); }
     function applyBrushStyle() { if(!ctx) return; if(isEraser){ctx.globalCompositeOperation='destination-out'; ctx.lineWidth=32;}else{ctx.globalCompositeOperation='source-over'; ctx.lineWidth=4; ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--title').trim();} }
     const getPos = e => { if(!canvas) return {x:0,y:0}; const rect=canvas.getBoundingClientRect(), cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY; return {x:cx-rect.left, y:cy-rect.top}; };
     if(canvas) {
