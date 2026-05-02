@@ -3,295 +3,237 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>言叶之庭 - 词库主题版</title>
-    <!-- 修复 Favicon 404 报错 -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍵</text></svg>">
-    <!-- 引入 Supabase 和 reCAPTCHA v2 -->
+    <title>言叶之庭</title>
+    <!-- 字体与外部依赖 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
     <script src="https://recaptcha.net/recaptcha/api.js" async defer></script>
     <style>
-        /* ================= 调色盘系统 (纯净扁平化无毛玻璃) ================= */
+        /* ================= 严格色值与全局规范 ================= */
         :root {
-            --bg: #f4f1eb; --card: #ffffff; --text: #2c3e50; --sub: #8b979f; --border: #e2dfd6;
-            --color-red: #d15147; --color-green: #5a825a; --color-brand: #2c3e50; --shadow: 0 8px 30px rgba(0,0,0,0.06);
-            --ui-radius: 24px;
+            --bg: #f5f5f3;
+            --title: #141414;
+            --text: #1a1a1a;
+            --sub: #707070;
+            --sub-light: #858585;
+            --card: #ffffff;
+            --brand: #e57c58;
+            --dot-inactive: #e0e0dd;
+            --btn-main: #1c1c1e;
+            --border: #d1d1d1;
+            --font-sans: -apple-system, BlinkMacSystemFont, Inter, Roboto, sans-serif;
+            --font-serif: "Noto Serif SC", serif;
+            --font-title: Georgia, "Noto Serif SC", serif;
         }
-        body.intense-mode {
-            --bg: #0f0a0a; --card: #1a1111; --text: #fdf5f5; --sub: #d66b6b; --border: #381c1c;
-            --color-red: #ff2a2a; --color-green: #ff9f0a; --color-brand: #ff9f0a; --shadow: 0 8px 30px rgba(255, 0, 0, 0.25);
+
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.2s, border-color 0.2s; }
+        
+        body {
+            font-family: var(--font-sans); background-color: var(--bg); color: var(--text);
+            min-height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: flex-start;
+            overflow-x: hidden;
         }
-        body[data-theme="sakura"] { --bg: #fce4ec; --card: #ffffff; --text: #880e4f; --sub: #d81b60; --border: #f8bbd0; --color-red: #e91e63; --color-green: #ec407a; --color-brand: #ec407a; --shadow: 0 8px 30px rgba(233,30,99,0.08); }
-        body[data-theme="sakura"].intense-mode { --bg: #2a0821; --card: #3b0d2e; --text: #ffe6f2; --sub: #b84d85; --border: #6b1853; --color-red: #ff1744; --color-green: #ff6e40; --color-brand: #ff6e40; --shadow: 0 8px 30px rgba(255,23,68,0.2); }
-        body[data-theme="sora"] { --bg: #e3f2fd; --card: #ffffff; --text: #0d47a1; --sub: #1976d2; --border: #bbdefb; --color-red: #f57c00; --color-green: #1e88e5; --color-brand: #1e88e5; --shadow: 0 8px 30px rgba(30,136,229,0.08); }
-        body[data-theme="sora"].intense-mode { --bg: #050d1a; --card: #0b172a; --text: #e1f0ff; --sub: #4477b3; --border: #1a365d; --color-red: #ff3d00; --color-green: #00b4d8; --color-brand: #00b4d8; --shadow: 0 8px 30px rgba(0,180,216,0.15); }
-        body[data-theme="yoru"] { --bg: #1a1a24; --card: #252533; --text: #dcdce6; --sub: #7b7b99; --border: #3d3d52; --color-red: #ff6666; --color-green: #33cc99; --color-brand: #33cc99; --shadow: 0 8px 30px rgba(0,0,0,0.25); }
-        body[data-theme="yoru"].intense-mode { --bg: #09090d; --card: #12121a; --text: #f0f0f5; --sub: #5c5c7a; --border: #242433; --color-red: #ff3333; --color-green: #00e6ac; --color-brand: #00e6ac; --shadow: 0 8px 30px rgba(255,51,51,0.3); }
-        body[data-theme="aki"] { --bg: #faefe6; --card: #ffffff; --text: #70290a; --sub: #b35929; --border: #f0d4c2; --color-red: #d1300a; --color-green: #a86b14; --color-brand: #a86b14; --shadow: 0 8px 30px rgba(112,41,10,0.08); }
-        body[data-theme="aki"].intense-mode { --bg: #210c03; --card: #361405; --text: #fcebd9; --sub: #c9642e; --border: #5c240a; --color-red: #ff3c0a; --color-green: #e6921c; --color-brand: #e6921c; --shadow: 0 8px 30px rgba(255,60,10,0.2); }
-        body[data-theme="take"] { --bg: #e8f0e8; --card: #ffffff; --text: #1f3b26; --sub: #467a53; --border: #c4d9c6; --color-red: #c24038; --color-green: #298a44; --color-brand: #298a44; --shadow: 0 8px 30px rgba(31,59,38,0.08); }
-        body[data-theme="take"].intense-mode { --bg: #0b140d; --card: #142918; --text: #e1ede4; --sub: #386644; --border: #1f4227; --color-red: #ff382e; --color-green: #00cc44; --color-brand: #00cc44; --shadow: 0 8px 30px rgba(0,204,68,0.2); }
-        body[data-theme="github"] { --bg: #ffffff; --card: #f6f8fa; --text: #24292f; --sub: #57606a; --border: #d0d7de; --color-red: #cf222e; --color-green: #2da44e; --color-brand: #2da44e; --shadow: none; --ui-radius: 8px; }
-        body[data-theme="github"].intense-mode { --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --sub: #8b949e; --border: #30363d; --color-red: #da3633; --color-green: #238636; --color-brand: #238636; --shadow: none; --ui-radius: 8px; }
+
+        /* 隐藏滚动条但保留滚动功能 */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        /* ================= 核心容器 ================= */
+        .container {
+            width: 100%; max-width: 460px; display: flex; flex-direction: column; gap: 28px;
+            padding: 40px 20px; position: relative; z-index: 10;
+        }
+
+        /* ================= 头部：星星 + 标题 ================= */
+        .header { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 10px; }
+        .claude-star { width: 36px; height: 36px; color: var(--brand); animation: claude-breathe 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; transform-origin: center; }
+        @keyframes claude-breathe { 0%, 100% { opacity: 0.8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
+        .title { font-family: var(--font-title); font-size: 26px; font-weight: 500; color: var(--title); }
+
+        /* ================= 欢迎区域 ================= */
+        .welcome { text-align: center; }
+        .welcome h2 { font-family: var(--font-serif); font-size: 32px; font-weight: 400; margin-bottom: 8px; color: var(--title); }
+        .welcome p { font-size: 15px; color: var(--sub); }
+
+        /* ================= 统计卡片 ================= */
+        .stats-card { background: var(--card); border-radius: 20px; padding: 20px; display: flex; justify-content: space-around; text-align: center; border: 1px solid var(--border); }
+        .stat-item .num { font-size: 20px; font-weight: 600; color: var(--title); }
+        .stat-item .label { font-size: 12px; color: var(--sub-light); margin-top: 4px; }
+
+        /* ================= 按钮组 ================= */
+        .btn-group { display: flex; flex-direction: column; gap: 14px; }
+        .btn { padding: 17px; border-radius: 28px; font-size: 16px; font-weight: 500; border: none; cursor: pointer; transition: all 0.2s; text-align: center; font-family: var(--font-sans); }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: var(--btn-main); color: #fff; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: rgba(0,0,0,0.03); }
+
+        /* ================= 区块标题与列表 ================= */
+        .section { display: flex; flex-direction: column; gap: 12px; }
+        .section-title { font-size: 16px; font-weight: 500; color: var(--title); }
+        .recent-item { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; font-size: 15px; color: var(--text); cursor: pointer; }
+        .recent-item:hover { background: #fbfbfb; }
+
+        /* ================= 日历 ================= */
+        .calendar { text-align: center; margin-top: 10px; }
+        .calendar-title { font-size: 13px; color: var(--sub-light); margin-bottom: 14px; }
+        .calendar-dots { display: flex; justify-content: center; gap: 9px; flex-wrap: wrap; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--dot-inactive); }
+        .dot.active { background: var(--brand); }
 
         /* ================= 全局加载动画 ================= */
         #global-loader { position: fixed; inset: 0; background: var(--bg); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s; }
-        .loader-spinner { width: 50px; height: 50px; border: 4px solid var(--border); border-top-color: var(--color-brand); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        .loader-spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--brand); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loader-text { font-size: 14px; font-weight: bold; color: var(--text); letter-spacing: 2px; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .loader-text { font-size: 14px; color: var(--sub); letter-spacing: 2px; }
 
-        * { box-sizing: border-box; transition: background-color 0.4s, color 0.4s, border-color 0.4s, box-shadow 0.3s, border-radius 0.3s; }
-        body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; }
+        /* ================= 登录视图 ================= */
+        #auth-view { display: none; flex-direction: column; justify-content: center; min-height: 80vh; }
+        .auth-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 40px 30px; text-align: center; }
+        .auth-tabs { display: flex; background: var(--bg); border-radius: 12px; margin-bottom: 20px; overflow: hidden; border: 1px solid var(--border); }
+        .auth-tab { flex: 1; padding: 12px; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--sub); }
+        .auth-tab.active { background: var(--btn-main); color: #fff; }
+        .auth-toggle { background: none; border: none; color: var(--sub); font-size: 13px; margin-top: 20px; cursor: pointer; text-decoration: underline; }
 
-        /* ================= 主页 Dashboard 样式 ================= */
-        #home-view { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; padding: 50px 20px; z-index: 5; overflow-y: auto; }
-        .home-container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 20px; }
-        .home-header { text-align: left; width: 100%; margin-bottom: 10px; }
-        .home-header h2 { font-size: 28px; margin: 0 0 8px 0; color: var(--text); }
-        .home-header p { font-size: 14px; color: var(--sub); margin: 0; }
-        
-        .home-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; width: 100%; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px 10px; text-align: center; box-shadow: var(--shadow); }
-        body[data-theme="github"] .stat-card { border-radius: 8px; box-shadow: none; }
-        .stat-card h3 { font-size: 12px; color: var(--sub); margin: 0 0 10px 0; }
-        .stat-card p { font-size: 22px; font-weight: bold; color: var(--color-brand); margin: 0; font-family: monospace; }
-        
-        .home-calendar-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; width: 100%; box-shadow: var(--shadow); }
-        body[data-theme="github"] .home-calendar-wrap { border-radius: 8px; box-shadow: none; }
-        .home-calendar-wrap h3 { font-size: 14px; margin: 0 0 15px 0; color: var(--text); }
-        .home-calendar { display: grid; grid-template-columns: repeat(14, 1fr); gap: 6px; } 
-        .cal-day { aspect-ratio: 1; border-radius: 4px; background: rgba(0,0,0,0.05); }
-        body.intense-mode .cal-day { background: rgba(255,255,255,0.05); }
-        .cal-day.active { background: var(--color-green); box-shadow: 0 0 8px rgba(90, 130, 90, 0.4); }
-        
-        .home-actions { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-top: 10px; }
-        .btn-home-start { background: var(--color-brand); color: var(--card); padding: 18px; border-radius: 20px; font-size: 16px; font-weight: bold; box-shadow: var(--shadow); cursor: pointer; border: none; text-align: center; transition: transform 0.2s; }
-        body[data-theme="github"] .btn-home-start { border-radius: 8px; box-shadow: none; }
-        .btn-home-start:active { transform: scale(0.96); }
-        .btn-home-resume { background: var(--card); color: var(--color-brand); border: 2px solid var(--color-brand); padding: 18px; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; transition: transform 0.2s; }
-        body[data-theme="github"] .btn-home-resume { border-radius: 8px; }
-        .btn-home-resume:active { transform: scale(0.96); }
+        /* ================= 通用表单控件 ================= */
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea { width: 100%; padding: 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); margin-bottom: 15px; font-size: 15px; font-family: var(--font-sans); outline: none; }
+        input:focus, textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(229, 124, 88, 0.1); }
+        .set-label { display: block; font-size: 13px; font-weight: 500; color: var(--sub); margin-bottom: 8px; }
 
-        /* ================= 侧滑配置卡片 ================= */
-        #setup-panel { position: fixed; top: 0; right: 0; width: 100%; max-width: 420px; height: 100%; background: var(--card); border-left: 1px solid var(--border); z-index: 1000; padding: 40px 25px; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); display: flex; flex-direction: column; overflow-y: auto; box-shadow: -10px 0 40px rgba(0,0,0,0.1); }
-        #setup-panel.open { transform: translateX(0); }
-        .setup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .setup-header h2 { margin: 0; font-size: 22px; color: var(--text); }
-        .close-btn { background: none; border: none; font-size: 28px; color: var(--sub); cursor: pointer; }
-
-        /* ================= 学习界面 (Learning View) ================= */
-        .main-card { width: 95%; max-width: 460px; background: var(--card); border-radius: var(--ui-radius); box-shadow: var(--shadow); overflow: hidden; position: relative; z-index: 10; display: none; flex-direction: column; border: 1px solid var(--border); }
-        
-        .progress-wrap { width: 100%; height: 4px; background: var(--border); flex-shrink: 0; position: relative; }
-        #progress-bar { height: 100%; width: 0%; background: var(--color-green); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        #mastery-bar { height: 100%; width: 0%; background: rgba(255,200,0,0.5); position: absolute; top: 0; left: 0; transition: width 0.6s ease; pointer-events: none; }
-
-        .nav { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); font-size: 11px; color: var(--sub); letter-spacing: 1px; flex-shrink: 0; gap: 4px; }
-        .nav span { cursor: pointer; padding: 5px 8px; border-radius: 12px; transition: background 0.2s; white-space: nowrap; }
-        .nav span:hover { background: var(--border); color: var(--text); }
-        #mode-toggle-btn { font-weight: bold; background: var(--border); color: var(--text); }
-        #mode-toggle-btn.locked { opacity: 0.2; pointer-events: none; }
-        #home-return-btn { color: var(--color-brand); font-weight: bold; }
-
-        #streak-badge { font-weight: bold; background: transparent; color: var(--sub); transition: all 0.3s; }
-        #streak-badge.hot { background: linear-gradient(135deg, #ff6b35, #ff9f0a); color: white; animation: streakPop 0.4s cubic-bezier(0.18,0.89,0.32,1.28); }
-        @keyframes streakPop { 0%{transform:scale(0.7)} 100%{transform:scale(1)} }
-
-        .quiz-box { padding: 20px 20px; text-align: center; min-height: 130px; display: flex; flex-direction: column; justify-content: center; flex: 1; }
-        #q-cat { font-size: 11px; color: var(--color-red); margin-bottom: 8px; font-weight: bold; letter-spacing: 2px; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
-        #q-text { font-size: 1.7rem; font-weight: 600; line-height: 1.5; word-break: break-all; text-shadow: 0 2px 4px rgba(0,0,0,0.02); margin:0; }
-        #q-text.long { font-size: 1.25rem; }
-        
-        .diff-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: bold; letter-spacing: 0; transition: all 0.3s; }
-        .diff-new { background: rgba(100,100,200,0.12); color: #6666cc; }
-        .diff-learning { background: rgba(30,136,229,0.12); color: #1e88e5; }
-        .diff-familiar { background: rgba(255,180,0,0.15); color: #d4a000; }
-        .diff-hard { background: rgba(209,81,71,0.12); color: #d15147; }
-        .diff-mastered { background: rgba(90,130,90,0.15); color: #5a825a; }
-
-        .canvas-area { position: relative; width: 100%; height: 300px; background: transparent; border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); overflow: hidden; flex-shrink: 0; }
-        .grid-bg { position: absolute; inset: 0; opacity: 0.05; background-image: linear-gradient(var(--text) 1px, transparent 1px), linear-gradient(90deg, var(--text) 1px, transparent 1px); background-size: 50% 50%; background-position: center; pointer-events: none; }
-        body.intense-mode .grid-bg { opacity: 0.15; background-image: linear-gradient(var(--color-red) 1px, transparent 1px), linear-gradient(90deg, var(--color-red) 1px, transparent 1px); }
-        #board { position: relative; z-index: 5; touch-action: none; cursor: crosshair; }
-        
-        #intense-timer { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 8rem; font-family: 'Courier New', monospace; font-weight: 900; color: rgba(255,51,51,0.12); z-index: 1; pointer-events: none; }
-        body.intense-mode #intense-timer { display: flex; }
-        #intense-timer.prep { color: rgba(255,159,10,0.35); font-size: 10rem; }
-        #intense-timer.urgent { color: rgba(255,51,51,0.5); text-shadow: 0 0 30px rgba(255,0,0,0.8); animation: shake 0.1s infinite; }
-        @keyframes shake { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } 100% { transform: translate(2px, -2px); } }
-
-        #ghost-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: "KaiTi","STKaiti",serif; color: var(--text); opacity: 0; pointer-events: none; z-index: 4; transition: opacity 0.4s; padding: 20px; text-align: center; font-size: 3.5rem; font-weight: bold; text-shadow: 0 0 20px var(--bg); }
-        #ghost-hint.show { opacity: 0.35; transform: scale(1.05); }
-
-        #finish-overlay { position: absolute; inset: 0; background: var(--bg); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; overflow-y: auto; }
-        .huge-symbol { font-size: 5rem; margin: 0; animation: popIn 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; }
-        @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-        #confetti-canvas { position: absolute; inset: 0; pointer-events: none; z-index: 99; }
-
-        .mastery-breakdown { width: 100%; max-width: 260px; margin: 12px auto 0; }
-        .mb-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 11px; }
-        .mb-label { width: 50px; text-align: right; color: var(--sub); }
-        .mb-track { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-        .mb-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
-        .mb-count { width: 24px; font-weight: bold; color: var(--text); }
-
-        #ans-pop { position: fixed; right: calc(50% - 480px); top: 50%; transform: translateY(-50%) scale(0.9); width: 280px; background: var(--card); border: 1px solid var(--border); padding: 25px 22px; border-radius: var(--ui-radius); box-shadow: var(--shadow); text-align: center; opacity: 0; pointer-events: none; z-index: 200; transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
-        #ans-pop.active { opacity: 1; pointer-events: auto; transform: translateY(-50%) scale(1); right: calc(50% - 540px); }
-        #ans-pop.timeout-state .judge-btn { display: none; }
-        #ans-text { font-size: 2.1rem; font-family: "KaiTi", serif; color: var(--text); display: block; margin-bottom: 10px; line-height: 1.2; font-weight: bold; }
-        #item-sr-stats { font-size: 11px; color: var(--sub); margin-bottom: 18px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
-        .sr-stat-chip { background: rgba(0,0,0,0.04); padding: 3px 8px; border-radius: 8px; }
-        body.intense-mode .sr-stat-chip { background: rgba(255,255,255,0.07); }
-        body[data-theme="github"] #ans-pop { box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-
-        #wrong-sidebar { position: fixed; left: 0; top: 0; width: 300px; height: 100%; background: var(--card); border-right: 1px solid var(--border); z-index: 1000; transform: translateX(-100%); display: flex; flex-direction: column; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: var(--shadow); }
-        #wrong-sidebar.active { transform: translateX(0); }
-        #wrong-sidebar-inner { display: flex; flex-direction: column; height: 100%; padding: 30px; overflow-y: auto; }
-        #wrong-list { flex: 1; margin: 20px 0; font-size: 14px; padding-right: 10px; }
-        .wrong-item { padding: 15px 0; border-bottom: 1px dashed var(--border); }
-
-        button { cursor: pointer; border: none; font-family: inherit; background: transparent; transition: all 0.2s; outline: none; }
-        button:active { transform: scale(0.96); }
-        .judge-btn { width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 12px; font-weight: bold; font-size: 15px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .judge-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
-        .btn-yes { background: var(--color-green); }
-        .btn-no { background: var(--color-red); }
-        body[data-theme="github"] .judge-btn { box-shadow: none; }
-        
-        .key-hint { font-size: 10px; color: var(--sub); margin-bottom: 14px; }
-        .key-chip { display: inline-block; background: var(--border); border-radius: 4px; padding: 1px 5px; font-family: monospace; margin: 0 2px; }
-
-        .footer { display: grid; grid-template-columns: 1fr 1fr 1fr 1.5fr 1fr; background: transparent; gap: 6px; padding: 10px; flex-shrink: 0; }
-        .footer button { padding: 14px 0; background: var(--border); border-radius: var(--ui-radius); font-size: 12px; font-weight: bold; color: var(--text); white-space: nowrap; }
-        .footer button:hover { filter: brightness(0.95); }
-        .btn-main { background: var(--color-brand) !important; color: var(--card) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 13px !important; }
-        body[data-theme="github"] .btn-main { box-shadow: none; color: #fff !important; }
-
-        /* ================= 通用表单与控件 ================= */
-        textarea, input[type="text"], input[type="email"], input[type="password"], input[type="number"] { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid transparent; background: rgba(0,0,0,0.04); color: var(--text); margin-bottom: 15px; font-size: 14px; outline: none; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); }
-        textarea:focus, input:focus { border-color: var(--color-brand); background: transparent; box-shadow: 0 0 0 4px rgba(0, 148, 255, 0.1); }
-        body.intense-mode textarea, body.intense-mode input { background: rgba(255,255,255,0.05); }
-        body[data-theme="github"] textarea, body[data-theme="github"] input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; box-shadow: none; }
-
-        .switch { position: relative; display: inline-block; width: 48px; height: 26px; }
+        /* Switch 开关 */
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; inset: 0; background-color: var(--border); transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        input:checked + .slider { background-color: var(--color-brand); }
-        input:checked + .slider:before { transform: translateX(22px); }
+        .slider { position: absolute; cursor: pointer; inset: 0; background-color: var(--border); border-radius: 34px; transition: .3s; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: .3s cubic-bezier(0.4, 0, 0.2, 1); }
+        input:checked + .slider { background-color: var(--brand); }
+        input:checked + .slider:before { transform: translateX(20px); }
 
+        /* ================= 侧滑面板 (设置与配置) ================= */
+        .side-panel { position: fixed; top: 0; right: 0; width: 100%; max-width: 460px; height: 100%; background: var(--bg); border-left: 1px solid var(--border); z-index: 2000; padding: 40px 20px; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); overflow-y: auto; display: flex; flex-direction: column; }
+        .side-panel.open { transform: translateX(0); }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .panel-header h2 { margin: 0; font-size: 20px; color: var(--title); font-family: var(--font-serif); font-weight: 400; }
+        .close-btn { background: none; border: none; font-size: 28px; color: var(--sub); cursor: pointer; font-weight: 300; }
+
+        /* 自定义下拉菜单 */
         .custom-select-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
-        .custom-select-display { width: 100%; padding: 15px; border-radius: 12px; background: rgba(0,0,0,0.04); color: var(--text); font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 2px solid transparent; transition: all 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); user-select: none; }
-        .custom-select-display:hover { background: rgba(0,0,0,0.08); }
-        .custom-select-display.open { border-color: var(--color-brand); background: transparent; box-shadow: 0 0 0 4px rgba(0, 148, 255, 0.1); }
+        .custom-select-display { width: 100%; padding: 16px; border-radius: 12px; background: var(--card); color: var(--text); font-size: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); user-select: none; }
+        .custom-select-display.open { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(229, 124, 88, 0.1); }
         .custom-select-display::after { content: '▼'; font-size: 10px; transition: transform 0.3s; color: var(--sub); }
         .custom-select-display.open::after { transform: rotate(180deg); }
-        .custom-select-dropdown { position: absolute; top: calc(100% + 5px); left: 0; right: 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); max-height: 200px; overflow-y: auto; z-index: 5000; opacity: 0; pointer-events: none; transform: translateY(-10px); transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        .custom-select-dropdown { position: absolute; top: calc(100% + 5px); left: 0; right: 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px; max-height: 200px; overflow-y: auto; z-index: 5000; opacity: 0; pointer-events: none; transform: translateY(-10px); transition: all 0.2s; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         .custom-select-dropdown.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
-        .custom-option { padding: 12px 15px; font-size: 14px; color: var(--text); cursor: pointer; transition: background 0.2s; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .custom-option { padding: 14px 16px; font-size: 14px; color: var(--text); cursor: pointer; border-bottom: 1px solid var(--bg); }
         .custom-option:last-child { border-bottom: none; }
-        .custom-option:hover { background: rgba(0,0,0,0.05); color: var(--color-brand); }
-        .custom-option.selected { color: var(--color-brand); font-weight: bold; background: rgba(0,148,255,0.05); }
-        body.intense-mode .custom-select-display { background: rgba(255,255,255,0.05); }
-        body[data-theme="github"] .custom-select-display { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; box-shadow: none; }
-        body[data-theme="github"] .custom-select-dropdown { border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .custom-option:hover { background: var(--bg); color: var(--brand); }
+        .custom-option.selected { color: var(--brand); font-weight: 500; background: rgba(229,124,88,0.05); }
 
-        .cb-group-container { background: rgba(0,0,0,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 10px; margin-bottom: 15px; max-height: 180px; overflow-y: auto; }
-        .cb-item { display: flex; align-items: center; padding: 10px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
-        .cb-item:hover { background: rgba(0,0,0,0.05); }
+        /* 复选框 */
+        .cb-group-container { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px; margin-bottom: 15px; max-height: 180px; overflow-y: auto; }
+        .cb-item { display: flex; align-items: center; padding: 10px; border-radius: 8px; cursor: pointer; }
+        .cb-item:hover { background: var(--bg); }
         .cb-item input { display: none; }
-        .cb-checkmark { width: 22px; height: 22px; border: 2px solid var(--sub); border-radius: 6px; margin-right: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
-        .cb-item input:checked + .cb-checkmark { background: var(--color-brand); border-color: var(--color-brand); }
-        .cb-item input:checked + .cb-checkmark::after { content: '✔'; color: var(--card); font-size: 14px; font-weight: bold; }
-        .cb-label { font-size: 14px; color: var(--text); flex: 1; word-break: break-all; }
-        body[data-theme="github"] .cb-group-container { border-radius: 6px; background: var(--bg); }
-        body[data-theme="github"] .cb-checkmark { border-radius: 4px; }
+        .cb-checkmark { width: 20px; height: 20px; border: 1px solid var(--border); border-radius: 6px; margin-right: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .cb-item input:checked + .cb-checkmark { background: var(--brand); border-color: var(--brand); }
+        .cb-item input:checked + .cb-checkmark::after { content: '✔'; color: white; font-size: 12px; }
+        .cb-label { font-size: 14px; color: var(--text); flex: 1; }
 
-        .full-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; overflow-y: auto; padding: 40px 20px; }
-        .set-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--ui-radius); padding: 35px; max-width: 480px; margin: 0 auto; box-shadow: var(--shadow); animation: slideUp 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
-        body[data-theme="github"] .set-box { border-radius: 6px; }
-        @keyframes slideUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
-        .set-label { display: block; font-size: 13px; font-weight: bold; color: var(--sub); margin-bottom: 8px; letter-spacing: 0.5px; }
-
-        #auth-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: none; overflow-y: auto; padding: 40px 20px; flex-direction: column; justify-content: center; align-items: center; }
-        .auth-card { background: var(--card); border: 1px solid var(--border); width: 100%; max-width: 400px; border-radius: var(--ui-radius); padding: 40px 35px; box-shadow: var(--shadow); text-align: center; margin: auto; }
-        body[data-theme="github"] .auth-card { border-radius: 6px; box-shadow: none; }
-        .auth-tabs { display: flex; background: rgba(0,0,0,0.05); border-radius: 12px; margin-bottom: 20px; overflow: hidden; }
-        .auth-tab { flex: 1; padding: 12px; font-size: 14px; font-weight: bold; cursor: pointer; color: var(--sub); transition: 0.3s; }
-        .auth-tab.active { background: var(--text); color: var(--bg); }
-        .auth-btn { width: 100%; padding: 16px; background: var(--color-brand); color: var(--card); border-radius: 12px; font-weight: bold; font-size: 16px; margin-top: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-        .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(0,0,0,0.15); }
-        body[data-theme="github"] .auth-btn { box-shadow: none; border-radius: 6px; color: #fff; }
-
-        /* SR Stats Panel */
-        #sr-stats-panel { background: rgba(0,0,0,0.03); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 20px; }
-        body.intense-mode #sr-stats-panel { background: rgba(255,255,255,0.04); }
-        .sr-stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13px; }
-        .sr-stat-row:last-child { margin-bottom: 0; }
-        .sr-bar-wrap { flex: 1; height: 5px; background: var(--border); border-radius: 3px; margin: 0 10px; overflow: hidden; }
-        .sr-bar-fill { height: 100%; border-radius: 3px; }
-
-        .rc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 25px; }
-        .rc-item { background: var(--bg); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s, box-shadow 0.3s; }
-        .rc-item:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
-        body[data-theme="github"] .rc-item:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.1); transform: translateY(-2px); }
-        .rc-cover { width: 100%; height: 120px; background-color: var(--border); object-fit: cover; border-bottom: 1px solid var(--border); }
-        .rc-cover-emoji { width: 100%; height: 120px; background-color: rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: center; font-size: 50px; border-bottom: 1px solid var(--border); }
-        body.intense-mode .rc-cover-emoji { background-color: rgba(255,255,255,0.05); }
-        body[data-theme="github"] .rc-cover-emoji { background-color: var(--card); }
-        .rc-info { padding: 18px; flex: 1; display: flex; flex-direction: column; }
-        .rc-title { font-weight: bold; font-size: 16px; margin: 0 0 8px 0; color: var(--text); line-height: 1.3; }
-        .rc-desc { font-size: 12px; color: var(--sub); margin: 0 0 12px 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
-        .rc-author { font-size: 11px; color: var(--card); background: var(--color-brand); padding: 4px 10px; border-radius: 20px; display: inline-block; align-self: flex-start; margin-bottom: 15px; }
-        .rc-actions { display: flex; gap: 8px; padding: 0 18px 18px 18px; }
-        .rc-btn { flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: bold; text-align: center; cursor: pointer; transition: all 0.2s; }
-        .rc-btn-dl { background: var(--text); color: var(--bg); border: none; }
-        .rc-btn-del { background: transparent; color: var(--color-red); border: 1px solid var(--color-red); }
-        .rc-btn-del:hover { background: var(--color-red); color: white; }
-
-        .file-upload-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; margin-bottom: 15px; }
-        .file-upload-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; }
-        .file-upload-btn { width: 100%; padding: 14px; background: rgba(0,0,0,0.03); border: 2px dashed var(--border); border-radius: 12px; color: var(--sub); font-size: 14px; text-align: center; pointer-events: none; transition: all 0.3s; }
-        .file-upload-wrapper:hover .file-upload-btn { border-color: var(--color-brand); color: var(--color-brand); }
-
-        #admin-panel { background: rgba(255,165,0,0.05); border: 1px dashed orange; border-radius: 16px; padding: 20px; margin-bottom: 25px; display: none; }
-        body[data-theme="github"] #admin-panel { border-radius: 6px; }
+        /* ================= 学习视图 (Learning View) ================= */
+        #learning-view { display: none; padding: 20px 0; }
+        .learn-card { background: var(--card); border-radius: 24px; border: 1px solid var(--border); display: flex; flex-direction: column; width: 100%; overflow: hidden; position: relative; }
         
-        @media (max-width: 1000px) {
-            #ans-pop { right: 50% !important; transform: translate(50%, -50%) scale(0.9) !important; width: 85%; }
-            #ans-pop.active { transform: translate(50%, -50%) scale(1) !important; }
-        }
+        .progress-wrap { width: 100%; height: 3px; background: var(--bg); position: relative; }
+        #progress-bar { height: 100%; width: 0%; background: var(--brand); transition: width 0.3s; }
+        #mastery-bar { height: 100%; width: 0%; background: rgba(229,124,88,0.3); position: absolute; top:0; left:0; }
+
+        .learn-nav { padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--bg); font-size: 12px; color: var(--sub); }
+        .learn-nav span { cursor: pointer; padding: 4px 8px; border-radius: 8px; }
+        .learn-nav span:hover { background: var(--bg); color: var(--title); }
+        #mode-toggle-btn { font-weight: 500; background: var(--bg); color: var(--title); }
+        
+        .quiz-box { padding: 25px 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; min-height: 120px; }
+        #q-cat { font-size: 11px; color: var(--brand); margin-bottom: 8px; font-weight: 500; letter-spacing: 1px; }
+        #q-text { font-size: 24px; font-family: var(--font-serif); font-weight: 400; color: var(--title); line-height: 1.4; word-break: break-all; }
+        
+        .canvas-area { position: relative; width: 100%; height: 280px; background: var(--card); border-bottom: 1px solid var(--bg); border-top: 1px solid var(--bg); }
+        .grid-bg { position: absolute; inset: 0; opacity: 0.3; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 33.33% 33.33%; background-position: center; pointer-events: none; }
+        #board { position: relative; z-index: 5; touch-action: none; cursor: crosshair; }
+        
+        #intense-timer { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 100px; font-family: monospace; font-weight: bold; color: rgba(229,124,88,0.08); z-index: 1; pointer-events: none; }
+        body.intense-mode #intense-timer { display: flex; }
+        #ghost-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-serif); color: var(--title); opacity: 0; pointer-events: none; z-index: 4; font-size: 40px; }
+        #ghost-hint.show { opacity: 0.15; }
+
+        .learn-footer { display: grid; grid-template-columns: 1fr 1fr 1fr 1.5fr 1fr; gap: 8px; padding: 15px; }
+        .learn-footer button { padding: 14px 0; background: var(--bg); border-radius: 16px; font-size: 13px; font-weight: 500; color: var(--text); border: 1px solid transparent; }
+        .learn-footer button:active { background: var(--border); }
+        .learn-footer .btn-main { background: var(--btn-main) !important; color: #fff !important; }
+
+        /* ================= 答案比对弹窗 ================= */
+        #ans-pop { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.95); width: 280px; background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 24px; text-align: center; opacity: 0; pointer-events: none; z-index: 200; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        #ans-pop.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+        #ans-text { font-size: 32px; font-family: var(--font-serif); color: var(--title); display: block; margin-bottom: 10px; line-height: 1.2; }
+        .ans-btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .judge-btn { flex: 1; padding: 14px; border-radius: 12px; font-weight: 500; font-size: 14px; color: #fff; cursor: pointer; border: none; }
+        .btn-yes { background: #4ca1af; }
+        .btn-no { background: #ff758c; }
+        #item-sr-stats { font-size: 11px; color: var(--sub); display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+
+        /* ================= 结束结算层 ================= */
+        #finish-overlay { position: absolute; inset: 0; background: var(--bg); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+        #finish-overlay h2 { font-family: var(--font-serif); font-size: 28px; font-weight: 400; color: var(--title); margin: 15px 0; }
+        
+        /* ================= 资源中心面板 ================= */
+        .rc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+        .rc-item { background: var(--card); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; }
+        .rc-cover { width: 100%; height: 100px; object-fit: cover; border-bottom: 1px solid var(--bg); }
+        .rc-cover-emoji { width: 100%; height: 100px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 40px; border-bottom: 1px solid var(--border); }
+        .rc-info { padding: 15px; flex: 1; }
+        .rc-title { font-weight: 500; font-size: 15px; margin: 0 0 5px 0; color: var(--title); }
+        .rc-desc { font-size: 12px; color: var(--sub); margin: 0 0 10px 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .rc-author { font-size: 11px; color: var(--sub); margin-bottom: 15px; }
+        .rc-actions { display: flex; gap: 8px; padding: 0 15px 15px 15px; }
+        .file-upload-wrapper { position: relative; overflow: hidden; width: 100%; margin-bottom: 15px; }
+        .file-upload-wrapper input[type=file] { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; width: 100%; }
+        .file-upload-btn { width: 100%; padding: 14px; background: var(--bg); border: 1px dashed var(--border); border-radius: 12px; color: var(--sub); font-size: 13px; text-align: center; pointer-events: none; }
     </style>
 </head>
-<body data-theme="default">
+<body>
 
+<!-- 全局加载动画 -->
 <div id="global-loader">
     <div class="loader-spinner"></div>
     <div class="loader-text" id="loader-text">载入中...</div>
 </div>
 
-<div id="auth-overlay">
+<!-- ================= 登录视图 ================= -->
+<div class="container" id="auth-view">
+    <div class="header" style="margin-bottom: 30px;">
+        <svg class="claude-star" viewBox="0 0 200 100" fill="currentColor">
+            <path d="m19.6 66.5 19.7-11 .3-1-.3-.5h-1l-3.3-.2-11.2-.3L14 53l-9.5-.5-2.4-.5L0 49l.2-1.5 2-1.3 2.9.2 6.3.5 9.5.6 6.9.4L38 49.1h1.6l.2-.7-.5-.4-.4-.4L29 41l-10.6-7-5.6-4.1-3-2-1.5-2-.6-4.2 2.7-3 3.7.3.9.2 3.7 2.9 8 6.1L37 36l1.5 1.2.6-.4.1-.3-.7-1.1L33 25l-6-10.4-2.7-4.3-.7-2.6c-.3-1-.4-2-.4-3l3-4.2L28 0l4.2.6L33.8 2l2.6 6 4.1 9.3L47 29.9l2 3.8 1 3.4.3 1h.7v-.5l.5-7.2 1-8.7 1-11.2.3-3.2 1.6-3.8 3-2L61 2.6l2 2.9-.3 1.8-1.1 7.7L59 27.1l-1.5 8.2h.9l1-1.1 4.1-5.4 6.9-8.6 3-3.5L77 13l2.3-1.8h4.3l3.1 4.7-1.4 4.9-4.4 5.6-3.7 4.7-5.3 7.1-3.2 5.7.3.4h.7l12-2.6 6.4-1.1 7.6-1.3 3.5 1.6.4 1.6-1.4 3.4-8.2 2-9.6 2-14.3 3.3-.2.1.2.3 6.4.6 2.8.2h6.8l12.6 1 3.3 2 1.9 2.7-.3 2-5.1 2.6-6.8-1.6-16-3.8-5.4-1.3h-.8v.4l4.6 4.5 8.3 7.5L89 80.1l.5 2.4-1.3 2-1.4-.2-9.2-7-3.6-3-8-6.8h-.5v.7l1.8 2.7 9.8 14.7.5 4.5-.7 1.4-2.6 1-2.7-.6-5.8-8-6-9-4.7-8.2-.5.4-2.9 30.2-1.3 1.5-3 1.2-2.5-2-1.4-3 1.4-6.2 1.6-8 1.3-6.4 1.2-7.9.7-2.6v-.2H49L43 72l-9 12.3-7.2 7.6-1.7.7-3-1.5.3-2.8L24 86l10-12.8 6-7.9 4-4.6-.1-.5h-.3L17.2 77.4l-4.7.6-2-2 .2-3 1-1 8-5.5Z"></path>
+        </svg>
+        <div class="title" id="auth-title">言叶之庭</div>
+    </div>
     <div class="auth-card" id="main-auth-card">
-        <h2 id="auth-title" style="margin-bottom:20px;">言叶之庭</h2>
         <div class="auth-tabs">
-            <span class="auth-tab active" id="tab-email" onclick="switchAuthType('email')">✉️ 邮箱验证</span>
-            <span class="auth-tab" id="tab-user" onclick="switchAuthType('username')">👤 邀请码注册</span>
+            <span class="auth-tab active" id="tab-email" onclick="switchAuthType('email')">邮箱验证</span>
+            <span class="auth-tab" id="tab-user" onclick="switchAuthType('username')">邀请码注册</span>
         </div>
-        <input type="text" id="auth-account" class="auth-input" placeholder="输入邮箱 (或管理员 admin)">
-        <input type="password" id="auth-pwd" class="auth-input" placeholder="设置密码（至少6位）">
-        <input type="text" id="auth-invite" class="auth-input" placeholder="输入收到的邀请码" style="display:none; border-color: orange;">
+        <input type="text" id="auth-account" placeholder="输入邮箱 (或管理员 admin)">
+        <input type="password" id="auth-pwd" placeholder="设置密码（至少6位）">
+        <input type="text" id="auth-invite" placeholder="输入收到的邀请码" style="display:none; border-color: var(--brand);">
         <div id="recaptcha-container" style="display:none; margin: 0 auto 15px auto; transform: scale(0.95); transform-origin: center;">
             <div class="g-recaptcha" data-sitekey="6LdjI7MsAAAAAKdB1F1MLbTAtYwzwBGVvNXk5khz"></div>
         </div>
-        <button class="auth-btn" id="auth-submit-btn" onclick="handleAuth()">登 录</button>
-        <button class="auth-toggle" id="auth-toggle-btn" onclick="toggleAuthMode()" style="background:none; border:none; color:var(--color-brand); margin-top:20px; cursor:pointer; text-decoration:underline;">没有账号？点击注册</button>
+        <button class="btn btn-primary" style="width:100%;" id="auth-submit-btn" onclick="handleAuth()">登 录</button>
+        <button class="auth-toggle" id="auth-toggle-btn" onclick="toggleAuthMode()">没有账号？点击注册</button>
     </div>
     <div class="auth-card" id="otp-auth-card" style="display: none;">
-        <h2>📧 信件验证</h2>
-        <p style="font-size:12px; color:var(--sub); margin-bottom:20px;">已向该邮箱发送了验证信件</p>
-        <input type="text" id="auth-otp-input" class="auth-input" placeholder="输入邮件验证码" maxlength="10" style="text-align:center; font-size: 22px; letter-spacing: 6px; font-family: monospace; font-weight:bold;">
-        <button class="auth-btn" id="otp-submit-btn" onclick="verifyOtpCode()">验证并登入</button>
-        <button class="auth-toggle" onclick="cancelOtpMode()" style="background:none; border:none; margin-top:15px; color:var(--sub); cursor:pointer;">返回重试</button>
+        <h3 style="margin-bottom:10px;">信件验证</h3>
+        <p style="font-size:12px; color:var(--sub); margin-bottom:20px;">已向该邮箱发送验证信件</p>
+        <input type="text" id="auth-otp-input" placeholder="输入邮件验证码" maxlength="10" style="text-align:center; font-size: 20px; letter-spacing: 4px; font-family: monospace;">
+        <button class="btn btn-primary" style="width:100%;" id="otp-submit-btn" onclick="verifyOtpCode()">验证并登入</button>
+        <button class="auth-toggle" onclick="cancelOtpMode()">返回重试</button>
     </div>
 </div>
 
@@ -299,44 +241,58 @@
 <audio id="bg-music-intense" src="bgm_intense.mp3" loop preload="auto"></audio>
 
 <!-- ================= 主页 Dashboard ================= -->
-<div id="home-view">
-    <div class="home-container">
-        <div class="home-header">
-            <h2>欢迎，<span id="home-username">Learner</span></h2>
-            <p>种一棵树最好的时间是十年前，其次是现在。</p>
+<div class="container" id="home-view" style="display: none;">
+    <div class="header">
+        <svg class="claude-star" viewBox="0 0 200 100" fill="currentColor">
+            <path d="m19.6 66.5 19.7-11 .3-1-.3-.5h-1l-3.3-.2-11.2-.3L14 53l-9.5-.5-2.4-.5L0 49l.2-1.5 2-1.3 2.9.2 6.3.5 9.5.6 6.9.4L38 49.1h1.6l.2-.7-.5-.4-.4-.4L29 41l-10.6-7-5.6-4.1-3-2-1.5-2-.6-4.2 2.7-3 3.7.3.9.2 3.7 2.9 8 6.1L37 36l1.5 1.2.6-.4.1-.3-.7-1.1L33 25l-6-10.4-2.7-4.3-.7-2.6c-.3-1-.4-2-.4-3l3-4.2L28 0l4.2.6L33.8 2l2.6 6 4.1 9.3L47 29.9l2 3.8 1 3.4.3 1h.7v-.5l.5-7.2 1-8.7 1-11.2.3-3.2 1.6-3.8 3-2L61 2.6l2 2.9-.3 1.8-1.1 7.7L59 27.1l-1.5 8.2h.9l1-1.1 4.1-5.4 6.9-8.6 3-3.5L77 13l2.3-1.8h4.3l3.1 4.7-1.4 4.9-4.4 5.6-3.7 4.7-5.3 7.1-3.2 5.7.3.4h.7l12-2.6 6.4-1.1 7.6-1.3 3.5 1.6.4 1.6-1.4 3.4-8.2 2-9.6 2-14.3 3.3-.2.1.2.3 6.4.6 2.8.2h6.8l12.6 1 3.3 2 1.9 2.7-.3 2-5.1 2.6-6.8-1.6-16-3.8-5.4-1.3h-.8v.4l4.6 4.5 8.3 7.5L89 80.1l.5 2.4-1.3 2-1.4-.2-9.2-7-3.6-3-8-6.8h-.5v.7l1.8 2.7 9.8 14.7.5 4.5-.7 1.4-2.6 1-2.7-.6-5.8-8-6-9-4.7-8.2-.5.4-2.9 30.2-1.3 1.5-3 1.2-2.5-2-1.4-3 1.4-6.2 1.6-8 1.3-6.4 1.2-7.9.7-2.6v-.2H49L43 72l-9 12.3-7.2 7.6-1.7.7-3-1.5.3-2.8L24 86l10-12.8 6-7.9 4-4.6-.1-.5h-.3L17.2 77.4l-4.7.6-2-2 .2-3 1-1 8-5.5Z"></path>
+        </svg>
+        <div class="title">言叶之庭</div>
+    </div>
+    
+    <div class="welcome">
+        <h2>欢迎，<span id="home-username">Learner</span></h2>
+        <p>种一棵树最好的时间是十年前，其次是现在。</p>
+    </div>
+
+    <div class="stats-card">
+        <div class="stat-item"><div class="num" id="stat-streak">0</div><div class="label">连续天数</div></div>
+        <div class="stat-item"><div class="num" id="stat-total">0</div><div class="label">词库总数</div></div>
+        <div class="stat-item"><div class="num" id="stat-acc">0%</div><div class="label">正确率</div></div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn btn-primary" onclick="openSetupPanel()">进入学习</button>
+        <button class="btn btn-outline" id="btn-resume-learn" style="display:none;" onclick="resumeLearning()">继续上次进度</button>
+        <button class="btn btn-outline" onclick="toggleSettings(true)">系统设定</button>
+    </div>
+
+    <div class="section">
+        <div class="section-title">最近接触</div>
+        <div id="recent-groups-list">
+            <div class="recent-item" style="color:var(--sub-light); text-align:center;">暂无记录</div>
         </div>
-        <div class="home-stats">
-            <div class="stat-card"><h3>历史准确率</h3><p id="stat-acc">0%</p></div>
-            <div class="stat-card"><h3>待消灭错题</h3><p id="stat-wrongs">0</p></div>
-            <div class="stat-card"><h3>绝对掌握率</h3><p id="stat-mastery">0%</p></div>
-        </div>
-        <div class="home-calendar-wrap">
-            <h3>📅 学习轨迹 (近28天)</h3>
-            <div class="home-calendar" id="home-calendar"></div>
-        </div>
-        <div class="home-actions">
-            <button class="btn-home-resume" id="btn-resume-learn" style="display:none;" onclick="resumeLearning()">接着上次学 🚀</button>
-            <button class="btn-home-start" onclick="openSetupPanel()">配置并开始新一轮</button>
-            <button onclick="toggleSettings(true)" style="padding:15px; background:var(--card); border:1px solid var(--border); border-radius:20px; font-weight:bold; color:var(--text); box-shadow:var(--shadow);">⚙️ 全局系统设定</button>
-        </div>
+    </div>
+
+    <div class="calendar">
+        <div class="calendar-title">近期活跃 (最近14天)</div>
+        <div class="calendar-dots" id="home-calendar"></div>
     </div>
 </div>
 
 <!-- ================= 动态控件锚点存储 (配置卡/设置共用) ================= -->
 <div id="dynamic-controls-pool" style="display: none;">
     <!-- 共享资源 -->
-    <button onclick="toggleResourceCenter(true)" style="width:100%; padding:16px; background:var(--text); color:var(--bg); border-radius:14px; font-weight:bold; font-size: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">🌐 探索共享资源中心</button>
+    <button class="btn btn-outline" onclick="toggleResourceCenter(true)" style="width:100%; margin-bottom: 25px;">🌐 浏览共享资源中心</button>
 
     <!-- SR 科学记忆模块 -->
-    <div style="background: rgba(90,130,90,0.06); border: 1px solid rgba(90,130,90,0.2); border-radius: 16px; padding: 18px; margin-bottom: 20px;">
+    <div style="background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 20px;">
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
-            <span style="font-size:18px;">🧠</span>
-            <span style="font-weight:bold; font-size:15px; color:var(--text);">间隔重复记忆算法</span>
+            <span style="font-weight:500; font-size:15px; color:var(--title);">🧠 间隔重复记忆算法</span>
             <label class="switch" style="margin-left:auto;"><input type="checkbox" id="sr-toggle" onchange="toggleSR()"><span class="slider"></span></label>
         </div>
-        <p style="font-size:11px; color:var(--sub); margin: 0 0 14px 0; line-height:1.6;">开启后：错题权重 ↑ 频繁复现，答对权重 ↓ 逐渐退场。<br>掌握的词条会在今天消失，明天再次出现复习检验！</p>
+        <p style="font-size:12px; color:var(--sub); margin: 0 0 14px 0; line-height:1.5;">开启后：错题高频复现。<br>掌握的词条会在今天隐身，明天重新浮现以检验长期记忆！</p>
         
-        <label class="set-label">🎯 掌握阈值（连续正确次数）</label>
+        <label class="set-label">🎯 掌握阈值</label>
         <div class="custom-select-wrapper" id="cw-mastery">
             <div class="custom-select-display" onclick="toggleCustomSelect('cs-mastery')">5 次连续正确</div>
             <div class="custom-select-dropdown" id="cs-mastery">
@@ -347,32 +303,29 @@
             <input type="hidden" id="mastery-val" value="5">
         </div>
 
-        <div id="sr-stats-panel">
-            <div class="sr-stat-row"><span style="font-size:12px; min-width:42px;">🟢 掌握</span><div class="sr-bar-wrap"><div class="sr-bar-fill" id="sr-bar-mastered" style="background:var(--color-green); width:0%"></div></div><span id="sr-count-mastered" style="font-size:12px; font-weight:bold; min-width:28px; text-align:right;">0</span></div>
-            <div class="sr-stat-row"><span style="font-size:12px; min-width:42px;">🔵 学习</span><div class="sr-bar-wrap"><div class="sr-bar-fill" id="sr-bar-learning" style="background:#1e88e5; width:0%"></div></div><span id="sr-count-learning" style="font-size:12px; font-weight:bold; min-width:28px; text-align:right;">0</span></div>
-            <div class="sr-stat-row"><span style="font-size:12px; min-width:42px;">🔴 强化</span><div class="sr-bar-wrap"><div class="sr-bar-fill" id="sr-bar-hard" style="background:var(--color-red); width:0%"></div></div><span id="sr-count-hard" style="font-size:12px; font-weight:bold; min-width:28px; text-align:right;">0</span></div>
-            <div class="sr-stat-row" style="margin-top:6px; padding-top:8px; border-top:1px dashed var(--border);">
-                <span style="font-size:11px; color:var(--sub);">整体掌握率</span><span id="sr-mastery-pct" style="font-size:13px; font-weight:bold; color:var(--color-green);">–</span>
-            </div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:10px; color:var(--sub);">
+            <span>🟢 掌握: <b id="sr-count-mastered" style="color:var(--text);">0</b></span>
+            <span>🔵 学习: <b id="sr-count-learning" style="color:var(--text);">0</b></span>
+            <span>🔴 强化: <b id="sr-count-hard" style="color:var(--text);">0</b></span>
         </div>
-        <button onclick="resetAllSRStats()" style="width:100%; padding:10px; border:1px solid var(--color-red); color:var(--color-red); border-radius:10px; font-size:12px; font-weight:bold; margin-top:10px;">⚠️ 重置所有记忆数据</button>
+        <button onclick="resetAllSRStats()" style="width:100%; padding:10px; background:transparent; color:var(--sub); border-radius:10px; font-size:12px; margin-top:10px; text-decoration:underline;">清空所有记忆数据</button>
     </div>
 
-    <label class="set-label">📚 本地词库多选混合 (Group)</label>
+    <label class="set-label">📚 本地词库多选混合</label>
     <div style="display:flex; gap:10px; margin-bottom:10px;">
-        <button onclick="checkAllGroups(true)" style="padding:6px 12px; background:rgba(0,0,0,0.05); border-radius:6px; font-size:12px; color:var(--text);">全选</button>
-        <button onclick="checkAllGroups(false)" style="padding:6px 12px; background:rgba(0,0,0,0.05); border-radius:6px; font-size:12px; color:var(--text);">全不选</button>
+        <button onclick="checkAllGroups(true)" style="padding:6px 12px; background:var(--card); border:1px solid var(--border); border-radius:6px; font-size:12px; color:var(--text); cursor:pointer;">全选</button>
+        <button onclick="checkAllGroups(false)" style="padding:6px 12px; background:var(--card); border:1px solid var(--border); border-radius:6px; font-size:12px; color:var(--text); cursor:pointer;">全不选</button>
     </div>
     <div class="cb-group-container" id="cb-group-list"></div>
-    <button onclick="deleteLocalGroups()" style="width:100%; padding:10px; border:1px solid var(--color-red); color:var(--color-red); border-radius:10px; font-weight:bold; font-size: 13px; margin-bottom: 15px;">🗑️ 永久删除选中的词库</button>
+    <button onclick="deleteLocalGroups()" style="width:100%; padding:10px; border:1px solid var(--border); background:transparent; color:var(--sub); border-radius:10px; font-size: 13px; margin-bottom: 15px; cursor:pointer;">🗑️ 删除选中的词库</button>
 
-    <label class="set-label">🎯 组内类型过滤 (Cat)</label>
+    <label class="set-label">🎯 题型过滤</label>
     <div class="custom-select-wrapper" id="cw-mode">
         <div class="custom-select-display" onclick="toggleCustomSelect('cs-mode')">随机全部 (选中分组)</div>
         <div class="custom-select-dropdown" id="cs-mode">
             <div class="custom-option selected" onclick="selectOption('cw-mode','all','随机全部 (选中分组)',null)">随机全部 (选中分组)</div>
             <div class="custom-option" onclick="selectOption('cw-mode','wrong','仅限错题本 (答对移出)',null)">仅限错题本 (答对移出)</div>
-            <div class="custom-option" onclick="selectOption('cw-mode','sr_hard','🔴 仅待强化 (权重 > 150)',null)">🔴 仅待强化 (权重 &gt; 150)</div>
+            <div class="custom-option" onclick="selectOption('cw-mode','sr_hard','🔴 仅待强化 (记忆法)',null)">🔴 仅待强化 (记忆法)</div>
             <div class="custom-option" onclick="selectOption('cw-mode','sr_mastered','🟢 仅已掌握词条',null)">🟢 仅已掌握词条</div>
             <div class="custom-option" onclick="selectOption('cw-mode','word','仅单纯字词',null)">仅单纯字词</div>
             <div class="custom-option" onclick="selectOption('cw-mode','note','仅文言注释',null)">仅文言注释</div>
@@ -384,201 +337,178 @@
     <div style="height:1px; background:var(--border); margin:25px 0;"></div>
 
     <label class="set-label">☁️ 导入新数据 (私密隔离)</label>
-    <p style="font-size:11px; color:var(--sub); margin:0 0 8px 0; line-height: 1.5;">分组名由下方决定，JSON内填：<br><code>[{"q":"题目","a":"答案","cat":"古诗/字词/课文"}]</code></p>
+    <p style="font-size:11px; color:var(--sub); margin:0 0 8px 0; line-height: 1.5;">JSON格式：<code>[{"q":"题","a":"答","cat":"类"}]</code></p>
     <input type="text" id="upload-group" placeholder="输入分组名，如：期中考试词汇" value="默认分组">
-    <textarea id="jsonInput" rows="4" placeholder='复制你的 JSON 数据粘贴到这里...'></textarea>
+    <textarea id="jsonInput" rows="4" placeholder='粘贴 JSON 数组...'></textarea>
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <button onclick="upload('merge')" style="background:var(--text); color:var(--bg); padding:14px; border-radius:10px; font-weight:bold;">增量合并</button>
-        <button onclick="upload('cover')" style="background:var(--color-red); color:white; padding:14px; border-radius:10px; font-weight:bold;">清空覆盖(此名组)</button>
+        <button onclick="upload('merge')" class="btn btn-outline" style="padding:12px; font-size:14px;">增量合并</button>
+        <button onclick="upload('cover')" class="btn btn-primary" style="padding:12px; font-size:14px;">清空覆盖</button>
     </div>
 </div>
 
 <!-- ================= 侧滑学习配置面板 ================= -->
-<div id="setup-panel">
-    <div class="setup-header">
-        <h2>学习方案配置</h2>
+<div class="side-panel" id="setup-panel">
+    <div class="panel-header">
+        <h2>学习配置</h2>
         <button class="close-btn" onclick="closeSetupPanel()">×</button>
     </div>
     <div id="setup-anchor"></div>
-    <button onclick="startNewLearning()" style="width:100%; padding:18px; background:var(--color-brand); color:var(--card); border-radius:16px; font-weight:bold; font-size:18px; margin-top:20px; box-shadow:var(--shadow);">出 发 ！</button>
+    <button class="btn btn-primary" onclick="startNewLearning()" style="width:100%; margin-top:20px;">开 始</button>
 </div>
 
 <!-- ================= 错题本侧边栏 ================= -->
-<div id="wrong-sidebar">
-    <div id="wrong-sidebar-inner">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0">错题本</h3>
-            <button onclick="toggleSidebar()" style="background:none; font-size:28px; color:var(--text);">×</button>
-        </div>
-        <div id="wrong-list"></div>
-        <div style="display:flex; gap:10px; flex-shrink: 0; flex-direction: column;">
-            <button onclick="clearWrongs()" style="width:100%; padding:14px; background:var(--border); border-radius:12px; font-size:14px; font-weight:bold; color:var(--text)">🗑️ 清空记录</button>
-            <button onclick="exportWrongs()" style="width:100%; padding:14px; background:var(--color-green); border-radius:12px; font-size:14px; font-weight:bold; color:white">📤 导出为文本 (.txt)</button>
-        </div>
+<div class="side-panel" id="wrong-sidebar" style="left:0; right:auto; transform:translateX(-100%);">
+    <div class="panel-header">
+        <h2>错题本</h2>
+        <button class="close-btn" onclick="toggleSidebar()">×</button>
+    </div>
+    <div style="flex: 1; overflow-y: auto; margin-bottom:20px;" id="wrong-list"></div>
+    <div style="display:flex; flex-direction:column; gap:10px; flex-shrink: 0;">
+        <button class="btn btn-outline" onclick="clearWrongs()" style="padding:12px; font-size:14px;">清空记录</button>
+        <button class="btn btn-primary" onclick="exportWrongs()" style="padding:12px; font-size:14px;">导出为文本 (.txt)</button>
     </div>
 </div>
 
 <!-- ================= 学习界面 (Learning View) ================= -->
-<div id="learning-view" class="main-card">
-    <div class="progress-wrap">
-        <div id="mastery-bar"></div>
-        <div id="progress-bar"></div>
-    </div>
-    
-    <div id="finish-overlay">
-        <canvas id="confetti-canvas"></canvas>
-        <p class="huge-symbol" id="finish-icon">🉑</p>
-        <h2 id="finish-title">完成挑战</h2>
-        <p id="session-stats" style="color:var(--sub); font-weight:bold; font-size:1.1rem; margin-bottom: 5px;">正确 0 | 错误 0</p>
-        <div class="mastery-breakdown" id="mastery-breakdown" style="display:none;"></div>
-        <p id="zen-quote-text" style="font-family:'KaiTi',serif; color:var(--sub); padding:0 30px; line-height:1.6; margin-top:12px;">--</p>
-        <button onclick="restartSession()" style="margin-top:30px; padding:14px 45px; border-radius:30px; border:2px solid var(--text); background:transparent; color:var(--text); font-weight:bold; font-size:16px; z-index:100;">再来一轮</button>
-        <button onclick="pauseLearning()" style="margin-top:15px; padding:14px 45px; border-radius:30px; border:none; background:var(--border); color:var(--text); font-weight:bold; font-size:14px; z-index:100;">返回主页</button>
-    </div>
+<div class="container" id="learning-view">
+    <div class="learn-card">
+        <div class="progress-wrap">
+            <div id="mastery-bar"></div>
+            <div id="progress-bar"></div>
+        </div>
+        
+        <div id="finish-overlay">
+            <canvas id="confetti-canvas"></canvas>
+            <h2 id="finish-title" style="margin-top:40px;">完成挑战</h2>
+            <p id="session-stats" style="color:var(--sub); font-weight:500; font-size:15px; margin-bottom: 20px;">正确 0 | 错误 0</p>
+            <p id="zen-quote-text" style="font-family:var(--font-serif); color:var(--sub); padding:0 30px; line-height:1.6; margin-bottom:40px;">--</p>
+            <div style="display:flex; flex-direction:column; gap:12px; width:80%; max-width:240px;">
+                <button class="btn btn-primary" onclick="restartSession()" style="padding:14px;">再来一轮</button>
+                <button class="btn btn-outline" onclick="pauseLearning()" style="padding:14px;">返回首页</button>
+            </div>
+        </div>
 
-    <div class="nav">
-        <span id="home-return-btn" onclick="pauseLearning()">🏠 首页</span>
-        <span onclick="toggleSidebar()">📓</span>
-        <span id="mode-toggle-btn" onclick="toggleAppMode()">🌸 休闲</span>
-        <span id="streak-badge">–</span>
-        <span id="count-info">0</span>
-        <span id="hint-btn" onclick="peekHint()">💡</span>
-        <span onclick="openSettingsFromLearning()">⚙️</span>
-    </div>
+        <div class="learn-nav">
+            <span id="home-return-btn" onclick="pauseLearning()">← 首页</span>
+            <span onclick="toggleSidebar()">错题</span>
+            <span id="mode-toggle-btn" onclick="toggleAppMode()">休闲模式</span>
+            <span id="streak-badge">–</span>
+            <span id="count-info">0</span>
+            <span onclick="peekHint()">提示</span>
+            <span onclick="openSettingsFromLearning()">配置</span>
+        </div>
 
-    <div class="quiz-box">
-        <div id="q-cat">READY</div>
-        <div id="q-text">等待开始...</div>
-    </div>
+        <div class="quiz-box">
+            <div id="q-cat">READY</div>
+            <div id="q-text">等待开始...</div>
+        </div>
 
-    <div class="canvas-area">
-        <div class="grid-bg"></div>
-        <div id="ghost-hint"></div>
-        <div id="intense-timer"></div>
-        <canvas id="board"></canvas>
-    </div>
+        <div class="canvas-area">
+            <div class="grid-bg"></div>
+            <div id="ghost-hint"></div>
+            <div id="intense-timer"></div>
+            <canvas id="board"></canvas>
+        </div>
 
-    <div class="footer">
-        <button onclick="clearBoard()" style="color:var(--sub);">🗑️ 清空</button>
-        <button onclick="undoDraw()" style="color:var(--sub);">↩️ 撤销</button>
-        <button id="eraser-btn" onclick="toggleEraser()" style="color:var(--sub);">✏️ 画笔</button>
-        <button class="btn-main" onclick="showAns(true)">核对答案</button>
-        <button onclick="skipQ()">跳过</button>
+        <div class="learn-footer">
+            <button onclick="clearBoard()">清空</button>
+            <button onclick="undoDraw()">撤销</button>
+            <button id="eraser-btn" onclick="toggleEraser()">画笔</button>
+            <button class="btn-main" onclick="showAns(true)">核对答案</button>
+            <button onclick="skipQ()">跳过</button>
+        </div>
     </div>
 </div>
 
 <div id="ans-pop">
-    <span style="font-size:11px; color:var(--sub); display:block; margin-bottom:10px; font-weight:bold;">核对结果</span>
+    <span style="font-size:12px; color:var(--sub-light); display:block; margin-bottom:10px;">核对结果</span>
     <div id="ans-text">--</div>
     <div id="item-sr-stats"></div>
-    <button class="judge-btn btn-yes" onclick="mark(true)">正确 ☑️</button>
-    <button class="judge-btn btn-no" onclick="mark(false)">错误 🔘</button>
-    <div class="key-hint">
-        <span class="key-chip">Y</span> 正确 &nbsp; <span class="key-chip">N</span> 错误 &nbsp; <span class="key-chip">Space</span> 核对
+    <div class="ans-btn-group">
+        <button class="judge-btn btn-no" onclick="mark(false)">记错</button>
+        <button class="judge-btn btn-yes" onclick="mark(true)">正确</button>
     </div>
 </div>
 
 <!-- ================= 资源中心面板 ================= -->
-<div id="resource-center" class="full-overlay">
-    <div class="set-box" style="max-width: 900px; width: 95%;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-            <h3 style="margin:0; font-size:22px;">🌐 共享资源中心</h3>
-            <button onclick="toggleResourceCenter(false)" style="background:none; font-size:30px; color:var(--text);">×</button>
-        </div>
-        <button onclick="toggleUploadModal(true)" style="width:100%; padding:16px; background:linear-gradient(135deg, var(--color-green), #4ca1af); color:white; border-radius:14px; font-weight:bold; font-size:16px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(90,130,90,0.2);">✨ 上传分享我的题库</button>
-        <div id="rc-list" class="rc-grid"></div>
+<div class="side-panel" id="resource-center">
+    <div class="panel-header">
+        <h2>共享资源中心</h2>
+        <button class="close-btn" onclick="toggleResourceCenter(false)">×</button>
     </div>
+    <button class="btn btn-primary" onclick="toggleUploadModal(true)" style="width:100%; margin-bottom: 20px;">分享我的题库</button>
+    <div id="rc-list" class="rc-grid"></div>
 </div>
 
-<!-- ================= 上传资源弹窗 ================= -->
-<div id="upload-modal" class="full-overlay" style="z-index: 3000;">
-    <div class="set-box">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h3 style="margin:0">分享题库</h3>
-            <button onclick="toggleUploadModal(false)" style="background:none; font-size:28px; color:var(--text);">×</button>
-        </div>
-        <label class="set-label">📝 题库标题</label>
-        <input type="text" id="rc-up-title" placeholder="例如：人教版九年级语文下册古诗">
-        <label class="set-label">📖 简介描述</label>
-        <textarea id="rc-up-desc" rows="2" placeholder="简单介绍一下这个题库的内容..."></textarea>
-        <label class="set-label">🖼️ 本地封面图片 (选填，自动压缩)</label>
-        <div class="file-upload-wrapper">
-            <input type="file" id="rc-up-file" accept="image/*" onchange="handleLocalImage(event)">
-            <div class="file-upload-btn" id="rc-up-file-label">📸 点击此处选择本地图片</div>
-        </div>
-        <input type="hidden" id="rc-up-cover-base64">
-        <label class="set-label">☁️ 题库 JSON 数据</label>
-        <p style="font-size:11px; color:var(--sub); margin:0 0 8px 0;">格式：<code>[{"q":"题目","a":"答案","cat":"古诗"}]</code></p>
-        <textarea id="rc-up-json" rows="4" placeholder="粘贴你的 JSON 数组..."></textarea>
-        <button onclick="submitResource()" style="width:100%; background:var(--text); color:var(--bg); padding:16px; border-radius:14px; font-size:16px; font-weight:bold; margin-top: 15px;">确认发布</button>
+<!-- 上传弹窗 -->
+<div class="side-panel" id="upload-modal" style="z-index: 3000;">
+    <div class="panel-header">
+        <h2>分享题库</h2>
+        <button class="close-btn" onclick="toggleUploadModal(false)">×</button>
     </div>
+    <label class="set-label">题库标题</label>
+    <input type="text" id="rc-up-title" placeholder="例如：人教版九年级语文下册">
+    <label class="set-label">简介描述</label>
+    <textarea id="rc-up-desc" rows="2" placeholder="简单介绍一下..."></textarea>
+    <label class="set-label">封面图片 (自动压缩)</label>
+    <div class="file-upload-wrapper">
+        <input type="file" id="rc-up-file" accept="image/*" onchange="handleLocalImage(event)">
+        <div class="file-upload-btn" id="rc-up-file-label">点击选取图片</div>
+    </div>
+    <input type="hidden" id="rc-up-cover-base64">
+    <label class="set-label">JSON 数据</label>
+    <textarea id="rc-up-json" rows="4" placeholder="粘贴 JSON 数组..."></textarea>
+    <button class="btn btn-primary" onclick="submitResource()" style="width:100%; margin-top: 10px;">确认发布</button>
 </div>
 
 <!-- ================= 设置面板 ================= -->
-<div id="settings" class="full-overlay">
-    <div class="set-box" id="settings-box">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h3 style="margin:0; font-size:20px;">系统全局设定</h3>
-            <button onclick="toggleSettings(false)" style="background:none; font-size:28px; color:var(--text);">×</button>
-        </div>
-        
-        <div id="admin-panel">
-            <h4 style="margin:0 0 15px 0; color: orange; font-size: 16px;">👑 邀请码 & 账号管理</h4>
-            <div style="display:flex; gap:10px; margin-bottom: 15px;">
-                <button onclick="generateInviteCodeToDB()" style="flex:1; padding:12px; background:orange; color:white; border-radius:10px; font-weight:bold;">生成 1 个</button>
-                <button onclick="fetchInviteCodesAdmin()" style="padding:12px; background:var(--card); border: 1px solid var(--border); border-radius:10px; color: var(--text);">🔄 刷新</button>
-            </div>
-            <div id="admin-codes" style="font-size:12px; max-height: 180px; overflow-y: auto; color: var(--text); padding-right: 5px;"></div>
-        </div>
-
-        <div style="text-align:center; padding-bottom: 20px; border-bottom: 1px dashed var(--border); margin-bottom: 20px;">
-            <span id="user-info-text" style="font-size:13px; color:var(--sub); display:block; margin-bottom: 12px; font-weight:bold;">未登录</span>
-            <div style="display:flex; justify-content:center; gap: 12px;">
-                <button onclick="logoutAccount()" style="padding:10px 20px; border-radius:10px; border:2px solid var(--color-green); color:var(--color-green); font-size:12px; font-weight:bold;">安全登出</button>
-                <button onclick="deleteAccount()" style="padding:10px 20px; border-radius:10px; border:2px solid var(--color-red); color:var(--color-red); font-size:12px; font-weight:bold;">危险: 注销</button>
-            </div>
-        </div>
-
-        <button onclick="toggleFullScreen()" style="width:100%; padding:14px; background:rgba(0,0,0,0.05); border:2px solid var(--border); color:var(--text); border-radius:14px; font-weight:bold; font-size: 15px; margin-bottom: 20px;">🔲 开启/退出沉浸全屏</button>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-            <span style="font-size:14px; font-weight:bold;">🎵 沉浸背景音乐</span>
-            <label class="switch"><input type="checkbox" id="bgm-toggle" onchange="toggleBGM()"><span class="slider"></span></label>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <span style="font-size:14px; font-weight:bold;">👆 双击画板清空</span>
-            <label class="switch"><input type="checkbox" id="dblclick-toggle" onchange="toggleDblClick()"><span class="slider"></span></label>
-        </div>
-
-        <label class="set-label">🎨 画面主题</label>
-        <div class="custom-select-wrapper" id="cw-theme">
-            <div class="custom-select-display" onclick="toggleCustomSelect('cs-theme')">🍵 抹茶 (默认绿)</div>
-            <div class="custom-select-dropdown" id="cs-theme">
-                <div class="custom-option selected" onclick="selectOption('cw-theme','default','🍵 抹茶 (默认绿)',changeTheme)">🍵 抹茶 (默认绿)</div>
-                <div class="custom-option" onclick="selectOption('cw-theme','sakura','🌸 落樱 (粉红)',changeTheme)">🌸 落樱 (粉红)</div>
-                <div class="custom-option" onclick="selectOption('cw-theme','sora','☁️ 晴空 (天蓝)',changeTheme)">☁️ 晴空 (天蓝)</div>
-                <div class="custom-option" onclick="selectOption('cw-theme','yoru','🌙 夜色 (暗紫)',changeTheme)">🌙 夜色 (暗紫)</div>
-                <div class="custom-option" onclick="selectOption('cw-theme','aki','🍁 枫叶 (橙红)',changeTheme)">🍁 枫叶 (橙红)</div>
-                <div class="custom-option" onclick="selectOption('cw-theme','take','🎋 修竹 (深绿)',changeTheme)">🎋 修竹 (深绿)</div>
-                <div class="custom-option" onclick="selectOption('cw-theme','github','🐙 极客 (GitHub 扁平)',changeTheme)">🐙 极客 (GitHub 扁平)</div>
-            </div>
-            <input type="hidden" id="theme-val" value="default">
-        </div>
-
-        <label class="set-label">⚡ 激烈模式 (每题限时)</label>
-        <div class="custom-select-wrapper" id="cw-time">
-            <div class="custom-select-display" onclick="toggleCustomSelect('cs-time')">每题 8 秒</div>
-            <div class="custom-select-dropdown" id="cs-time">
-                <div class="custom-option" onclick="selectOption('cw-time','5','每题 5 秒',changeIntenseTime)">每题 5 秒</div>
-                <div class="custom-option selected" onclick="selectOption('cw-time','8','每题 8 秒',changeIntenseTime)">每题 8 秒</div>
-                <div class="custom-option" onclick="selectOption('cw-time','12','每题 12 秒',changeIntenseTime)">每题 12 秒</div>
-            </div>
-            <input type="hidden" id="time-val" value="8">
-        </div>
-        
-        <div style="height:1px; background:var(--border); margin:25px 0;"></div>
-        <div id="settings-anchor"></div>
+<div class="side-panel" id="settings">
+    <div class="panel-header">
+        <h2>系统全局设定</h2>
+        <button class="close-btn" onclick="toggleSettings(false)">×</button>
     </div>
+    
+    <div id="admin-panel" style="background: rgba(229,124,88,0.05); border: 1px dashed var(--brand); border-radius: 16px; padding: 20px; margin-bottom: 25px; display: none;">
+        <h4 style="margin:0 0 15px 0; color: var(--brand); font-weight:500;">👑 邀请码管理</h4>
+        <div style="display:flex; gap:10px; margin-bottom: 15px;">
+            <button onclick="generateInviteCodeToDB()" class="btn btn-primary" style="flex:1; padding:10px; font-size:13px;">生成 1 个</button>
+            <button onclick="fetchInviteCodesAdmin()" class="btn btn-outline" style="padding:10px; font-size:13px;">刷新</button>
+        </div>
+        <div id="admin-codes" style="font-size:12px; max-height: 180px; overflow-y: auto;"></div>
+    </div>
+
+    <div style="text-align:center; padding-bottom: 20px; border-bottom: 1px solid var(--bg); margin-bottom: 20px;">
+        <span id="user-info-text" style="font-size:13px; color:var(--sub); display:block; margin-bottom: 15px;">未登录</span>
+        <div style="display:flex; gap: 10px;">
+            <button class="btn btn-outline" onclick="logoutAccount()" style="flex:1; padding:12px; font-size:13px;">退出登录</button>
+            <button class="btn btn-outline" onclick="deleteAccount()" style="flex:1; padding:12px; font-size:13px; color:#ff3b30; border-color:#ff3b30;">注销账号</button>
+        </div>
+    </div>
+
+    <button class="btn btn-outline" onclick="toggleFullScreen()" style="width:100%; margin-bottom: 25px;">开启全屏模式</button>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+        <span style="font-size:14px; font-weight:500;">沉浸背景音乐</span>
+        <label class="switch"><input type="checkbox" id="bgm-toggle" onchange="toggleBGM()"><span class="slider"></span></label>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <span style="font-size:14px; font-weight:500;">双击画板清空</span>
+        <label class="switch"><input type="checkbox" id="dblclick-toggle" onchange="toggleDblClick()"><span class="slider"></span></label>
+    </div>
+
+    <label class="set-label">⚡ 激烈模式限时</label>
+    <div class="custom-select-wrapper" id="cw-time">
+        <div class="custom-select-display" onclick="toggleCustomSelect('cs-time')">每题 8 秒</div>
+        <div class="custom-select-dropdown" id="cs-time">
+            <div class="custom-option" onclick="selectOption('cw-time','5','每题 5 秒',changeIntenseTime)">每题 5 秒</div>
+            <div class="custom-option selected" onclick="selectOption('cw-time','8','每题 8 秒',changeIntenseTime)">每题 8 秒</div>
+            <div class="custom-option" onclick="selectOption('cw-time','12','每题 12 秒',changeIntenseTime)">每题 12 秒</div>
+        </div>
+        <input type="hidden" id="time-val" value="8">
+    </div>
+    
+    <div style="height:1px; background:var(--bg); margin:25px 0;"></div>
+    <div id="settings-anchor"></div>
 </div>
 
 <script>
@@ -594,23 +524,15 @@
     let currentUser = null, authType = 'email', isRegisterMode = false, pendingAuthEmail = "";
     let wrongStorageKey = 'wrongs_v11';
     let allowDblClickClear = true;
-    let activeSession = null; // 暂停恢复数据存储
+    let activeSession = null; 
 
     // ======= 🧠 间隔重复记忆系统 =======
-    let memoryStats = {};
-    let useSpacedRepetition = true;
-    let sessionStreak = 0;
+    let memoryStats = {}; let useSpacedRepetition = true; let sessionStreak = 0;
     const WEIGHT_DEFAULT = 100, WEIGHT_MAX = 600, WEIGHT_MIN = 5, REVIEW_BOOST_DAYS = 3;
     let masteryThreshold = 5;
 
-    function loadMemoryStats() {
-        if (!currentUser) return;
-        memoryStats = JSON.parse(localStorage.getItem(`mem_stats_${currentUser.id}`) || '{}');
-    }
-    function saveMemoryStats() {
-        if (!currentUser) return;
-        localStorage.setItem(`mem_stats_${currentUser.id}`, JSON.stringify(memoryStats));
-    }
+    function loadMemoryStats() { if (!currentUser) return; memoryStats = JSON.parse(localStorage.getItem(`mem_stats_${currentUser.id}`) || '{}'); }
+    function saveMemoryStats() { if (!currentUser) return; localStorage.setItem(`mem_stats_${currentUser.id}`, JSON.stringify(memoryStats)); }
     function getItemKey(item) { return item.id ? String(item.id) : ('q_' + (item.q + item.a).split('').reduce((a,c) => ((a<<5)-a)+c.charCodeAt(0)|0, 0)); }
     function getItemStats(item) {
         const key = getItemKey(item);
@@ -632,22 +554,15 @@
     }
     function getEffectiveWeight(item) {
         const stats = getItemStats(item); let w = stats.memory_weight; let daysSince = 0;
-        if (stats.last_seen) {
-            daysSince = (Date.now() - stats.last_seen) / (1000 * 60 * 60 * 24);
-            if (daysSince > REVIEW_BOOST_DAYS) w = Math.min(WEIGHT_MAX, w + Math.floor(daysSince * 15));
-        }
-        // 核心：已掌握词汇隔日重新少量浮现
-        if (stats.consecutive_correct >= masteryThreshold) {
-            if (daysSince >= 1) return Math.min(WEIGHT_DEFAULT, WEIGHT_MIN + Math.floor(daysSince * 8));
-            else return 0; // 今天隐身
-        }
+        if (stats.last_seen) { daysSince = (Date.now() - stats.last_seen) / (1000 * 60 * 60 * 24); if (daysSince > REVIEW_BOOST_DAYS) w = Math.min(WEIGHT_MAX, w + Math.floor(daysSince * 15)); }
+        if (stats.consecutive_correct >= masteryThreshold) { if (daysSince >= 1) return Math.min(WEIGHT_DEFAULT, WEIGHT_MIN + Math.floor(daysSince * 8)); else return 0; }
         return w;
     }
     function weightedPick(items) {
-        const m = document.getElementById('mode-val').value;
+        const mv = document.getElementById('mode-val'); const m = mv ? mv.value : 'all';
         if (!useSpacedRepetition || items.length === 0 || m === 'sr_mastered') return items[Math.floor(Math.random() * items.length)];
         let validItems = items.filter(item => getEffectiveWeight(item) > 0);
-        if (validItems.length === 0) validItems = items; // 保底兜盖
+        if (validItems.length === 0) validItems = items; 
         const weights = validItems.map(item => getEffectiveWeight(item));
         const total = weights.reduce((a, b) => a + b, 0); let r = Math.random() * total;
         for (let i = 0; i < validItems.length; i++) { r -= weights[i]; if (r <= 0) return validItems[i]; }
@@ -656,43 +571,26 @@
     function getDifficultyInfo(item) {
         if (!useSpacedRepetition) return null;
         const stats = getItemStats(item); const w = stats.memory_weight;
-        if (stats.consecutive_correct >= masteryThreshold) return { cls: 'diff-mastered', label: '🟢 已掌握' };
-        if (w <= 30) return { cls: 'diff-familiar', label: '🟡 熟悉' };
-        if (w <= 120) return { cls: 'diff-learning', label: '🔵 学习中' };
-        if (stats.wrong_count === 0 && stats.consecutive_correct === 0) return { cls: 'diff-new', label: '⚪ 初见' };
-        return { cls: 'diff-hard', label: '🔴 需强化' };
+        if (stats.consecutive_correct >= masteryThreshold) return { cls: 'diff-mastered', label: '已掌握' };
+        if (w <= 30) return { cls: 'diff-familiar', label: '熟悉' };
+        if (w <= 120) return { cls: 'diff-learning', label: '学习中' };
+        if (stats.wrong_count === 0 && stats.consecutive_correct === 0) return { cls: 'diff-new', label: '初见' };
+        return { cls: 'diff-hard', label: '需强化' };
     }
     function renderSRStats() {
         if (!useSpacedRepetition || filtered.length === 0) return;
         let mastered = 0, hard = 0, learning = 0;
-        filtered.forEach(item => {
-            const stats = getItemStats(item);
-            if (stats.consecutive_correct >= masteryThreshold) mastered++;
-            else if (stats.memory_weight > 150) hard++;
-            else learning++;
-        });
+        filtered.forEach(item => { const stats = getItemStats(item); if (stats.consecutive_correct >= masteryThreshold) mastered++; else if (stats.memory_weight > 150) hard++; else learning++; });
         const total = filtered.length; const pct = total > 0 ? Math.round((mastered / total) * 100) : 0;
-        const setW = (id, val) => { const el = document.getElementById(id); if(el) el.style.width = (total > 0 ? Math.round((val/total)*100) : 0) + '%'; };
         const setT = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
-        setW('sr-bar-mastered', mastered); setT('sr-count-mastered', mastered);
-        setW('sr-bar-learning', learning); setT('sr-count-learning', learning);
-        setW('sr-bar-hard', hard); setT('sr-count-hard', hard);
-        const pctEl = document.getElementById('sr-mastery-pct'); if(pctEl) pctEl.innerText = `${pct}%`;
+        setT('sr-count-mastered', mastered); setT('sr-count-learning', learning); setT('sr-count-hard', hard);
         const mb = document.getElementById('mastery-bar'); if(mb) mb.style.width = pct + '%';
     }
-    function updateMasteryThresh() {
-        masteryThreshold = parseInt(document.getElementById('mastery-val').value) || 5;
-        const disp = document.getElementById('mastery-thresh-display'); if(disp) disp.innerText = masteryThreshold;
-        localStorage.setItem('mastery_thresh', masteryThreshold); renderSRStats();
-    }
+    function updateMasteryThresh() { masteryThreshold = parseInt(document.getElementById('mastery-val').value) || 5; localStorage.setItem('mastery_thresh', masteryThreshold); renderSRStats(); }
     function toggleSR() { useSpacedRepetition = document.getElementById('sr-toggle').checked; localStorage.setItem('use_sr', useSpacedRepetition); renderSRStats(); }
-    function resetAllSRStats() {
-        if (!confirm('⚠️ 确定要清空所有记忆权重数据？这将重置所有词条的学习进度。')) return;
-        memoryStats = {}; saveMemoryStats(); renderSRStats(); alert('记忆数据已归零。一切重新开始。');
-    }
+    function resetAllSRStats() { if (!confirm('⚠️ 清空所有记忆权重数据？')) return; memoryStats = {}; saveMemoryStats(); renderSRStats(); alert('记忆数据已归零。'); }
     function updateStreakBadge() {
-        const badge = document.getElementById('streak-badge');
-        if(!badge) return;
+        const badge = document.getElementById('streak-badge'); if(!badge) return;
         if (sessionStreak >= 3) { badge.innerText = `🔥${sessionStreak}`; badge.className = 'hot'; } 
         else { badge.innerText = sessionStreak > 0 ? `✦${sessionStreak}` : '–'; badge.className = ''; }
     }
@@ -710,34 +608,69 @@
         gs.correct += isOk ? 1 : 0; gs.wrong += isOk ? 0 : 1;
         localStorage.setItem(`global_stats_${currentUser.id}`, JSON.stringify(gs));
     }
+    function getConsecutiveDays() {
+        if(!currentUser) return 0;
+        let dates = JSON.parse(localStorage.getItem(`study_dates_${currentUser.id}`) || '[]');
+        if(dates.length === 0) return 0;
+        dates.sort((a,b) => new Date(b) - new Date(a));
+        let streak = 0; let currDate = new Date(); currDate.setHours(0,0,0,0);
+        const todayStr = currDate.toLocaleDateString('en-CA');
+        let checkDate = new Date(currDate);
+        if(!dates.includes(todayStr)) checkDate.setDate(checkDate.getDate() - 1);
+        for(let i=0; i<365; i++) {
+            const dateStr = checkDate.toLocaleDateString('en-CA');
+            if(dates.includes(dateStr)) { streak++; checkDate.setDate(checkDate.getDate() - 1); } else break;
+        }
+        return streak;
+    }
     function updateHomeStats() {
         if(!currentUser) return;
         let gs = JSON.parse(localStorage.getItem(`global_stats_${currentUser.id}`) || '{"correct":0, "wrong":0}');
         let acc = (gs.correct + gs.wrong) > 0 ? Math.round((gs.correct / (gs.correct + gs.wrong)) * 100) : 0;
         
-        const accEl = document.getElementById('stat-acc'); if(accEl) accEl.innerText = acc + '%';
-        const wrEl = document.getElementById('stat-wrongs'); if(wrEl) wrEl.innerText = wrongs.length;
-        
-        let mastered = 0;
-        all.forEach(i => { if(getItemStats(i).consecutive_correct >= masteryThreshold) mastered++; });
-        let mstRate = all.length > 0 ? Math.round((mastered / all.length) * 100) : 0;
-        const mstEl = document.getElementById('stat-mastery'); if(mstEl) mstEl.innerText = mstRate + '%';
+        const sAcc = document.getElementById('stat-acc'); if(sAcc) sAcc.innerText = acc + '%';
+        const sTot = document.getElementById('stat-total'); if(sTot) sTot.innerText = all.length;
+        const sStr = document.getElementById('stat-streak'); if(sStr) sStr.innerText = getConsecutiveDays();
         
         const container = document.getElementById('home-calendar');
         if(container) {
             const dates = JSON.parse(localStorage.getItem(`study_dates_${currentUser.id}`) || '[]');
             let html = '';
-            for(let i = 27; i >= 0; i--) {
+            for(let i = 13; i >= 0; i--) {
                 const d = new Date(); d.setDate(d.getDate() - i);
-                const dateStr = d.toLocaleDateString('en-CA');
-                const isAct = dates.includes(dateStr);
-                html += `<div class="cal-day ${isAct ? 'active' : ''}" title="${dateStr}"></div>`;
+                const isAct = dates.includes(d.toLocaleDateString('en-CA'));
+                html += `<span class="dot ${isAct ? 'active' : ''}"></span>`;
             }
             container.innerHTML = html;
         }
 
+        // Recent groups
+        const recentBox = document.getElementById('recent-groups-list');
+        if(recentBox) {
+            const recent = JSON.parse(localStorage.getItem(`recent_groups_${currentUser.id}`) || '[]');
+            if(recent.length === 0) recentBox.innerHTML = '<div class="recent-item" style="color:var(--sub-light); text-align:center;">暂无记录</div>';
+            else recentBox.innerHTML = recent.slice(0,2).map(r => `<div class="recent-item" onclick="quickStart('${r}')">${r}</div>`).join('');
+        }
+
         let displayEmail = currentUser.email.endsWith('@yanye.local') ? currentUser.email.replace('@yanye.local', '') : currentUser.email.split('@')[0];
         const unEl = document.getElementById('home-username'); if(unEl) unEl.innerText = displayEmail;
+    }
+
+    function recordRecentGroup(groupNames) {
+        if(!currentUser || !groupNames || groupNames.length === 0) return;
+        const groupStr = groupNames.join(' + ');
+        let recent = JSON.parse(localStorage.getItem(`recent_groups_${currentUser.id}`) || '[]');
+        recent = recent.filter(r => r !== groupStr);
+        recent.unshift(groupStr);
+        if(recent.length > 5) recent.pop();
+        localStorage.setItem(`recent_groups_${currentUser.id}`, JSON.stringify(recent));
+    }
+
+    function quickStart(groupStr) {
+        const groups = groupStr.split(' + ');
+        const checkboxes = document.querySelectorAll('#cb-group-list input');
+        checkboxes.forEach(cb => { cb.checked = groups.includes(cb.value); });
+        applyRule(); startNewLearning();
     }
 
     // ======= 核心流程控制 =======
@@ -761,10 +694,18 @@
         }
     }
 
+    function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err => alert(`全屏失败: ${err.message}`)); else if (document.exitFullscreen) document.exitFullscreen(); toggleSettings(false); }
+    function exportWrongs() {
+        if (wrongs.length === 0) return alert("错题本空空如也！");
+        let content = "言叶之庭 - 个人错题本\n==========================\n\n";
+        wrongs.forEach((w, i) => { content += `[${i+1}] 类别: ${w.cat || '综合'}\n题目: ${w.q}\n答案: ${w.a}\n--------------------------\n`; });
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "我的错题本.txt"; a.click();
+    }
+
     window.onload = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session && session.user) loginSuccess(session.user);
-        else { hideLoading(); const overlay = document.getElementById('auth-overlay'); if(overlay) overlay.style.display = 'flex'; }
+        else { hideLoading(); const v = document.getElementById('auth-view'); if(v) v.style.display = 'flex'; }
         
         allowDblClickClear = localStorage.getItem('allow_dblclick') !== 'false';
         const dblTg = document.getElementById('dblclick-toggle'); if(dblTg) dblTg.checked = allowDblClickClear;
@@ -801,13 +742,8 @@
         const disp = wrapper.querySelector('.custom-select-display'); if(disp) disp.innerText = text; 
         const hid = wrapper.querySelector('input[type="hidden"]'); if(hid) hid.value = val;
         const dropdown = wrapper.querySelector('.custom-select-dropdown'); 
-        if(dropdown) {
-            dropdown.querySelectorAll('.custom-option').forEach(el => el.classList.remove('selected'));
-            if(event && event.target) event.target.classList.add('selected');
-            dropdown.classList.remove('open'); 
-        }
-        if(disp) disp.classList.remove('open');
-        if (callback) callback();
+        if(dropdown) { dropdown.querySelectorAll('.custom-option').forEach(el => el.classList.remove('selected')); if(event && event.target) event.target.classList.add('selected'); dropdown.classList.remove('open'); }
+        if(disp) disp.classList.remove('open'); if (callback) callback();
     }
 
     // ======= Auth =======
@@ -820,9 +756,8 @@
     }
     function toggleAuthMode() {
         isRegisterMode = !isRegisterMode; 
-        const aTi = document.getElementById('auth-title'); if(aTi) aTi.innerText = isRegisterMode ? '加入言叶之庭' : '登录账号'; 
+        const aTi = document.getElementById('auth-toggle-btn'); if(aTi) aTi.innerText = isRegisterMode ? '已有账号？点击登录' : '没有账号？点击注册'; 
         const aSb = document.getElementById('auth-submit-btn'); if(aSb) aSb.innerText = isRegisterMode ? '注 册' : '登 录'; 
-        const aTb = document.getElementById('auth-toggle-btn'); if(aTb) aTb.innerText = isRegisterMode ? '已有账号？点击登录' : '没有账号？点击注册'; 
         const rcC = document.getElementById('recaptcha-container'); if(rcC) rcC.style.display = isRegisterMode ? 'block' : 'none'; 
         switchAuthType(authType);
     }
@@ -834,184 +769,106 @@
         if (account.toLowerCase() === 'admin') {
             account = 'admin@yanye.com'; authType = 'email';
             const { data, error } = await supabase.auth.signInWithPassword({ email: account, password: pwd });
-            if (error) { const regRes = await supabase.auth.signUp({ email: account, password: pwd }); if (regRes.data?.session === null) { hideLoading(); alert("请先关闭 Supabase 邮箱验证再试。"); return; } loginSuccess(regRes.data?.user); return; }
+            if (error) { const regRes = await supabase.auth.signUp({ email: account, password: pwd }); if (regRes.data?.session === null) { hideLoading(); alert("【拦截】检测到创建 admin 账号，请先去 Supabase 后台暂时关闭【Confirm email】再试！"); return; } loginSuccess(regRes.data?.user); return; }
             loginSuccess(data.user); return;
         }
         try {
             let finalEmail = account; if (authType === 'username') { if (!/^[a-zA-Z0-9_]+$/.test(account)) throw new Error("用户名只能包含字母、数字或下划线"); finalEmail = account + '@yanye.local'; }
             if (isRegisterMode) {
-                if (authType === 'username') { if (!inviteCode) throw new Error("邀请码为必填项"); const { data: codeData, error: codeErr } = await supabase.from('invitation_codes').select('*').eq('code', inviteCode).single(); if (codeErr || !codeData || codeData.is_used) throw new Error("邀请码无效或已被使用"); }
+                if (authType === 'username') { if(!inviteCode) throw new Error("邀请码为必填项"); const { data: codeData, error: codeErr } = await supabase.from('invitation_codes').select('*').eq('code', inviteCode).single(); if (codeErr || !codeData || codeData.is_used) throw new Error("邀请码无效或已被使用"); }
                 const { data, error } = await supabase.auth.signUp({ email: finalEmail, password: pwd });
                 if (error) throw error;
                 if (authType === 'username') { await supabase.from('invitation_codes').update({ is_used: true, used_by: account }).eq('code', inviteCode); loginSuccess(data.user); }
                 else if (data.session === null) { hideLoading(); pendingAuthEmail = finalEmail; document.getElementById('main-auth-card').style.display = 'none'; document.getElementById('otp-auth-card').style.display = 'block'; }
                 else loginSuccess(data.user);
-            } else {
-                const { data, error } = await supabase.auth.signInWithPassword({ email: finalEmail, password: pwd });
-                if (error) throw error; loginSuccess(data.user);
-            }
+            } else { const { data, error } = await supabase.auth.signInWithPassword({ email: finalEmail, password: pwd }); if (error) throw error; loginSuccess(data.user); }
         } catch (e) { hideLoading(); alert("操作失败：" + e.message); if (window.grecaptcha) grecaptcha.reset(); }
     }
     async function verifyOtpCode() {
-        const token = document.getElementById('auth-otp-input').value.trim();
-        if (!token || token.length < 5) return alert("请输入完整的验证码");
-        showLoading("核验代码...");
-        try { const { data, error } = await supabase.auth.verifyOtp({ email: pendingAuthEmail, token, type: 'signup' }); if (error) throw error; loginSuccess(data.user); } catch (e) { hideLoading(); alert("验证失败: " + e.message); }
+        const token = document.getElementById('auth-otp-input').value.trim(); if (!token || token.length < 5) return alert("请输入完整的验证码");
+        showLoading("核验代码..."); try { const { data, error } = await supabase.auth.verifyOtp({ email: pendingAuthEmail, token, type: 'signup' }); if (error) throw error; loginSuccess(data.user); } catch (e) { hideLoading(); alert("验证失败: " + e.message); }
     }
     function cancelOtpMode() { const oac = document.getElementById('otp-auth-card'); if(oac) oac.style.display = 'none'; const mac = document.getElementById('main-auth-card'); if(mac) mac.style.display = 'block'; if (window.grecaptcha) grecaptcha.reset(); }
+    
     function loginSuccess(user) {
         currentUser = user; 
-        const ao = document.getElementById('auth-overlay'); if(ao) ao.style.display = 'none';
+        const av = document.getElementById('auth-view'); if(av) av.style.display = 'none';
+        
         let displayEmail = user.email;
         if (displayEmail === 'admin@yanye.com') displayEmail = '🌟 管理员 (Admin)';
-        else if (displayEmail.endsWith('@yanye.local')) displayEmail = '👤 ' + displayEmail.replace('@yanye.local', '');
+        else if (displayEmail.endsWith('@yanye.local')) displayEmail = displayEmail.replace('@yanye.local', '');
+        
         const uit = document.getElementById('user-info-text'); if(uit) uit.innerText = `已连接账号: ${displayEmail}`;
         const ap = document.getElementById('admin-panel');
         if (user.email === 'admin@yanye.com' && ap) { ap.style.display = 'block'; fetchInviteCodesAdmin(); }
         wrongStorageKey = `wrongs_v11_${user.id}`; wrongs = JSON.parse(localStorage.getItem(wrongStorageKey) || '[]');
         
-        // 加载 SR 设置
         useSpacedRepetition = localStorage.getItem('use_sr') !== 'false';
         const st = document.getElementById('sr-toggle'); if(st) st.checked = useSpacedRepetition;
         masteryThreshold = parseInt(localStorage.getItem('mastery_thresh') || '5');
         const mv = document.getElementById('mastery-val'); if(mv) mv.value = masteryThreshold; 
-        const mtd = document.getElementById('mastery-thresh-display'); if(mtd) mtd.innerText = masteryThreshold;
         const masteryTexts = { '3': '3 次连续正确', '5': '5 次连续正确', '8': '8 次连续正确' }; 
         const cwMd = document.querySelector('#cw-mastery .custom-select-display'); if(cwMd) cwMd.innerText = masteryTexts[masteryThreshold] || '5 次连续正确';
         
-        loadTheme(); loadMemoryStats(); syncAndGoHome();
+        loadMemoryStats(); syncAndGoHome();
     }
-    async function generateInviteCodeToDB() {
-        showLoading("生成中..."); const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = ''; for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-        try { const { error } = await supabase.from('invitation_codes').insert({ code, created_by: currentUser.id }); if (error) throw error; fetchInviteCodesAdmin(); } catch (e) { alert("生成失败: " + e.message); } hideLoading();
-    }
-    async function fetchInviteCodesAdmin() {
-        const div = document.getElementById('admin-codes'); if(!div) return; div.innerHTML = "读取中...";
-        try { const { data, error } = await supabase.from('invitation_codes').select('*').order('created_at', { ascending: false }); if (error) throw error; div.innerHTML = data.map(c => `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 5px;border-bottom:1px dashed var(--border);"><div><strong style="color:${c.is_used?'var(--sub)':'var(--color-green)'};letter-spacing:1px;font-size:14px;">${c.code}</strong><div style="font-size:11px;margin-top:4px;color:var(--sub);">${c.is_used?('已用: '+c.used_by):'✨ 全新可用'}</div></div><button onclick="invalidateInviteCode('${c.code}','${c.used_by||''}')" style="background:var(--color-red);color:white;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:bold;">作废/封号</button></div>`).join(''); } catch (e) { div.innerHTML = "读取失败: " + e.message; }
-    }
-    async function invalidateInviteCode(code, usedBy) {
-        if (!confirm(`⚠️ 危险操作：\n作废该邀请码将导致用户(${usedBy||'无'})被彻底删除！\n\n确定执行？`)) return;
-        showLoading("销毁中...");
-        try { const { error } = await supabase.rpc('admin_delete_invite_and_user', { target_code: code, target_username: usedBy }); if (error) throw error; alert("执行成功！"); fetchInviteCodesAdmin(); } catch (e) { alert("销毁失败: " + e.message); }
-        hideLoading();
-    }
-    async function logoutAccount() {
-        showLoading("切断连接...");
-        try { await supabase.auth.signOut(); for (let key in localStorage) { if (key.startsWith('sb-')) localStorage.removeItem(key); } window.location.replace(window.location.href.split('?')[0]); } catch (error) { window.location.reload(); }
-    }
-    async function deleteAccount() {
-        const c1 = confirm("⚠️ 危险警告\n注销账号将永久销毁您的所有云端词库、错题本，此操作不可逆！\n\n确定要继续吗？"); if (!c1) return;
-        const c2 = prompt("请输入【确认注销】四个字以执行自毁程序："); if (c2 !== "确认注销") return alert("自毁程序已中止。");
-        showLoading("销毁中...");
-        try { const { error } = await supabase.rpc('delete_user'); if (error) throw error; alert("账号数据已彻底化为尘埃。有缘再见。"); await logoutAccount(); } catch (e) { alert("注销失败：" + e.message); hideLoading(); }
-    }
+    
+    async function generateInviteCodeToDB() { showLoading("生成中..."); const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = ''; for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length)); try { const { error } = await supabase.from('invitation_codes').insert({ code, created_by: currentUser.id }); if (error) throw error; fetchInviteCodesAdmin(); } catch (e) { alert("生成失败: " + e.message); } hideLoading(); }
+    async function fetchInviteCodesAdmin() { const div = document.getElementById('admin-codes'); if(!div) return; div.innerHTML = "读取中..."; try { const { data, error } = await supabase.from('invitation_codes').select('*').order('created_at', { ascending: false }); if (error) throw error; div.innerHTML = data.map(c => `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 5px;border-bottom:1px dashed var(--border);"><div><strong style="color:${c.is_used?'var(--sub)':'var(--color-green)'};letter-spacing:1px;font-size:14px;">${c.code}</strong><div style="font-size:11px;margin-top:4px;color:var(--sub);">${c.is_used?('已用: '+c.used_by):'✨ 全新可用'}</div></div><button onclick="invalidateInviteCode('${c.code}','${c.used_by||''}')" style="background:transparent;border:1px solid var(--color-red);color:var(--color-red);border-radius:6px;padding:6px 12px;font-size:11px;">作废/封号</button></div>`).join(''); } catch (e) { div.innerHTML = "读取失败: " + e.message; } }
+    async function invalidateInviteCode(code, usedBy) { if (!confirm(`⚠️ 危险操作：\n作废该邀请码将导致用户(${usedBy||'无'})被彻底删除！\n\n确定执行？`)) return; showLoading("销毁中..."); try { const { error } = await supabase.rpc('admin_delete_invite_and_user', { target_code: code, target_username: usedBy }); if (error) throw error; fetchInviteCodesAdmin(); } catch (e) { alert("销毁失败: " + e.message); } hideLoading(); }
+    async function logoutAccount() { showLoading("切断..."); try { await supabase.auth.signOut(); for (let key in localStorage) { if (key.startsWith('sb-')) localStorage.removeItem(key); } window.location.reload(); } catch (error) { window.location.reload(); } }
+    async function deleteAccount() { const c1 = confirm("⚠️ 危险警告\n注销账号将永久销毁您的所有数据，此操作不可逆！\n\n确定要继续吗？"); if (!c1) return; const c2 = prompt("请输入【确认注销】："); if (c2 !== "确认注销") return alert("已中止。"); showLoading("销毁中..."); try { const { error } = await supabase.rpc('delete_user'); if (error) throw error; alert("数据已抹除。"); await logoutAccount(); } catch (e) { alert("注销失败：" + e.message); hideLoading(); } }
 
     // ======= 资源中心 =======
     let resourceData = [];
-    function toggleResourceCenter(show) { const rc = document.getElementById('resource-center'); if(rc) rc.style.display = show ? 'block' : 'none'; if (show) { toggleSettings(false); closeSetupPanel(); fetchResources(); } }
-    function toggleUploadModal(show) {
-        const um = document.getElementById('upload-modal'); if(um) um.style.display = show ? 'block' : 'none';
-        if (!show) { const ruf = document.getElementById('rc-up-file'); if(ruf) ruf.value = ""; const rcb = document.getElementById('rc-up-cover-base64'); if(rcb) rcb.value = ""; const rcl = document.getElementById('rc-up-file-label'); if(rcl) { rcl.innerText = "📸 点击此处选择本地图片"; rcl.style.borderColor = "var(--border)"; rcl.style.color = "var(--sub)"; } }
-    }
-    function handleLocalImage(e) {
-        const file = e.target.files[0]; if (!file) return; const reader = new FileReader();
-        reader.onload = (event) => { const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d'); let w = img.width, h = img.height; if (w > h && w > 500) { h *= 500/w; w = 500; } else if (h > 500) { w *= 500/h; h = 500; } canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h); const rcb = document.getElementById('rc-up-cover-base64'); if(rcb) rcb.value = canvas.toDataURL('image/jpeg', 0.8); const label = document.getElementById('rc-up-file-label'); if(label) { label.innerText = `✅ 图片已就绪 (${file.name})`; label.style.borderColor = "var(--color-green)"; label.style.color = "var(--color-green)"; } }; img.src = event.target.result; }; reader.readAsDataURL(file);
-    }
-    async function fetchResources() {
-        const listDiv = document.getElementById('rc-list'); if(!listDiv) return; listDiv.innerHTML = '<p style="color:var(--sub);font-size:14px;grid-column:1/-1;text-align:center;">连接资源卫星中...</p>';
-        try { const { data, error } = await supabase.from('resource_center').select('*').order('created_at', { ascending: false }); if (error) throw error; resourceData = data || []; renderResources(); } catch (e) { listDiv.innerHTML = `<p style="color:red;font-size:14px;grid-column:1/-1;text-align:center;">卫星连接失败: ${e.message}</p>`; }
-    }
+    function toggleResourceCenter(show) { const rc = document.getElementById('resource-center'); if(rc) rc.classList.toggle('open', show); if (show) { closeSetupPanel(); fetchResources(); } }
+    function toggleUploadModal(show) { const um = document.getElementById('upload-modal'); if(um) um.classList.toggle('open', show); if (!show) { const ruf = document.getElementById('rc-up-file'); if(ruf) ruf.value = ""; const rcb = document.getElementById('rc-up-cover-base64'); if(rcb) rcb.value = ""; const rcl = document.getElementById('rc-up-file-label'); if(rcl) { rcl.innerText = "点击选取图片"; } } }
+    function handleLocalImage(e) { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (event) => { const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d'); let w = img.width, h = img.height; if (w > h && w > 500) { h *= 500/w; w = 500; } else if (h > 500) { w *= 500/h; h = 500; } canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h); const rcb = document.getElementById('rc-up-cover-base64'); if(rcb) rcb.value = canvas.toDataURL('image/jpeg', 0.8); const label = document.getElementById('rc-up-file-label'); if(label) { label.innerText = `✅ 图片已就绪 (${file.name})`; } }; img.src = event.target.result; }; reader.readAsDataURL(file); }
+    async function fetchResources() { const listDiv = document.getElementById('rc-list'); if(!listDiv) return; listDiv.innerHTML = '<p style="color:var(--sub);font-size:14px;grid-column:1/-1;text-align:center;">读取中...</p>'; try { const { data, error } = await supabase.from('resource_center').select('*').order('created_at', { ascending: false }); if (error) throw error; resourceData = data || []; renderResources(); } catch (e) { listDiv.innerHTML = `<p style="color:var(--color-red);font-size:14px;grid-column:1/-1;text-align:center;">连接失败: ${e.message}</p>`; } }
     function renderResources() {
         const listDiv = document.getElementById('rc-list'); if(!listDiv) return;
-        if (resourceData.length === 0) { listDiv.innerHTML = '<p style="color:var(--sub);font-size:14px;grid-column:1/-1;text-align:center;">空空如也，快来分享第一个题库吧！</p>'; return; }
-        const isAdmin = currentUser && currentUser.email === 'admin@yanye.com';
-        const localGroups = [...new Set(all.map(i => i.group_name || '默认分组'))];
+        if (resourceData.length === 0) { listDiv.innerHTML = '<p style="color:var(--sub);font-size:14px;grid-column:1/-1;text-align:center;">暂无资源分享</p>'; return; }
+        const isAdmin = currentUser && currentUser.email === 'admin@yanye.com'; const localGroups = [...new Set(all.map(i => i.group_name || '默认分组'))];
         listDiv.innerHTML = resourceData.map(res => {
             const canDelete = currentUser && (res.uploader_id === currentUser.id || isAdmin);
-            let displayAuthor = res.uploader_email.endsWith('@yanye.local') ? '👤 ' + res.uploader_email.replace('@yanye.local', '') : res.uploader_email.split('@')[0];
-            if (res.uploader_email === 'admin@yanye.com') displayAuthor = '👑 官方精选';
+            let displayAuthor = res.uploader_email.endsWith('@yanye.local') ? '👤 ' + res.uploader_email.replace('@yanye.local', '') : res.uploader_email.split('@')[0]; if (res.uploader_email === 'admin@yanye.com') displayAuthor = '👑 官方精选';
             const coverHtml = (res.cover_url && res.cover_url.length > 20) ? `<img src="${res.cover_url}" class="rc-cover" onerror="this.outerHTML='<div class=\\'rc-cover-emoji\\'>📄</div>'">` : `<div class="rc-cover-emoji">📄</div>`;
             const isDownloaded = localGroups.includes(res.title);
-            const dlBtnHtml = isDownloaded ? `<button class="rc-btn" style="background:var(--border);color:var(--sub);cursor:not-allowed;" disabled>✅ 已下载</button>` : `<button class="rc-btn rc-btn-dl" onclick="downloadResource('${res.id}')">📥 下载</button>`;
-            return `<div class="rc-item">${coverHtml}<div class="rc-info"><h4 class="rc-title">${res.title}</h4><div class="rc-author">${displayAuthor}</div><p class="rc-desc">${res.description||'暂无简介'}</p></div><div class="rc-actions">${dlBtnHtml}${canDelete?`<button class="rc-btn rc-btn-del" onclick="deleteResource('${res.id}')">🗑️</button>`:''}</div></div>`;
+            const dlBtnHtml = isDownloaded ? `<button class="btn btn-outline" style="flex:1; padding:8px; font-size:12px;" disabled>已下载</button>` : `<button class="btn btn-primary" style="flex:1; padding:8px; font-size:12px;" onclick="downloadResource('${res.id}')">下载</button>`;
+            return `<div class="rc-item">${coverHtml}<div class="rc-info"><h4 class="rc-title">${res.title}</h4><div class="rc-author">${displayAuthor}</div><p class="rc-desc">${res.description||'暂无简介'}</p></div><div class="rc-actions">${dlBtnHtml}${canDelete?`<button class="btn btn-outline" style="color:var(--color-red); border-color:var(--color-red); padding:8px;" onclick="deleteResource('${res.id}')">删除</button>`:''}</div></div>`;
         }).join('');
     }
     async function submitResource() {
         const titEl = document.getElementById('rc-up-title'), desEl = document.getElementById('rc-up-desc'), covEl = document.getElementById('rc-up-cover-base64'), jsnEl = document.getElementById('rc-up-json');
-        if(!titEl || !jsnEl) return;
-        const title = titEl.value.trim(), desc = desEl ? desEl.value.trim() : "", cover = covEl ? covEl.value : "", jsonText = jsnEl.value.trim();
-        if (!title || !jsonText) return alert("标题和 JSON 数据为必填项！");
-        let jsonData = [];
+        if(!titEl || !jsnEl) return; const title = titEl.value.trim(), desc = desEl ? desEl.value.trim() : "", cover = covEl ? covEl.value : "", jsonText = jsnEl.value.trim();
+        if (!title || !jsonText) return alert("标题和 JSON 数据为必填项！"); let jsonData = [];
         try { jsonData = JSON.parse(jsonText); if (!Array.isArray(jsonData)) throw new Error("JSON 必须是数组格式"); } catch (e) { return alert("JSON 格式有误: " + e.message); }
         showLoading("上传中...");
-        try { const { error } = await supabase.from('resource_center').insert({ title, description: desc, cover_url: cover, json_data: jsonData, uploader_id: currentUser.id, uploader_email: currentUser.email }); if (error) throw error; alert("发布成功！感谢您的无私分享。"); titEl.value = ''; if(desEl) desEl.value = ''; jsnEl.value = ''; toggleUploadModal(false); fetchResources(); } catch (e) { alert("发布失败: " + e.message); }
-        hideLoading();
+        try { const { error } = await supabase.from('resource_center').insert({ title, description: desc, cover_url: cover, json_data: jsonData, uploader_id: currentUser.id, uploader_email: currentUser.email }); if (error) throw error; alert("发布成功！"); titEl.value = ''; if(desEl) desEl.value = ''; jsnEl.value = ''; toggleUploadModal(false); fetchResources(); } catch (e) { alert("发布失败: " + e.message); } hideLoading();
     }
     async function downloadResource(id) {
         const res = resourceData.find(r => r.id === id); if (!res) return;
-        const groupName = prompt(`你要将【${res.title}】下载到本地的哪个分组中？`, res.title); if (!groupName) return;
-        showLoading("合并词条中...");
-        try { const dataToInsert = res.json_data.map(item => { const cleanItem = { ...item, group_name: groupName, user_id: currentUser.id }; delete cleanItem.id; delete cleanItem.created_at; return cleanItem; }); const { error } = await supabase.from('dictation_items').insert(dataToInsert); if (error) throw error; alert(`成功！${dataToInsert.length} 个词条已落入【${groupName}】分组！`); await sync(); renderResources(); } catch (e) { alert("下载失败：" + e.message); }
-        hideLoading();
+        const groupName = prompt(`你要将【${res.title}】下载到本地的哪个分组中？\n可以直接设为原名也可以修改：`, res.title); if (!groupName) return;
+        showLoading("合并中...");
+        try { const dataToInsert = res.json_data.map(item => { const cleanItem = { ...item, group_name: groupName, user_id: currentUser.id }; delete cleanItem.id; delete cleanItem.created_at; return cleanItem; }); const { error } = await supabase.from('dictation_items').insert(dataToInsert); if (error) throw error; alert(`成功导入 ${dataToInsert.length} 个词条！`); await sync(); renderResources(); } catch (e) { alert("下载失败：" + e.message); } hideLoading();
     }
     async function deleteResource(id) {
-        if (!confirm("确定要彻底抹除这个分享吗？")) return;
-        showLoading("抹除中...");
-        try { const { error } = await supabase.from('resource_center').delete().eq('id', id); if (error) throw error; fetchResources(); } catch (e) { alert("删除失败: " + e.message); }
-        hideLoading();
+        if (!confirm("确定要抹除这个分享吗？")) return; showLoading("抹除中...");
+        try { const { error } = await supabase.from('resource_center').delete().eq('id', id); if (error) throw error; fetchResources(); } catch (e) { alert("删除失败: " + e.message); } hideLoading();
     }
 
-    // ======= 核心系统 =======
-    function initGame() { initCanvas(); initBGM(); renderWrongs(); loadTheme(); }
-    function changeTheme() { 
-        const tv = document.getElementById('theme-val'); if(!tv) return;
-        const t = tv.value; document.body.setAttribute('data-theme', t); localStorage.setItem('app_theme', t); initCanvas(); 
-    }
-    function loadTheme() {
-        const saved = localStorage.getItem('app_theme') || 'default';
-        const m = { 'default': '🍵 抹茶 (默认绿)', 'sakura': '🌸 落樱 (粉红)', 'sora': '☁️ 晴空 (天蓝)', 'yoru': '🌙 夜色 (暗紫)', 'aki': '🍁 枫叶 (橙红)', 'take': '🎋 修竹 (深绿)', 'github': '🐙 极客 (GitHub 扁平)' };
-        const tv = document.getElementById('theme-val'); if(tv) tv.value = saved; 
-        const cwMd = document.querySelector('#cw-theme .custom-select-display'); if(cwMd) cwMd.innerText = m[saved] || m['default'];
-        document.body.setAttribute('data-theme', saved);
-    }
-    function toggleAppMode() {
-        if (isSessionActive) return; isIntenseMode = !isIntenseMode;
-        document.body.classList.toggle('intense-mode', isIntenseMode);
-        const mtb = document.getElementById('mode-toggle-btn'); if(mtb) mtb.innerText = isIntenseMode ? '⚡ 激烈' : '🌸 休闲';
-        resetEraser(); initCanvas(); playBGM(true); restartSession();
-    }
-    function restartSession() {
-        clearInterval(qTimerInterval); clearInterval(prepInterval); clearTimeout(autoNextTimeout); isSessionActive = false; sessionStreak = 0; updateStreakBadge();
-        const mtb = document.getElementById('mode-toggle-btn'); if(mtb) mtb.classList.remove('locked');
-        const itm = document.getElementById('intense-timer'); if(itm) { itm.classList.remove('prep', 'urgent'); itm.innerText = ''; }
-        const fov = document.getElementById('finish-overlay'); if(fov) fov.style.display = 'none';
-        const cc = document.getElementById('confetti-canvas'); if(cc) { const cCtx = cc.getContext('2d'); cCtx.clearRect(0, 0, window.innerWidth, window.innerHeight); }
-        const ap = document.getElementById('ans-pop'); if(ap) ap.classList.remove('timeout-state');
-        resetEraser(); pool = [...filtered]; sCorrect = 0; sWrong = 0; updateProgress();
-        if (audioInitialized) playBGM(true);
-        if (isIntenseMode) startPrepCountdown();
-        else { if (pool.length > 0) nextQ(); else { const qt = document.getElementById('q-text'); if(qt) qt.innerText = "该筛选条件下暂无题目"; } }
-    }
-    
-    // 主页及流程控制
+    // ======= 主页及流程控制 =======
     async function syncAndGoHome() {
         showLoading("同步词库数据...");
-        const { data } = await supabase.from('dictation_items').select('*');
-        all = data || []; updateGroupSelect(); 
-        hideLoading();
+        const { data } = await supabase.from('dictation_items').select('*'); all = data || []; updateGroupSelect(); hideLoading();
         const lv = document.getElementById('learning-view'); if(lv) lv.style.display = 'none';
         const hv = document.getElementById('home-view'); if(hv) hv.style.display = 'flex';
         updateHomeStats();
-        
-        const bRl = document.getElementById('btn-resume-learn');
-        if(bRl) bRl.style.display = activeSession ? 'block' : 'none';
+        const bRl = document.getElementById('btn-resume-learn'); if(bRl) bRl.style.display = activeSession ? 'block' : 'none';
     }
-
     async function sync() {
         showLoading("更新数据...");
-        const { data } = await supabase.from('dictation_items').select('*');
-        all = data || []; updateGroupSelect(); updateHomeStats();
-        hideLoading();
+        const { data } = await supabase.from('dictation_items').select('*'); all = data || []; updateGroupSelect(); updateHomeStats(); hideLoading();
     }
 
     function openSetupPanel() {
@@ -1023,11 +880,10 @@
     function openSettingsFromLearning() {
         const sa = document.getElementById('settings-anchor'); const dp = document.getElementById('dynamic-controls-pool');
         if(sa && dp) { sa.appendChild(dp); dp.style.display = 'block'; }
-        const st = document.getElementById('settings'); if(st) st.style.display = 'block';
-        renderSRStats();
+        const st = document.getElementById('settings'); if(st) st.classList.add('open'); renderSRStats();
     }
     function toggleSettings(s) { 
-        if(!s) { const st = document.getElementById('settings'); if(st) st.style.display = 'none'; }
+        if(!s) { const st = document.getElementById('settings'); if(st) st.classList.remove('open'); }
         else openSettingsFromLearning(); 
     }
 
@@ -1035,6 +891,11 @@
         closeSetupPanel(); activeSession = null;
         const hv = document.getElementById('home-view'); if(hv) hv.style.display = 'none';
         const lv = document.getElementById('learning-view'); if(lv) lv.style.display = 'flex';
+        
+        // 记录最近学习的组
+        const selectedGroups = Array.from(document.querySelectorAll('#cb-group-list input:checked')).map(el => el.value);
+        recordRecentGroup(selectedGroups);
+        
         applyRule(); 
     }
 
@@ -1059,21 +920,20 @@
         const lv = document.getElementById('learning-view'); if(lv) lv.style.display = 'flex';
         isSessionActive = true;
         
-        const mtb = document.getElementById('mode-toggle-btn'); if(mtb) mtb.innerText = isIntenseMode ? '⚡ 激烈' : '🌸 休闲';
+        const mtb = document.getElementById('mode-toggle-btn'); if(mtb) mtb.innerText = isIntenseMode ? '激烈' : '休闲';
         const ss = document.getElementById('session-stats'); if(ss) ss.innerText = `正确 ${sCorrect} | 错误 ${sWrong}`;
         updateStreakBadge();
         
         const qEl = document.getElementById('q-text'); if(qEl) { qEl.innerText = current.q; qEl.className = current.q.length > 12 ? 'long' : ''; }
         const qc = document.getElementById('q-cat'); if(qc) qc.innerText = `${(current.cat || 'COMMON').toUpperCase()} · 共 ${current.a ? current.a.length : 0} 字`; 
         const at = document.getElementById('ans-text'); if(at) at.innerText = current.a || '';
-        const ap = document.getElementById('ans-pop'); if(ap) ap.classList.remove('timeout-state');
+        const ap = document.getElementById('ans-pop'); if(ap) ap.classList.remove('active');
         
         if (isIntenseMode) {
             const itm = document.getElementById('intense-timer'); if(itm) itm.innerText = qTimeLeft;
             qTimerInterval = setInterval(() => {
                 qTimeLeft--; if(itm) itm.innerText = qTimeLeft;
-                if (qTimeLeft <= 3 && qTimeLeft > 0) { if(itm) itm.classList.add('urgent'); }
-                else { if(itm) itm.classList.remove('urgent'); }
+                if (qTimeLeft <= 3 && qTimeLeft > 0) { if(itm) itm.classList.add('urgent'); } else { if(itm) itm.classList.remove('urgent'); }
                 if (qTimeLeft <= 0) { clearInterval(qTimerInterval); if(itm) itm.classList.remove('urgent'); handleTimeUp(); }
             }, 1000);
         }
@@ -1083,7 +943,7 @@
         const groups = [...new Set(all.map(i => i.group_name || '默认分组'))];
         const container = document.getElementById('cb-group-list'); if(!container) return;
         const previouslyChecked = Array.from(container.querySelectorAll('input:checked')).map(el => el.value);
-        if (groups.length === 0) { container.innerHTML = '<p style="font-size:12px;color:var(--sub);padding:10px;">暂无本地词库</p>'; return; }
+        if (groups.length === 0) { container.innerHTML = '<p style="font-size:13px;color:var(--sub);padding:10px;text-align:center;">暂无本地词库，请先从资源中心下载</p>'; return; }
         container.innerHTML = groups.map(g => {
             const isChecked = (previouslyChecked.length === 0) ? 'checked' : (previouslyChecked.includes(g) ? 'checked' : '');
             return `<label class="cb-item"><input type="checkbox" value="${g}" ${isChecked} onchange="applyRule()"><div class="cb-checkmark"></div><div class="cb-label">${g}</div></label>`;
@@ -1093,18 +953,15 @@
     async function deleteLocalGroups() {
         const selected = Array.from(document.querySelectorAll('#cb-group-list input:checked')).map(el => el.value);
         if (selected.length === 0) return alert("请先勾选要删除的词库");
-        if (!confirm(`⚠️ 确定要彻底删除以下 ${selected.length} 个词库吗？\n（${selected.join(', ')}）`)) return;
-        showLoading("清理词库中...");
-        try { const { error } = await supabase.from('dictation_items').delete().eq('user_id', currentUser.id).in('group_name', selected); if (error) throw error; alert("词库已彻底删除！"); sync(); } catch (e) { alert("删除失败：" + e.message); }
-        hideLoading();
+        if (!confirm(`⚠️ 确定要彻底删除以下 ${selected.length} 个词库吗？`)) return;
+        showLoading("清理中...");
+        try { const { error } = await supabase.from('dictation_items').delete().eq('user_id', currentUser.id).in('group_name', selected); if (error) throw error; sync(); } catch (e) { alert("删除失败：" + e.message); } hideLoading();
     }
     function applyRule() {
         const mv = document.getElementById('mode-val'); const m = mv ? mv.value : 'all';
         const selectedGroups = Array.from(document.querySelectorAll('#cb-group-list input:checked')).map(el => el.value);
         let baseList = selectedGroups.length > 0 ? all.filter(i => selectedGroups.includes(i.group_name || '默认分组')) : [];
-        if (useSpacedRepetition && m === 'all') { // 全局模式下应用真·隔日重现拦截
-            baseList = baseList.filter(item => { const s = getItemStats(item); if (s.consecutive_correct >= masteryThreshold) { if (!s.last_seen) return true; const days = (Date.now() - s.last_seen)/(1000*60*60*24); if(days < 1) return false; } return true; });
-        }
+        if (useSpacedRepetition && m === 'all') { baseList = baseList.filter(item => { const s = getItemStats(item); if (s.consecutive_correct >= masteryThreshold) { if (!s.last_seen) return true; const days = (Date.now() - s.last_seen)/(1000*60*60*24); if(days < 1) return false; } return true; }); }
         if (m === 'all') filtered = baseList;
         else if (m === 'wrong') filtered = wrongs;
         else if (m === 'sr_hard') filtered = baseList.filter(i => { const s = getItemStats(i); return s.memory_weight > 150 && s.consecutive_correct < masteryThreshold; });
@@ -1116,75 +973,69 @@
         const ci = document.getElementById('count-info'); if(ci) ci.innerText = `${filtered.length}`;
         renderSRStats(); restartSession();
     }
+
+    function toggleAppMode() {
+        if (isSessionActive) return; isIntenseMode = !isIntenseMode;
+        document.body.classList.toggle('intense-mode', isIntenseMode);
+        const mtb = document.getElementById('mode-toggle-btn'); if(mtb) mtb.innerText = isIntenseMode ? '激烈' : '休闲';
+        resetEraser(); initCanvas(); playBGM(true); restartSession();
+    }
+    function changeIntenseTime() { if(isIntenseMode) restartSession(); }
+    function restartSession() {
+        clearInterval(qTimerInterval); clearInterval(prepInterval); clearTimeout(autoNextTimeout); isSessionActive = false; sessionStreak = 0; updateStreakBadge();
+        const mtb = document.getElementById('mode-toggle-btn'); if(mtb) mtb.classList.remove('locked');
+        const itm = document.getElementById('intense-timer'); if(itm) { itm.classList.remove('prep', 'urgent'); itm.innerText = ''; }
+        const fov = document.getElementById('finish-overlay'); if(fov) fov.style.display = 'none';
+        const cc = document.getElementById('confetti-canvas'); if(cc) { const cCtx = cc.getContext('2d'); cCtx.clearRect(0, 0, window.innerWidth, window.innerHeight); }
+        const ap = document.getElementById('ans-pop'); if(ap) ap.classList.remove('active', 'timeout-state');
+        resetEraser(); pool = [...filtered]; sCorrect = 0; sWrong = 0; updateProgress();
+        if (audioInitialized) playBGM(true);
+        if (isIntenseMode) startPrepCountdown(); else { if (pool.length > 0) nextQ(); else { const qt = document.getElementById('q-text'); if(qt) qt.innerText = "该筛选条件下暂无题目"; } }
+    }
+
     function startPrepCountdown() {
-        let prepTime = 12; const timerEl = document.getElementById('intense-timer'); if(timerEl) { timerEl.classList.add('prep'); timerEl.innerText = prepTime; }
-        const qt = document.getElementById('q-text'); if(qt) qt.innerText = "准备迎接极限考验..."; 
+        let prepTime = 5; const timerEl = document.getElementById('intense-timer'); if(timerEl) { timerEl.classList.add('prep'); timerEl.innerText = prepTime; }
+        const qt = document.getElementById('q-text'); if(qt) qt.innerText = "准备迎接..."; 
         const qc = document.getElementById('q-cat'); if(qc) qc.innerText = "PREPARING";
         prepInterval = setInterval(() => { prepTime--; if(timerEl) timerEl.innerText = prepTime; if (prepTime <= 0) { clearInterval(prepInterval); if(timerEl) timerEl.classList.remove('prep'); beginIntenseChallenge(); } }, 1000);
     }
     function beginIntenseChallenge() { isSessionActive = true; const mtb = document.getElementById('mode-toggle-btn'); if(mtb) mtb.classList.add('locked'); sessionStartTime = Date.now(); if (pool.length > 0) nextQ(); }
     function nextQ() {
-        if (!pool.length) return;
-        clearBoard();
-        current = weightedPick(pool);
+        if (!pool.length) return; clearBoard(); current = weightedPick(pool);
         const qEl = document.getElementById('q-text'); if(qEl) { qEl.innerText = current.q; qEl.className = current.q.length > 12 ? 'long' : ''; }
-        const catEl = document.getElementById('q-cat');
-        const diffInfo = getDifficultyInfo(current);
-        const catText = `${(current.cat || 'COMMON').toUpperCase()} · ${current.a ? current.a.length : 0} 字`;
-        if(catEl) {
-            if (diffInfo && useSpacedRepetition) { catEl.innerHTML = `<span>${catText}</span><span class="diff-badge ${diffInfo.cls}">${diffInfo.label}</span>`; } 
-            else { catEl.innerHTML = `<span>${catText}</span>`; }
-        }
+        const catEl = document.getElementById('q-cat'); const diffInfo = getDifficultyInfo(current); const catText = `${(current.cat || 'COMMON').toUpperCase()}`;
+        if(catEl) { if (diffInfo && useSpacedRepetition) { catEl.innerHTML = `<span>${catText}</span><span class="diff-badge ${diffInfo.cls}">${diffInfo.label}</span>`; } else { catEl.innerHTML = `<span>${catText}</span>`; } }
         const at = document.getElementById('ans-text'); if(at) at.innerText = current.a || '';
-        
         const isr = document.getElementById('item-sr-stats');
         if (useSpacedRepetition && isr) {
-            const stats = getItemStats(current);
-            const daysSince = stats.last_seen ? Math.floor((Date.now() - stats.last_seen) / (1000*60*60*24)) : null;
-            isr.innerHTML = `
-                <span class="sr-stat-chip">❌ ${stats.wrong_count} 次</span>
-                <span class="sr-stat-chip">✅ 连对 ${stats.consecutive_correct}</span>
-                <span class="sr-stat-chip">⚖️ 权重 ${stats.memory_weight}</span>
-                ${daysSince !== null ? `<span class="sr-stat-chip">🕐 ${daysSince === 0 ? '今天' : daysSince + '天前'}</span>` : '<span class="sr-stat-chip">🕐 初见</span>'}
-            `;
+            const stats = getItemStats(current); const daysSince = stats.last_seen ? Math.floor((Date.now() - stats.last_seen) / (1000*60*60*24)) : null;
+            isr.innerHTML = `<span class="sr-stat-chip">❌ ${stats.wrong_count} 次</span><span class="sr-stat-chip">✅ 连对 ${stats.consecutive_correct}</span><span class="sr-stat-chip">⚖️ 权重 ${stats.memory_weight}</span>${daysSince !== null ? `<span class="sr-stat-chip">🕐 ${daysSince === 0 ? '今天' : daysSince + '天前'}</span>` : '<span class="sr-stat-chip">🕐 初见</span>'}`;
         } else if(isr) { isr.innerHTML = ''; }
-        
-        const ap = document.getElementById('ans-pop'); if(ap) ap.classList.remove('timeout-state');
+        const ap = document.getElementById('ans-pop'); if(ap) ap.classList.remove('active', 'timeout-state');
         if (isIntenseMode) {
             const tv = document.getElementById('time-val'); qTimeLeft = parseInt(tv ? tv.value : '8') || 8;
-            const itm = document.getElementById('intense-timer'); if(itm) itm.innerText = qTimeLeft;
-            clearInterval(qTimerInterval);
-            qTimerInterval = setInterval(() => {
-                qTimeLeft--; if(itm) itm.innerText = qTimeLeft;
-                if (qTimeLeft <= 3 && qTimeLeft > 0) { if(itm) itm.classList.add('urgent'); }
-                else { if(itm) itm.classList.remove('urgent'); }
-                if (qTimeLeft <= 0) { clearInterval(qTimerInterval); if(itm) itm.classList.remove('urgent'); handleTimeUp(); }
-            }, 1000);
+            const itm = document.getElementById('intense-timer'); if(itm) itm.innerText = qTimeLeft; clearInterval(qTimerInterval);
+            qTimerInterval = setInterval(() => { qTimeLeft--; if(itm) itm.innerText = qTimeLeft; if (qTimeLeft <= 3 && qTimeLeft > 0) { if(itm) itm.classList.add('urgent'); } else { if(itm) itm.classList.remove('urgent'); } if (qTimeLeft <= 0) { clearInterval(qTimerInterval); if(itm) itm.classList.remove('urgent'); handleTimeUp(); } }, 1000);
         }
     }
     function handleTimeUp() {
-        playSFX('no');
-        const ap = document.getElementById('ans-pop'); if(ap) ap.classList.add('timeout-state');
+        playSFX('no'); const ap = document.getElementById('ans-pop'); if(ap) ap.classList.add('active', 'timeout-state');
         const at = document.getElementById('ans-text'); if(at) at.innerHTML = current.a + '<br><span style="color:var(--color-red);font-size:14px;display:block;margin-top:10px;">⏳ 超时跳过</span>';
-        showAns(true); autoNextTimeout = setTimeout(() => { if(ap) ap.classList.remove('timeout-state'); mark(false); }, 1500);
+        autoNextTimeout = setTimeout(() => { if(ap) ap.classList.remove('timeout-state', 'active'); mark(false); }, 1500);
     }
     function mark(isOk) {
-        recordActivity(); updateGlobalStats(isOk); // 更新主页数据
+        recordActivity(); updateGlobalStats(isOk); 
         if (isOk) {
-            sCorrect++; sessionStreak++;
-            if (sessionStreak > 0 && sessionStreak % 3 === 0) playSFX('streak');
-            else playSFX('yes');
+            sCorrect++; sessionStreak++; if (sessionStreak > 0 && sessionStreak % 3 === 0) playSFX('streak'); else playSFX('yes');
             const mv = document.getElementById('mode-val');
             if (mv && mv.value === 'wrong') { wrongs = wrongs.filter(i => i.q !== current.q); localStorage.setItem(wrongStorageKey, JSON.stringify(wrongs)); renderWrongs(); const ci = document.getElementById('count-info'); if(ci) ci.innerText = `${pool.length - 1}`; }
         } else {
-            sWrong++; sessionStreak = 0;
-            if (!isIntenseMode) playSFX('no');
+            sWrong++; sessionStreak = 0; if (!isIntenseMode) playSFX('no');
             if (!wrongs.find(i => i.q === current.q)) { wrongs.push(current); localStorage.setItem(wrongStorageKey, JSON.stringify(wrongs)); renderWrongs(); }
         }
         if (useSpacedRepetition) updateItemStats(current, isOk); updateStreakBadge();
-        pool = pool.filter(i => i !== current); updateProgress(); showAns(false);
-        if (pool.length === 0) { clearInterval(qTimerInterval); showFinish(false); }
-        else setTimeout(nextQ, 350);
+        pool = pool.filter(i => i !== current); updateProgress(); const ap = document.getElementById('ans-pop'); if(ap) ap.classList.remove('active');
+        if (pool.length === 0) { clearInterval(qTimerInterval); showFinish(false); } else setTimeout(nextQ, 350);
     }
     function showFinish(isTimeout) {
         isSessionActive = false; const mtb = document.getElementById('mode-toggle-btn'); if(mtb) mtb.classList.remove('locked');
@@ -1192,31 +1043,22 @@
         const zenEl = document.getElementById('zen-quote-text'), iconEl = document.getElementById('finish-icon'), titleEl = document.getElementById('finish-title');
         const mbDiv = document.getElementById('mastery-breakdown');
         if (isIntenseMode) {
-            const timeUsed = Math.floor((Date.now() - sessionStartTime) / 1000);
-            const accuracy = (sCorrect + sWrong) > 0 ? Math.round((sCorrect / (sCorrect + sWrong)) * 100) : 0;
+            const timeUsed = Math.floor((Date.now() - sessionStartTime) / 1000); const accuracy = (sCorrect + sWrong) > 0 ? Math.round((sCorrect / (sCorrect + sWrong)) * 100) : 0;
             if(iconEl) iconEl.innerText = '⚡'; if(titleEl) titleEl.innerText = '挑战结束';
-            if(zenEl) { zenEl.innerText = `「 命中率: ${accuracy}% | 总耗时: ${timeUsed}s 」\n高速流转，完成重载。`; zenEl.style.fontFamily = "'Courier New', monospace"; zenEl.style.whiteSpace = "pre-wrap"; }
+            if(zenEl) { zenEl.innerText = `「 命中率: ${accuracy}% | 总耗时: ${timeUsed}s 」\n高速流转，完成重载。`; zenEl.style.fontFamily = "monospace"; zenEl.style.whiteSpace = "pre-wrap"; }
         } else {
-            if(iconEl) iconEl.innerText = '🉑'; if(titleEl) titleEl.innerText = '洗练完成'; if(zenEl) { zenEl.innerText = "「 行到水穷处，坐看云起时。 」"; zenEl.style.fontFamily = '"KaiTi", serif'; } setTimeout(fireConfetti, 100);
+            if(iconEl) iconEl.innerText = '🉑'; if(titleEl) titleEl.innerText = '洗练完成'; if(zenEl) { zenEl.innerText = "「 行到水穷处，坐看云起时。 」"; zenEl.style.fontFamily = "var(--font-serif)"; } setTimeout(fireConfetti, 100);
         }
-        // SR 掌握分布可视化
         if (useSpacedRepetition && filtered.length > 0 && mbDiv) {
-            mbDiv.style.display = 'block';
-            let mastered = 0, hard = 0, learning = 0;
+            mbDiv.style.display = 'block'; let mastered = 0, hard = 0, learning = 0;
             filtered.forEach(item => { const s = getItemStats(item); if (s.consecutive_correct >= masteryThreshold) mastered++; else if (s.memory_weight > 150) hard++; else learning++; });
             const total = filtered.length; const bar = (val, color) => `<div class="mb-fill" style="background:${color}; width:${Math.round((val/total)*100)}%"></div>`;
-            mbDiv.innerHTML = `
-                <div class="mb-row"><div class="mb-label">🟢掌握</div><div class="mb-track">${bar(mastered,'var(--color-green)')}</div><div class="mb-count">${mastered}</div></div>
-                <div class="mb-row"><div class="mb-label">🔵学习</div><div class="mb-track">${bar(learning,'#1e88e5')}</div><div class="mb-count">${learning}</div></div>
-                <div class="mb-row"><div class="mb-label">🔴强化</div><div class="mb-track">${bar(hard,'var(--color-red)')}</div><div class="mb-count">${hard}</div></div>
-            `;
+            mbDiv.innerHTML = `<div class="mb-row"><div class="mb-label">🟢掌握</div><div class="mb-track">${bar(mastered,'var(--color-green)')}</div><div class="mb-count">${mastered}</div></div><div class="mb-row"><div class="mb-label">🔵学习</div><div class="mb-track">${bar(learning,'#1e88e5')}</div><div class="mb-count">${learning}</div></div><div class="mb-row"><div class="mb-label">🔴强化</div><div class="mb-track">${bar(hard,'var(--color-red)')}</div><div class="mb-count">${hard}</div></div>`;
         } else if(mbDiv) { mbDiv.style.display = 'none'; }
-        const fov = document.getElementById('finish-overlay'); if(fov) fov.style.display = 'flex';
-        renderSRStats();
+        const fov = document.getElementById('finish-overlay'); if(fov) fov.style.display = 'flex'; renderSRStats();
     }
     function fireConfetti() {
-        const canvas = document.getElementById('confetti-canvas'); if(!canvas) return; const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const canvas = document.getElementById('confetti-canvas'); if(!canvas) return; const ctx = canvas.getContext('2d'); canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         const pieces = [], colors = ['#d15147','#5a825a','#ff9f0a','#00b4d8','#ec407a'];
         for (let i = 0; i < 100; i++) pieces.push({ x: canvas.width/2, y: canvas.height/2+100, vx: (Math.random()-0.5)*20, vy: (Math.random()-1)*20, size: Math.random()*10+5, color: colors[Math.floor(Math.random()*colors.length)], rot: Math.random()*360, rotS: (Math.random()-0.5)*10 });
         function draw() { ctx.clearRect(0,0,canvas.width,canvas.height); let active = false; pieces.forEach(p => { p.x+=p.vx; p.y+=p.vy; p.vy+=0.5; p.rot+=p.rotS; if(p.y<canvas.height) active=true; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180); ctx.fillStyle=p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size); ctx.restore(); }); const fov = document.getElementById('finish-overlay'); if(active && fov && fov.style.display==='flex') requestAnimationFrame(draw); } draw();
@@ -1224,20 +1066,17 @@
     function initBGM() { const bt = document.getElementById('bgm-toggle'); if(bt) bt.checked = localStorage.getItem('bgm_enabled') !== 'false'; document.body.addEventListener('click', () => { if (!audioInitialized) { playBGM(); audioInitialized = true; } }, { once: true }); }
     function playBGM(forceRestart = false) { const n = document.getElementById('bg-music'), i = document.getElementById('bg-music-intense'); if(!n || !i) return; n.pause(); i.pause(); const bt = document.getElementById('bgm-toggle'); if (bt && bt.checked) { const active = isIntenseMode ? i : n; if (forceRestart) active.currentTime = 0; active.play().catch(() => {}); } }
     function toggleBGM() { const bt = document.getElementById('bgm-toggle'); if(bt) localStorage.setItem('bgm_enabled', bt.checked); playBGM(); }
-    function toggleSidebar() { const ws = document.getElementById('wrong-sidebar'); if(ws) ws.classList.toggle('active'); }
-    function renderWrongs() { const wl = document.getElementById('wrong-list'); if(wl) wl.innerHTML = wrongs.map(i => `<div class="wrong-item"><div style="font-weight:bold;color:var(--text);font-size:16px;">${i.a}</div><div style="font-size:12px;color:var(--sub);margin-top:6px;">${i.q}</div></div>`).join(''); }
-    function clearWrongs() { if (confirm("清空本地记录？")) { wrongs = []; localStorage.setItem(wrongStorageKey, '[]'); renderWrongs(); applyRule(); } }
+    function toggleSidebar() { const ws = document.getElementById('wrong-sidebar'); if(ws) ws.classList.toggle('open'); }
+    function renderWrongs() { const wl = document.getElementById('wrong-list'); if(wl) wl.innerHTML = wrongs.map(i => `<div class="wrong-item"><div style="font-weight:600;color:var(--text);font-size:16px;">${i.a}</div><div style="font-size:13px;color:var(--sub);margin-top:6px;">${i.q}</div></div>`).join(''); }
+    function clearWrongs() { if (confirm("清空本地错题记录？")) { wrongs = []; localStorage.setItem(wrongStorageKey, '[]'); renderWrongs(); applyRule(); } }
     async function upload(mode) {
-        const jip = document.getElementById('jsonInput'); const ug = document.getElementById('upload-group');
-        if(!jip || !ug) return;
-        const input = jip.value, groupName = ug.value || '默认分组';
-        if (!input) return alert("请粘贴 JSON");
+        const jip = document.getElementById('jsonInput'); const ug = document.getElementById('upload-group'); if(!jip || !ug) return;
+        const input = jip.value, groupName = ug.value || '默认分组'; if (!input) return alert("请粘贴 JSON");
         try {
             const data = JSON.parse(input).map(item => ({ ...item, group_name: groupName, user_id: currentUser.id }));
             if (mode === 'cover') { if (!confirm("确定清空云端【该分组所有词条】并覆盖？")) return; await supabase.from('dictation_items').delete().eq('user_id', currentUser.id).eq('group_name', groupName); }
-            showLoading("上传解析中...");
-            await supabase.from('dictation_items').insert(data); alert("同步成功！"); jip.value = ""; toggleSettings(false); sync();
-        } catch (e) { hideLoading(); alert("失败: " + e.message); }
+            showLoading("数据写入中..."); await supabase.from('dictation_items').insert(data); alert("同步成功！"); jip.value = ""; toggleSettings(false); sync();
+        } catch(e) { hideLoading(); alert("失败: " + e.message); }
     }
 
     // ======= 画板 =======
@@ -1246,19 +1085,19 @@
     function saveCanvasState() { if(!ctx || !canvas) return; undoStack.push(ctx.getImageData(0,0,canvas.width,canvas.height)); if(undoStack.length>20) undoStack.shift(); }
     function undoDraw() { if(!ctx) return; if(undoStack.length>0) ctx.putImageData(undoStack.pop(),0,0); }
     function initCanvas() { if(!canvas || !ctx) return; const rect = canvas.parentNode.getBoundingClientRect(); canvas.width = rect.width; canvas.height = rect.height; ctx.lineCap='round'; ctx.lineJoin='round'; applyBrushStyle(); }
-    function toggleEraser() { isEraser = !isEraser; const btn=document.getElementById('eraser-btn'); if(btn){ btn.innerText=isEraser?'🧽 橡皮':'✏️ 画笔'; btn.style.color=isEraser?'var(--color-red)':'var(--sub)'; } applyBrushStyle(); }
-    function resetEraser() { isEraser=false; const btn=document.getElementById('eraser-btn'); if(btn){btn.innerText='✏️ 画笔'; btn.style.color='var(--sub)';} applyBrushStyle(); }
-    function applyBrushStyle() { if(!ctx) return; if(isEraser){ctx.globalCompositeOperation='destination-out'; ctx.lineWidth=28;}else{ctx.globalCompositeOperation='source-over'; ctx.lineWidth=4; ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--text').trim();} }
+    function toggleEraser() { isEraser = !isEraser; const btn=document.getElementById('eraser-btn'); if(btn){ btn.innerText=isEraser?'橡皮':'画笔'; btn.style.color=isEraser?'var(--color-red)':'var(--sub)'; } applyBrushStyle(); }
+    function resetEraser() { isEraser=false; const btn=document.getElementById('eraser-btn'); if(btn){btn.innerText='画笔'; btn.style.color='var(--sub)';} applyBrushStyle(); }
+    function applyBrushStyle() { if(!ctx) return; if(isEraser){ctx.globalCompositeOperation='destination-out'; ctx.lineWidth=32;}else{ctx.globalCompositeOperation='source-over'; ctx.lineWidth=4; ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--text').trim();} }
     const getPos = e => { if(!canvas) return {x:0,y:0}; const rect=canvas.getBoundingClientRect(), cx=e.touches?e.touches[0].clientX:e.clientX, cy=e.touches?e.touches[0].clientY:e.clientY; return {x:cx-rect.left, y:cy-rect.top}; };
     if(canvas) {
         canvas.addEventListener('touchstart', e => { e.preventDefault(); const t=new Date().getTime(), tl=t-lastTap; if(tl<300&&tl>0&&allowDblClickClear){clearBoard();return;} lastTap=t; saveCanvasState(); drawing=true; ctx.beginPath(); const p=getPos(e); ctx.moveTo(p.x,p.y); }, {passive:false});
         canvas.addEventListener('touchmove', e => { e.preventDefault(); if(drawing){const p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke();} }, {passive:false}); window.addEventListener('touchend', ()=>drawing=false);
-        canvas.addEventListener('mousedown', e => { saveCanvasState(); drawing=true; ctx.beginPath(); const p=getPos(e); ctx.moveTo(p.x,p.y); });
+        canvas.addEventListener('mousedown', e => { saveCanvasState(); drawing=true; ctx.beginPath(); const p=getPos(e); ctx.moveTo(p.x,p.y); }); 
         canvas.addEventListener('mousemove', e => { if(drawing){const p=getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke();} }); window.addEventListener('mouseup', ()=>drawing=false);
         canvas.addEventListener('dblclick', ()=>{ if(allowDblClickClear) clearBoard(); });
     }
     function clearBoard() { if(!ctx || !canvas) return; saveCanvasState(); ctx.clearRect(0,0,canvas.width,canvas.height); }
-    function showAns(s) { if(s&&isIntenseMode) clearInterval(qTimerInterval); const ap = document.getElementById('ans-pop'); if(ap) ap.classList.toggle('active', s); }
+    function showAns(s) { if(s&&isIntenseMode) clearInterval(qTimerInterval); const ap = document.getElementById('ans-pop'); if(ap) { if(s) ap.classList.add('active'); else ap.classList.remove('active'); } }
     function updateProgress() { const pb = document.getElementById('progress-bar'); if(pb) pb.style.width = (filtered.length===0?0:((filtered.length-pool.length)/filtered.length)*100)+'%'; }
     function peekHint() { const h=document.getElementById('ghost-hint'); if(h) { h.innerText=current?current.a:''; h.classList.add('show'); setTimeout(()=>h.classList.remove('show'),1000); } }
     function skipQ() { if(pool.length>1){clearInterval(qTimerInterval); nextQ();} }
