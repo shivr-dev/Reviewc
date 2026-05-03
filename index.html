@@ -37,15 +37,6 @@
             --color-red: #d94848; --color-green: #d6833c; --brand: #d6833c; --shadow: 0 8px 30px rgba(255, 0, 0, 0.25);
         }
 
-        body[data-theme="github"] {
-            --bg: #ffffff; --card: #f6f8fa; --text: #24292f; --title: #24292f; --sub: #57606a; --border: #d0d7de;
-            --color-red: #cf222e; --color-green: #2da44e; --brand: #2da44e; --shadow: none; --ui-radius: 8px;
-        }
-        body[data-theme="github"].intense-mode {
-            --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --title: #c9d1d9; --sub: #8b949e; --border: #30363d;
-            --color-red: #da3633; --color-green: #238636; --brand: #238636; --shadow: none; --ui-radius: 8px;
-        }
-
         * { margin: 0; padding: 0; box-sizing: border-box; transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s, border-radius 0.2s; }
         
         body {
@@ -62,7 +53,6 @@
             padding: 40px 20px; position: relative; z-index: 10;
         }
 
-        /* 居中固定卡片 (用于学习界面，自然撑开高度) */
         .main-card { 
             width: 95%; max-width: 460px; max-height: 95vh; background: var(--card); border-radius: var(--ui-radius); 
             box-shadow: var(--shadow); overflow: hidden; position: relative; z-index: 10; 
@@ -102,6 +92,14 @@
         .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--dot-inactive); }
         .dot.active { background: var(--brand); }
 
+        /* ================= 错误弹窗 (Toast) ================= */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { background: var(--color-red); color: white; padding: 14px 22px; border-radius: 12px; font-size: 14px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.15); animation: toastSlideIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; opacity: 0; transform: translateX(120%); font-family: var(--font-sans); display: flex; align-items: center; gap: 8px; }
+        .toast.success { background: var(--color-green); }
+        @keyframes toastSlideIn { to { opacity: 1; transform: translateX(0); } }
+        .toast.fade-out { animation: toastFadeOut 0.3s forwards; }
+        @keyframes toastFadeOut { to { opacity: 0; transform: translateY(-15px); } }
+
         /* ================= 全局加载动画 ================= */
         #global-loader { position: fixed; inset: 0; background: var(--bg); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s; }
         .loader-spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--brand); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
@@ -121,7 +119,6 @@
         input:focus, textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(229, 124, 88, 0.1); }
         .set-label { display: block; font-size: 13px; font-weight: 500; color: var(--sub); margin-bottom: 8px; text-align: left; }
 
-        /* Switch 开关 */
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; inset: 0; background-color: var(--border); border-radius: 34px; transition: .3s; }
@@ -129,14 +126,13 @@
         input:checked + .slider { background-color: var(--brand); }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        /* ================= 侧滑面板 (设置与配置) ================= */
+        /* ================= 侧滑面板 ================= */
         .side-panel { position: fixed; top: 0; right: 0; width: 100%; max-width: 460px; height: 100%; background: var(--bg); border-left: 1px solid var(--border); z-index: 2000; padding: 40px 20px; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); overflow-y: auto; display: flex; flex-direction: column; }
         .side-panel.open { transform: translateX(0); }
         .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .panel-header h2 { margin: 0; font-size: 20px; color: var(--title); font-family: var(--font-serif); font-weight: 400; }
         .close-btn { background: none; border: none; font-size: 28px; color: var(--sub); cursor: pointer; font-weight: 300; }
 
-        /* 左侧滑出 (错题本专用) */
         .side-panel.left-side { right: auto; left: 0; border-left: none; border-right: 1px solid var(--border); transform: translateX(-100%); }
         .side-panel.left-side.open { transform: translateX(0); }
 
@@ -174,7 +170,6 @@
         #mode-toggle-btn { font-weight: 500; background: var(--bg); color: var(--title); }
         #home-return-btn { color: var(--title); font-weight: 500; }
 
-        /* Streak badge */
         #streak-badge { font-weight: bold; background: transparent; color: var(--sub); transition: all 0.3s; }
         #streak-badge.hot { background: var(--brand); color: white; animation: streakPop 0.4s cubic-bezier(0.18,0.89,0.32,1.28); }
         @keyframes streakPop { 0%{transform:scale(0.7)} 100%{transform:scale(1)} }
@@ -186,7 +181,6 @@
         
         .diff-badge { font-size: 10px; padding: 2px 8px; border-radius: 8px; font-weight: 500; letter-spacing: 0; border: 1px solid var(--border); color: var(--sub); }
         
-        /* 画板区域自适应撑开 */
         .canvas-area { position: relative; width: 100%; height: 35vh; min-height: 250px; background: var(--card); border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); flex: 1; }
         .grid-bg { position: absolute; inset: 0; opacity: 0.3; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 33.33% 33.33%; background-position: center; pointer-events: none; }
         #board { position: relative; z-index: 5; touch-action: none; cursor: crosshair; display: block; }
@@ -254,6 +248,9 @@
 </head>
 <body>
 
+<!-- 全局右上角 Toast 提示容器 -->
+<div id="toast-container"></div>
+
 <!-- 全局加载动画 -->
 <div id="global-loader">
     <div class="loader-spinner"></div>
@@ -304,7 +301,7 @@
     </div>
     
     <div class="welcome">
-        <h2>欢迎，<span id="home-username">Learner</span></h2>
+        <h2>欢迎回来，<span id="home-username">Learner</span></h2>
         <p>静下心来，开启今日修习</p>
     </div>
 
@@ -343,7 +340,7 @@
             <span style="font-weight:500; font-size:15px; color:var(--title);">间隔重复记忆</span>
             <label class="switch"><input type="checkbox" id="sr-toggle" onchange="toggleSR()"><span class="slider"></span></label>
         </div>
-        <p style="font-size:12px; color:var(--sub); margin: 0 0 14px 0; line-height:1.5;">开启后错题高频复现。<br>掌握的词条会在今日隐身，明日重新浮现以检验长期记忆。</p>
+        <p style="font-size:12px; color:var(--sub); margin: 0 0 14px 0; line-height:1.5;">开启后：错题高频复现。<br>掌握的词条会在今天隐身，明天重新浮现以检验长期记忆！</p>
         
         <label class="set-label">掌握阈值</label>
         <div class="custom-select-wrapper" id="cw-mastery">
@@ -391,7 +388,7 @@
 
     <label class="set-label">导入私密数据</label>
     <p style="font-size:11px; color:var(--sub); margin:0 0 8px 0; line-height: 1.5;">JSON格式：<code>[{"q":"题","a":"答","cat":"类"}]</code></p>
-    <input type="text" id="upload-group" placeholder="输入分组名，如：期中考试" value="默认分组">
+    <input type="text" id="upload-group" placeholder="输入分组名，如：期中考试词汇" value="默认分组">
     <textarea id="jsonInput" rows="4" placeholder='粘贴 JSON 数组...'></textarea>
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
         <button onclick="upload('merge')" class="btn btn-outline" style="padding:12px; font-size:14px;">增量合并</button>
@@ -415,17 +412,16 @@
         <h2>错题本</h2>
         <button class="close-btn" onclick="toggleSidebar()">×</button>
     </div>
-    <div id="wrong-list"></div>
+    <div style="flex: 1; overflow-y: auto; margin-bottom:20px;" id="wrong-list"></div>
     <div style="display:flex; flex-direction:column; gap:10px; flex-shrink: 0;">
         <button class="btn btn-outline" onclick="clearWrongs()" style="padding:12px; font-size:14px;">清空记录</button>
-        <button class="btn btn-primary" onclick="exportWrongs()" style="padding:12px; font-size:14px;">导出为文本</button>
+        <button class="btn btn-primary" onclick="exportWrongs()" style="padding:12px; font-size:14px;">导出为文本 (.txt)</button>
     </div>
 </div>
 
 <!-- ================= 学习界面 (Learning View) ================= -->
 <div id="learning-view" style="display:none; width:100vw; height:100vh; position:fixed; inset:0; align-items:center; justify-content:center; background:var(--bg); z-index:50;">
-    <!-- 取消强制 90vh，让其随内容自适应 -->
-    <div class="main-card" style="display:flex;">
+    <div class="main-card">
         <div class="progress-wrap">
             <div id="mastery-bar"></div>
             <div id="progress-bar"></div>
@@ -444,9 +440,9 @@
         </div>
 
         <div class="learn-nav nav">
-            <span id="home-return-btn" onclick="pauseLearning()">← 首页</span>
+            <span id="home-return-btn" onclick="pauseLearning()">返回</span>
             <span onclick="toggleSidebar()">错题</span>
-            <span id="mode-toggle-btn" onclick="toggleAppMode()">休闲模式</span>
+            <span id="mode-toggle-btn" onclick="toggleAppMode()">休闲</span>
             <span id="streak-badge">–</span>
             <span id="count-info">0</span>
             <span onclick="peekHint()">提示</span>
@@ -520,7 +516,7 @@
 <!-- ================= 设置面板 ================= -->
 <div class="side-panel" id="settings">
     <div class="panel-header">
-        <h2>系统设定</h2>
+        <h2>系统全局设定</h2>
         <button class="close-btn" onclick="toggleSettings(false)">×</button>
     </div>
     
@@ -563,26 +559,34 @@
         <input type="hidden" id="time-val" value="8">
     </div>
     
-    <label class="set-label" style="margin-top: 20px;">画面主题</label>
-    <div class="custom-select-wrapper" id="cw-theme">
-        <div class="custom-select-display" onclick="toggleCustomSelect('cs-theme')">抹茶 (默认)</div>
-        <div class="custom-select-dropdown" id="cs-theme">
-            <div class="custom-option selected" onclick="selectOption('cw-theme','default','抹茶 (默认)',changeTheme)">抹茶 (默认)</div>
-            <div class="custom-option" onclick="selectOption('cw-theme','sakura','落樱',changeTheme)">落樱</div>
-            <div class="custom-option" onclick="selectOption('cw-theme','sora','晴空',changeTheme)">晴空</div>
-            <div class="custom-option" onclick="selectOption('cw-theme','yoru','夜色',changeTheme)">夜色</div>
-            <div class="custom-option" onclick="selectOption('cw-theme','aki','枫叶',changeTheme)">枫叶</div>
-            <div class="custom-option" onclick="selectOption('cw-theme','take','修竹',changeTheme)">修竹</div>
-            <div class="custom-option" onclick="selectOption('cw-theme','github','极客 (Github扁平)',changeTheme)">极客 (Github扁平)</div>
-        </div>
-        <input type="hidden" id="theme-val" value="default">
-    </div>
-    
     <div style="height:1px; background:var(--bg); margin:25px 0;"></div>
     <div id="settings-anchor"></div>
 </div>
 
 <script>
+    // ======= 全局 Toast 提示拦截 =======
+    function showToast(msg, type='error') {
+        let container = document.getElementById('toast-container');
+        if(!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            document.body.appendChild(container);
+        }
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerText = msg;
+        container.appendChild(toast);
+        setTimeout(() => { toast.classList.add('fade-out'); setTimeout(() => toast.remove(), 300); }, 3000);
+    }
+    
+    // 全局错误捕获机制，自动转化为优雅 Toast
+    window.addEventListener('error', function(e) { 
+        if(e.message) showToast("系统异常: " + e.message); 
+    });
+    window.addEventListener('unhandledrejection', function(e) { 
+        if(e.reason) showToast("网络异常: " + (e.reason.message || e.reason)); 
+    });
+
     const SUPABASE_URL = 'https://ltnlmgtoqecvctyeetma.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0bmxtZ3RvcWVjdmN0eWVldG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjM4MTAsImV4cCI6MjA4OTYzOTgxMH0.OB5An1HAkEiASsE_cV1KoFCWBcyYQGUPa6BKsM6LwaI';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -659,7 +663,7 @@
     }
     function updateMasteryThresh() { masteryThreshold = parseInt(document.getElementById('mastery-val').value) || 5; localStorage.setItem('mastery_thresh', masteryThreshold); renderSRStats(); }
     function toggleSR() { useSpacedRepetition = document.getElementById('sr-toggle').checked; localStorage.setItem('use_sr', useSpacedRepetition); renderSRStats(); }
-    function resetAllSRStats() { if (!confirm('⚠️ 确定要清空记忆数据？')) return; memoryStats = {}; saveMemoryStats(); renderSRStats(); alert('数据已归零。'); }
+    function resetAllSRStats() { if (!confirm('⚠️ 确定要清空记忆数据？')) return; memoryStats = {}; saveMemoryStats(); renderSRStats(); showToast('数据已归零。', 'success'); }
     function updateStreakBadge() {
         const badge = document.getElementById('streak-badge'); if(!badge) return;
         if (sessionStreak >= 3) { badge.innerText = `🔥${sessionStreak}`; badge.className = 'hot'; } 
@@ -763,9 +767,9 @@
         }
     }
 
-    function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err => console.log(`全屏失败: ${err.message}`)); else if (document.exitFullscreen) document.exitFullscreen(); toggleSettings(false); }
+    function toggleFullScreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err => showToast(`全屏失败: ${err.message}`)); else if (document.exitFullscreen) document.exitFullscreen(); toggleSettings(false); }
     function exportWrongs() {
-        if (wrongs.length === 0) return alert("错题本空空如也！");
+        if (wrongs.length === 0) return showToast("错题本空空如也！");
         let content = "言叶之庭 - 个人错题本\n==========================\n\n";
         wrongs.forEach((w, i) => { content += `[${i+1}] 类别: ${w.cat || '综合'}\n题目: ${w.q}\n答案: ${w.a}\n--------------------------\n`; });
         const blob = new Blob([content], { type: "text/plain;charset=utf-8" }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "我的错题本.txt"; a.click();
@@ -832,13 +836,13 @@
     }
     async function handleAuth() {
         let account = document.getElementById('auth-account').value.trim(); const pwd = document.getElementById('auth-pwd').value; const inviteCode = document.getElementById('auth-invite').value.trim();
-        if (!account || !pwd) return alert("请填写账号和密码");
-        if (isRegisterMode && account.toLowerCase() !== 'admin') { const recaptchaResponse = window.grecaptcha ? grecaptcha.getResponse() : null; if (!recaptchaResponse) { alert("请先完成验证！"); return; } }
+        if (!account || !pwd) return showToast("请填写账号和密码");
+        if (isRegisterMode && account.toLowerCase() !== 'admin') { const recaptchaResponse = window.grecaptcha ? grecaptcha.getResponse() : null; if (!recaptchaResponse) { showToast("请先完成验证！"); return; } }
         showLoading("身份核实中...");
         if (account.toLowerCase() === 'admin') {
             account = 'admin@yanye.com'; authType = 'email';
             const { data, error } = await supabase.auth.signInWithPassword({ email: account, password: pwd });
-            if (error) { const regRes = await supabase.auth.signUp({ email: account, password: pwd }); if (regRes.data?.session === null) { hideLoading(); alert("【拦截】检测到创建 admin 账号，请先去 Supabase 后台暂时关闭【Confirm email】再试！"); return; } loginSuccess(regRes.data?.user); return; }
+            if (error) { const regRes = await supabase.auth.signUp({ email: account, password: pwd }); if (regRes.data?.session === null) { hideLoading(); showToast("【拦截】检测到创建 admin，请去后台关闭 Confirm email"); return; } loginSuccess(regRes.data?.user); return; }
             loginSuccess(data.user); return;
         }
         try {
@@ -851,11 +855,11 @@
                 else if (data.session === null) { hideLoading(); pendingAuthEmail = finalEmail; document.getElementById('main-auth-card').style.display = 'none'; document.getElementById('otp-auth-card').style.display = 'block'; }
                 else loginSuccess(data.user);
             } else { const { data, error } = await supabase.auth.signInWithPassword({ email: finalEmail, password: pwd }); if (error) throw error; loginSuccess(data.user); }
-        } catch (e) { hideLoading(); alert("操作失败：" + e.message); if (window.grecaptcha) grecaptcha.reset(); }
+        } catch (e) { hideLoading(); showToast("操作失败：" + e.message); if (window.grecaptcha) grecaptcha.reset(); }
     }
     async function verifyOtpCode() {
-        const token = document.getElementById('auth-otp-input').value.trim(); if (!token || token.length < 5) return alert("请输入完整的验证码");
-        showLoading("核验代码..."); try { const { data, error } = await supabase.auth.verifyOtp({ email: pendingAuthEmail, token, type: 'signup' }); if (error) throw error; loginSuccess(data.user); } catch (e) { hideLoading(); alert("验证失败: " + e.message); }
+        const token = document.getElementById('auth-otp-input').value.trim(); if (!token || token.length < 5) return showToast("请输入完整的验证码");
+        showLoading("核验代码..."); try { const { data, error } = await supabase.auth.verifyOtp({ email: pendingAuthEmail, token, type: 'signup' }); if (error) throw error; loginSuccess(data.user); } catch (e) { hideLoading(); showToast("验证失败: " + e.message); }
     }
     function cancelOtpMode() { document.getElementById('otp-auth-card').style.display = 'none'; document.getElementById('main-auth-card').style.display = 'block'; if (window.grecaptcha) grecaptcha.reset(); }
     
@@ -879,14 +883,14 @@
         const masteryTexts = { '3': '3 次连续正确', '5': '5 次连续正确', '8': '8 次连续正确' }; 
         const cwMd = document.querySelector('#cw-mastery .custom-select-display'); if(cwMd) cwMd.innerText = masteryTexts[masteryThreshold] || '5 次连续正确';
         
-        loadTheme(); loadMemoryStats(); syncAndGoHome();
+        loadMemoryStats(); syncAndGoHome();
     }
     
-    async function generateInviteCodeToDB() { showLoading("生成中..."); const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = ''; for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length)); try { const { error } = await supabase.from('invitation_codes').insert({ code, created_by: currentUser.id }); if (error) throw error; fetchInviteCodesAdmin(); } catch (e) { alert("生成失败: " + e.message); } hideLoading(); }
+    async function generateInviteCodeToDB() { showLoading("生成中..."); const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = ''; for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length)); try { const { error } = await supabase.from('invitation_codes').insert({ code, created_by: currentUser.id }); if (error) throw error; fetchInviteCodesAdmin(); } catch (e) { showToast("生成失败: " + e.message); } hideLoading(); }
     async function fetchInviteCodesAdmin() { const div = document.getElementById('admin-codes'); if(!div) return; div.innerHTML = "读取中..."; try { const { data, error } = await supabase.from('invitation_codes').select('*').order('created_at', { ascending: false }); if (error) throw error; div.innerHTML = data.map(c => `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 5px;border-bottom:1px dashed var(--border);"><div><strong style="color:${c.is_used?'var(--sub)':'var(--color-green)'};letter-spacing:1px;font-size:14px;">${c.code}</strong><div style="font-size:11px;margin-top:4px;color:var(--sub);">${c.is_used?('已用: '+c.used_by):'全新可用'}</div></div><button onclick="invalidateInviteCode('${c.code}','${c.used_by||''}')" style="background:transparent;border:1px solid var(--color-red);color:var(--color-red);border-radius:6px;padding:6px 12px;font-size:11px;">作废/封号</button></div>`).join(''); } catch (e) { div.innerHTML = "读取失败: " + e.message; } }
-    async function invalidateInviteCode(code, usedBy) { if (!confirm(`⚠️ 危险操作：\n作废该邀请码将导致用户(${usedBy||'无'})被彻底删除！\n\n确定执行？`)) return; showLoading("销毁中..."); try { const { error } = await supabase.rpc('admin_delete_invite_and_user', { target_code: code, target_username: usedBy }); if (error) throw error; fetchInviteCodesAdmin(); } catch (e) { alert("销毁失败: " + e.message); } hideLoading(); }
+    async function invalidateInviteCode(code, usedBy) { if (!confirm(`⚠️ 危险操作：\n作废该邀请码将导致用户(${usedBy||'无'})被彻底删除！\n\n确定执行？`)) return; showLoading("销毁中..."); try { const { error } = await supabase.rpc('admin_delete_invite_and_user', { target_code: code, target_username: usedBy }); if (error) throw error; showToast("执行成功！", "success"); fetchInviteCodesAdmin(); } catch (e) { showToast("销毁失败: " + e.message); } hideLoading(); }
     async function logoutAccount() { showLoading("切断..."); try { await supabase.auth.signOut(); for (let key in localStorage) { if (key.startsWith('sb-')) localStorage.removeItem(key); } window.location.reload(); } catch (error) { window.location.reload(); } }
-    async function deleteAccount() { const c1 = confirm("⚠️ 危险警告\n注销账号将永久销毁您的所有数据，此操作不可逆！\n\n确定要继续吗？"); if (!c1) return; const c2 = prompt("请输入【确认注销】："); if (c2 !== "确认注销") return alert("已中止。"); showLoading("销毁中..."); try { const { error } = await supabase.rpc('delete_user'); if (error) throw error; alert("数据已抹除。"); await logoutAccount(); } catch (e) { alert("注销失败：" + e.message); hideLoading(); } }
+    async function deleteAccount() { const c1 = confirm("⚠️ 危险警告\n注销账号将永久销毁您的所有数据，此操作不可逆！\n\n确定要继续吗？"); if (!c1) return; const c2 = prompt("请输入【确认注销】："); if (c2 !== "确认注销") return showToast("已中止。"); showLoading("销毁中..."); try { const { error } = await supabase.rpc('delete_user'); if (error) throw error; showToast("数据已抹除。", "success"); await logoutAccount(); } catch (e) { showToast("注销失败：" + e.message); hideLoading(); } }
 
     // ======= 资源中心 =======
     let resourceData = [];
@@ -910,20 +914,20 @@
     async function submitResource() {
         const titEl = document.getElementById('rc-up-title'), desEl = document.getElementById('rc-up-desc'), covEl = document.getElementById('rc-up-cover-base64'), jsnEl = document.getElementById('rc-up-json');
         if(!titEl || !jsnEl) return; const title = titEl.value.trim(), desc = desEl ? desEl.value.trim() : "", cover = covEl ? covEl.value : "", jsonText = jsnEl.value.trim();
-        if (!title || !jsonText) return alert("标题和 JSON 数据为必填项！"); let jsonData = [];
-        try { jsonData = JSON.parse(jsonText); if (!Array.isArray(jsonData)) throw new Error("JSON 必须是数组格式"); } catch (e) { return alert("JSON 格式有误: " + e.message); }
+        if (!title || !jsonText) return showToast("标题和 JSON 数据为必填项！"); let jsonData = [];
+        try { jsonData = JSON.parse(jsonText); if (!Array.isArray(jsonData)) throw new Error("JSON 必须是数组格式"); } catch (e) { return showToast("JSON 格式有误: " + e.message); }
         showLoading("上传中...");
-        try { const { error } = await supabase.from('resource_center').insert({ title, description: desc, cover_url: cover, json_data: jsonData, uploader_id: currentUser.id, uploader_email: currentUser.email }); if (error) throw error; alert("发布成功！"); titEl.value = ''; if(desEl) desEl.value = ''; jsnEl.value = ''; toggleUploadModal(false); fetchResources(); } catch (e) { alert("发布失败: " + e.message); } hideLoading();
+        try { const { error } = await supabase.from('resource_center').insert({ title, description: desc, cover_url: cover, json_data: jsonData, uploader_id: currentUser.id, uploader_email: currentUser.email }); if (error) throw error; showToast("发布成功！", "success"); titEl.value = ''; if(desEl) desEl.value = ''; jsnEl.value = ''; toggleUploadModal(false); fetchResources(); } catch (e) { showToast("发布失败: " + e.message); } hideLoading();
     }
     async function downloadResource(id) {
         const res = resourceData.find(r => r.id === id); if (!res) return;
         const groupName = prompt(`你要将【${res.title}】下载到本地的哪个分组中？\n可以直接设为原名也可以修改：`, res.title); if (!groupName) return;
         showLoading("合并中...");
-        try { const dataToInsert = res.json_data.map(item => { const cleanItem = { ...item, group_name: groupName, user_id: currentUser.id }; delete cleanItem.id; delete cleanItem.created_at; return cleanItem; }); const { error } = await supabase.from('dictation_items').insert(dataToInsert); if (error) throw error; alert(`成功导入 ${dataToInsert.length} 个词条！`); await sync(); renderResources(); } catch (e) { alert("下载失败：" + e.message); } hideLoading();
+        try { const dataToInsert = res.json_data.map(item => { const cleanItem = { ...item, group_name: groupName, user_id: currentUser.id }; delete cleanItem.id; delete cleanItem.created_at; return cleanItem; }); const { error } = await supabase.from('dictation_items').insert(dataToInsert); if (error) throw error; showToast(`成功导入 ${dataToInsert.length} 个词条！`, "success"); await sync(); renderResources(); } catch (e) { showToast("下载失败：" + e.message); } hideLoading();
     }
     async function deleteResource(id) {
         if (!confirm("确定要抹除这个分享吗？")) return; showLoading("抹除中...");
-        try { const { error } = await supabase.from('resource_center').delete().eq('id', id); if (error) throw error; fetchResources(); } catch (e) { alert("删除失败: " + e.message); } hideLoading();
+        try { const { error } = await supabase.from('resource_center').delete().eq('id', id); if (error) throw error; fetchResources(); } catch (e) { showToast("删除失败: " + e.message); } hideLoading();
     }
 
     // ======= 主页及流程控制 =======
@@ -1027,7 +1031,7 @@
         if (selected.length === 0) return alert("请先勾选要删除的词库");
         if (!confirm(`⚠️ 确定要彻底删除以下 ${selected.length} 个词库吗？`)) return;
         showLoading("清理中...");
-        try { const { error } = await supabase.from('dictation_items').delete().eq('user_id', currentUser.id).in('group_name', selected); if (error) throw error; sync(); } catch (e) { alert("删除失败：" + e.message); } hideLoading();
+        try { const { error } = await supabase.from('dictation_items').delete().eq('user_id', currentUser.id).in('group_name', selected); if (error) throw error; sync(); } catch (e) { showToast("删除失败：" + e.message); } hideLoading();
     }
     function applyRule() {
         const mv = document.getElementById('mode-val'); const m = mv ? mv.value : 'all';
@@ -1145,12 +1149,12 @@
     function clearWrongs() { if (confirm("清空本地错题记录？")) { wrongs = []; localStorage.setItem(wrongStorageKey, '[]'); renderWrongs(); applyRule(); } }
     async function upload(mode) {
         const jip = document.getElementById('jsonInput'); const ug = document.getElementById('upload-group'); if(!jip || !ug) return;
-        const input = jip.value, groupName = ug.value || '默认分组'; if (!input) return alert("请粘贴 JSON");
+        const input = jip.value, groupName = ug.value || '默认分组'; if (!input) return showToast("请粘贴 JSON");
         try {
             const data = JSON.parse(input).map(item => ({ ...item, group_name: groupName, user_id: currentUser.id }));
             if (mode === 'cover') { if (!confirm("确定清空云端【该分组所有词条】并覆盖？")) return; await supabase.from('dictation_items').delete().eq('user_id', currentUser.id).eq('group_name', groupName); }
-            showLoading("数据写入中..."); await supabase.from('dictation_items').insert(data); alert("同步成功！"); jip.value = ""; toggleSettings(false); sync();
-        } catch(e) { hideLoading(); alert("失败: " + e.message); }
+            showLoading("数据写入中..."); await supabase.from('dictation_items').insert(data); showToast("同步成功！", "success"); jip.value = ""; toggleSettings(false); sync();
+        } catch(e) { hideLoading(); showToast("失败: " + e.message); }
     }
     
     // ======= 画板 =======
