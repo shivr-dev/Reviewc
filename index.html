@@ -11,7 +11,6 @@
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='' viewBox='0 0 100 100'><text x='50' y='56' text-anchor='middle' font-size='64' font-family='Georgia,serif' fill='%23d4714e'>Y</text></svg>">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
   <script src="https://recaptcha.net/recaptcha/api.js" async defer></script>
 
   <link rel="stylesheet" href="css/styles.css">
@@ -372,6 +371,8 @@
     <div id="settings-anchor"></div>
   </div>
   <script src="js/01-i18n.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
+  <script>if(!window.supabase){document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"><\/script>');}</script>
   <script src="js/02-config.js"></script>
   <script src="js/03-state.js"></script>
   <script src="js/04-ui.js"></script>
