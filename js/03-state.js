@@ -1,0 +1,14 @@
+    let currentLang = localStorage.getItem('lang') || 'zh-CN';
+    let isRegisterMode = false, authType = 'email', pendingAuthEmail = '';
+    let currentUser = null, all = [], filtered = [], pool = [], current = null, wrongs = [];
+    let sCorrect = 0, sWrong = 0;
+    let isIntenseMode = false, isSessionActive = false;
+    let prepInterval = null, qTimerInterval = null, qTimeLeft = 8, sessionStartTime = 0, autoNextTimeout = null;
+    let audioInitialized = false, allowDblClickClear = true, activeSession = null;
+    let wrongStorageKey = 'wrongs_v11';
+    let resourceData = [];
+    let memoryStats = {}, useSpacedRepetition = true, sessionStreak = 0;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const canvas = document.getElementById('board');
+    const ctx = canvas ? canvas.getContext('2d') : null;
+    let drawing = false, isEraser = false, lastTap = 0, undoStack = [];
