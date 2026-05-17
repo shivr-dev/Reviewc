@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>言叶之庭</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500&family=Noto+Serif+JP:wght@400;500&family=Noto+Serif+KR:wght@400;500&family=Crimson+Pro:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='' viewBox='0 0 100 100'><text x='50' y='56' text-anchor='middle' font-size='64' font-family='Georgia,serif' fill='%23d4714e'>Y</text></svg>">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js"></script>
+  <script src="https://recaptcha.net/recaptcha/api.js" async defer></script>
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-lang="zh-CN">
+  <svg width="0" height="0" style="position:absolute;left:-9999px;top:-9999px;overflow:hidden" aria-hidden="true">
+    <symbol id="brand-star" viewBox="0 0 200 100">
+      <path d="m19.6 66.5 19.7-11 .3-1-.3-.5h-1l-3.3-.2-11.2-.3L14 53l-9.5-.5-2.4-.5L0 49l.2-1.5 2-1.3 2.9.2 6.3.5 9.5.6 6.9.4L38 49.1h1.6l.2-.7-.5-.4-.4-.4L29 41l-10.6-7-5.6-4.1-3-2-1.5-2-.6-4.2 2.7-3 3.7.3.9.2 3.7 2.9 8 6.1L37 36l1.5 1.2.6-.4.1-.3-.7-1.1L33 25l-6-10.4-2.7-4.3-.7-2.6c-.3-1-.4-2-.4-3l3-4.2L28 0l4.2.6L33.8 2l2.6 6 4.1 9.3L47 29.9l2 3.8 1 3.4.3 1h.7v-.5l.5-7.2 1-8.7 1-11.2.3-3.2 1.6-3.8 3-2L61 2.6l2 2.9-.3 1.8-1.1 7.7L59 27.1l-1.5 8.2h.9l1-1.1 4.1-5.4 6.9-8.6 3-3.5L77 13l2.3-1.8h4.3l3.1 4.7-1.4 4.9-4.4 5.6-3.7 4.7-5.3 7.1-3.2 5.7.3.4h.7l12-2.6 6.4-1.1 7.6-1.3 3.5 1.6.4 1.6-1.4 3.4-8.2 2-9.6 2-14.3 3.3-.2.1.2.3 6.4.6 2.8.2h6.8l12.6 1 3.3 2 1.9 2.7-.3 2-5.1 2.6-6.8-1.6-16-3.8-5.4-1.3h-.8v.4l4.6 4.5 8.3 7.5L89 80.1l.5 2.4-1.3 2-1.4-.2-9.2-7-3.6-3-8-6.8h-.5v.7l1.8 2.7 9.8 14.7.5 4.5-.7 1.4-2.6 1-2.7-.6-5.8-8-6-9-4.7-8.2-.5.4-2.9 30.2-1.3 1.5-3 1.2-2.5-2-1.4-3 1.4-6.2 1.6-8 1.3-6.4 1.2-7.9.7-2.6v-.2H49L43 72l-9 12.3-7.2 7.6-1.7.7-3-1.5.3-2.8L24 86l10-12.8 6-7.9 4-4.6-.1-.5h-.3L17.2 77.4l-4.7.6-2-2 .2-3 1-1 8-5.5Z"></path>
+    </symbol>
+  </svg>
+
+  <div id="panel-backdrop" onclick="closeAllPanels()"></div>
+  <div id="toast-container"></div>
+
+  <div id="global-loader">
+    <div class="loader-logo-wrap">
+      <svg class="loader-star" viewBox="0 0 200 100" fill="currentColor"><use href="#brand-star"></use></svg>
+      <div class="loader-ring"></div>
+    </div>
+    <div class="loader-text" id="loader-text">载入中…</div>
+  </div>
+
+  <div id="auth-view">
+    <div class="auth-logo-wrap">
+      <svg class="claude-star large" viewBox="0 0 200 100" fill="currentColor"><use href="#brand-star"></use></svg>
+      <div class="title" id="auth-title">言叶之庭</div>
+    </div>
+
+    <div class="lang-selector" id="auth-lang-selector">
+      <button class="lang-btn active" onclick="setLang('zh-CN')">简体中文</button>
+      <button class="lang-btn" onclick="setLang('en')">English</button>
+      <button class="lang-btn" onclick="setLang('ja')">日本語</button>
+      <button class="lang-btn" onclick="setLang('ko')">한국어</button>
+    </div>
+
+    <div class="auth-card" id="main-auth-card">
+      <div class="auth-tabs">
+        <span class="auth-tab active" id="tab-email" onclick="switchAuthType('email')">邮箱验证</span>
+        <span class="auth-tab" id="tab-user" onclick="switchAuthType('username')">邀请码注册</span>
+      </div>
+      <input type="text" id="auth-account" placeholder="输入邮箱 (或管理员 admin)">
+      <input type="password" id="auth-pwd" placeholder="设置密码（至少6位）">
+      <input type="text" id="auth-invite" placeholder="输入收到的邀请码" style="display:none; border-color: var(--brand);">
+      <div id="recaptcha-container" style="display:none; margin: 0 auto 15px auto; transform: scale(0.95); transform-origin: center;">
+        <div class="g-recaptcha" data-sitekey="6LdjI7MsAAAAAKdB1F1MLbTAtYwzwBGVvNXk5khz"></div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;" id="auth-submit-btn" onclick="handleAuth()">登 录</button>
+      <button class="auth-toggle" id="auth-toggle-btn" onclick="toggleAuthMode()">没有账号？点击注册</button>
+    </div>
+
+    <div class="auth-card" id="otp-auth-card" style="display:none;">
+      <h3 style="margin-bottom:10px;">信件验证</h3>
+      <p style="font-size:12px; color:var(--sub); margin-bottom:18px;">已向该邮箱发送验证信件</p>
+      <input type="text" id="auth-otp-input" placeholder="输入邮件验证码" maxlength="10" style="text-align:center; font-size:20px; letter-spacing:5px; font-family: monospace;">
+      <button class="btn btn-primary" style="width:100%;" onclick="verifyOtpCode()">验证并登入</button>
+      <button class="auth-toggle" onclick="cancelOtpMode()">返回重试</button>
+    </div>
+  </div>
+
+  <audio id="bg-music" src="bgm.mp3" loop preload="auto"></audio>
+  <audio id="bg-music-intense" src="bgm_intense.mp3" loop preload="auto"></audio>
+
+  <div class="container" id="home-view" style="display:none;">
+    <div class="header">
+      <svg class="claude-star" viewBox="0 0 200 100" fill="currentColor"><use href="#brand-star"></use></svg>
+      <div class="title" data-i18n="app_name">言叶之庭</div>
+    </div>
+
+    <div class="welcome">
+      <h2 data-i18n-template="welcome">欢迎回来，<span id="home-username">Learner</span></h2>
+      <p data-i18n="welcome_sub">静下心来，开启今日修习</p>
+    </div>
+
+    <div class="stats-card">
+      <div class="stat-item"><div class="num" id="stat-streak">0</div><div class="label" data-i18n="stat_streak">连续天数</div></div>
+      <div class="stat-item"><div class="num" id="stat-total">0</div><div class="label" data-i18n="stat_total">题库总量</div></div>
+      <div class="stat-item"><div class="num" id="stat-acc">0%</div><div class="label" data-i18n="stat_acc">正确率</div></div>
+    </div>
+
+    <div class="chart-card" id="chart-section">
+      <div class="chart-header">
+        <span class="chart-title" data-i18n="chart_title">近期正确率走势</span>
+        <div class="chart-legend">
+          <span><span class="legend-dot" style="background:var(--color-green)"></span><span data-i18n="legend_correct">正确</span></span>
+          <span><span class="legend-dot" style="background:var(--color-red)"></span><span data-i18n="legend_wrong">错误</span></span>
+        </div>
+      </div>
+      <svg id="accuracy-chart-svg" viewBox="0 0 340 70" preserveAspectRatio="none"></svg>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="openPanel('setup-panel')" data-i18n="btn_start">进入学习</button>
+      <button class="btn btn-outline" id="btn-resume-learn" style="display:none;" onclick="resumeLearning()" data-i18n="btn_resume">继续上次进度</button>
+      <button class="btn btn-outline" onclick="openPanel('settings')" data-i18n="btn_settings">系统设定</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title" data-i18n="recent_title">最近接触</div>
+      <div id="recent-groups-list">
+        <div class="recent-item" style="color:var(--sub-light); text-align:center;" data-i18n="no_recent">暂无记录</div>
+      </div>
+    </div>
+
+    <div class="calendar">
+      <div class="calendar-title" data-i18n="cal_title">近期活跃 (最近14天)</div>
+      <div class="calendar-dots" id="home-calendar"></div>
+    </div>
+
+    <div class="lang-selector" style="padding-bottom:20px;">
+      <button class="lang-btn active" id="home-lang-zh" onclick="setLang('zh-CN')">中</button>
+      <button class="lang-btn" id="home-lang-en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="home-lang-ja" onclick="setLang('ja')">日</button>
+      <button class="lang-btn" id="home-lang-ko" onclick="setLang('ko')">한</button>
+    </div>
+  </div>
+
+  <div id="dynamic-controls-pool" style="display:none;">
+    <button class="btn btn-outline" onclick="toggleResourceCenter(true)" style="width:100%; margin-bottom:20px;">浏览共享资源中心</button>
+
+    <div class="sr-module">
+      <div class="sr-module-header">
+        <span class="sr-module-title">间隔重复记忆</span>
+        <label class="switch"><input type="checkbox" id="sr-toggle" onchange="toggleSR()"><span class="slider"></span></label>
+      </div>
+      <p class="sr-module-desc">开启后：错题高频复现。掌握的词条今天隐身，明天重现以检验长期记忆。</p>
+      <label class="set-label">掌握阈值</label>
+      <div class="custom-select-wrapper" id="cw-mastery">
+        <div class="custom-select-display" onclick="toggleCustomSelect('cs-mastery')">5 次连续正确</div>
+        <div class="custom-select-dropdown" id="cs-mastery">
+          <div class="custom-option" onclick="selectOption('cw-mastery','3','3 次连续正确',updateMasteryThresh)">3 次连续正确</div>
+          <div class="custom-option selected" onclick="selectOption('cw-mastery','5','5 次连续正确',updateMasteryThresh)">5 次连续正确</div>
+          <div class="custom-option" onclick="selectOption('cw-mastery','8','8 次连续正确',updateMasteryThresh)">8 次连续正确</div>
+        </div>
+        <input type="hidden" id="mastery-val" value="5">
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:10px; color:var(--sub);">
+        <span>掌握: <b id="sr-count-mastered" style="color:var(--text);">0</b></span>
+        <span>学习: <b id="sr-count-learning" style="color:var(--text);">0</b></span>
+        <span>强化: <b id="sr-count-hard" style="color:var(--text);">0</b></span>
+      </div>
+      <button onclick="resetAllSRStats()" style="width:100%; padding:9px; background:transparent; color:var(--sub); border:none; font-size:12px; margin-top:10px; text-decoration:underline; cursor:pointer;">清空所有记忆数据</button>
+    </div>
+
+    <label class="set-label">选择词库</label>
+    <div style="display:flex; gap:8px; margin-bottom:8px;">
+      <button onclick="checkAllGroups(true)" style="padding:5px 12px; background:var(--card); border:1px solid var(--border); border-radius:7px; font-size:12px; color:var(--text); cursor:pointer;">全选</button>
+      <button onclick="checkAllGroups(false)" style="padding:5px 12px; background:var(--card); border:1px solid var(--border); border-radius:7px; font-size:12px; color:var(--text); cursor:pointer;">全不选</button>
+    </div>
+    <div class="cb-group-container" id="cb-group-list"></div>
+    <button onclick="deleteLocalGroups()" style="width:100%; padding:9px; border:1px solid var(--border); background:transparent; color:var(--sub); border-radius:10px; font-size:13px; margin-bottom:12px; cursor:pointer;">删除选中的词库</button>
+
+    <label class="set-label">题型过滤</label>
+    <div class="custom-select-wrapper" id="cw-mode">
+      <div class="custom-select-display" onclick="toggleCustomSelect('cs-mode')">随机全部</div>
+      <div class="custom-select-dropdown" id="cs-mode">
+        <div class="custom-option selected" onclick="selectOption('cw-mode','all','随机全部',null)">随机全部</div>
+        <div class="custom-option" onclick="selectOption('cw-mode','wrong','仅限错题本',null)">仅限错题本</div>
+        <div class="custom-option" onclick="selectOption('cw-mode','sr_hard','仅待强化',null)">仅待强化</div>
+        <div class="custom-option" onclick="selectOption('cw-mode','sr_mastered','仅已掌握',null)">仅已掌握词条</div>
+        <div class="custom-option" onclick="selectOption('cw-mode','word','仅单纯字词',null)">仅单纯字词</div>
+        <div class="custom-option" onclick="selectOption('cw-mode','note','仅文言注释',null)">仅文言注释</div>
+        <div class="custom-option" onclick="selectOption('cw-mode','poem','仅古诗长句',null)">仅古诗长句</div>
+      </div>
+      <input type="hidden" id="mode-val" value="all">
+    </div>
+
+    <div class="divider"></div>
+
+    <label class="set-label">导入私密数据</label>
+    <p style="font-size:11px; color:var(--sub); margin:0 0 8px 0; line-height:1.5;">JSON: <code>[{"q":"题","a":"答","cat":"类"}]</code></p>
+    <input type="text" id="upload-group" placeholder="输入分组名，如：期中考试词汇" value="默认分组">
+    <textarea id="jsonInput" rows="4" placeholder="粘贴 JSON 数组..."></textarea>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <button onclick="upload('merge')" class="btn btn-outline" style="padding:11px; font-size:14px;">增量合并</button>
+      <button onclick="upload('cover')" class="btn btn-primary" style="padding:11px; font-size:14px;">清空覆盖</button>
+    </div>
+  </div>
+
+  <div class="side-panel" id="setup-panel">
+    <div class="panel-header">
+      <h2>学习配置</h2>
+      <button class="close-btn" onclick="closeAllPanels()">×</button>
+    </div>
+    <div id="setup-anchor" style="flex:1; overflow-y:auto;"></div>
+    <button class="btn btn-primary" onclick="startNewLearning()" style="width:100%; margin-top:16px; flex-shrink:0;">开 始</button>
+  </div>
+
+  <div class="side-panel left-side" id="wrong-sidebar">
+    <div class="panel-header">
+      <h2>错题本</h2>
+      <button class="close-btn" onclick="closeAllPanels()">×</button>
+    </div>
+    <div style="flex:1; overflow-y:auto; margin-bottom:16px;" id="wrong-list"></div>
+    <div style="display:flex; flex-direction:column; gap:8px; flex-shrink:0;">
+      <button class="btn btn-outline" onclick="clearWrongs()" style="padding:11px; font-size:13px;">清空记录</button>
+      <button class="btn btn-primary" onclick="exportWrongs()" style="padding:11px; font-size:13px;">导出为文本</button>
+    </div>
+  </div>
+
+  <div id="learning-view" style="display:none; width:100vw; height:100vh; position:fixed; inset:0; align-items:center; justify-content:center; background:var(--bg); z-index:50;">
+    <div class="main-card">
+      <div class="progress-wrap">
+        <div id="mastery-bar"></div>
+        <div id="progress-bar"></div>
+      </div>
+
+      <div id="finish-overlay">
+        <canvas id="confetti-canvas"></canvas>
+        <div class="finish-star-wrap">
+          <svg id="finish-star" class="claude-star large" viewBox="0 0 200 100" fill="currentColor"><use href="#brand-star"></use></svg>
+        </div>
+        <h2 id="finish-title">完成挑战</h2>
+        <p id="session-stats" style="color:var(--sub); font-weight:500; font-size:14px; margin-bottom:16px;">正确 0 | 错误 0</p>
+        <div class="mastery-breakdown" id="mastery-breakdown" style="display:none;"></div>
+        <p id="zen-quote-text" style="font-family:var(--font-cn-title); color:var(--sub); padding:0 28px; line-height:1.7; margin-bottom:32px; font-size:15px;">--</p>
+        <div style="display:flex; flex-direction:column; gap:10px; width:80%; max-width:220px;">
+          <button class="btn btn-primary" onclick="restartSession()" style="padding:13px;">再来一轮</button>
+          <button class="btn btn-outline" onclick="pauseLearning()" style="padding:13px;">返回首页</button>
+        </div>
+      </div>
+
+      <div class="learn-nav">
+        <span id="home-return-btn" onclick="pauseLearning()">返回</span>
+        <span onclick="openPanel('wrong-sidebar')">错题</span>
+        <span id="mode-toggle-btn" onclick="toggleAppMode()">休闲</span>
+        <span id="streak-badge">–</span>
+        <span id="count-info">0</span>
+        <span onclick="peekHint()">提示</span>
+        <span onclick="openSettingsFromLearning()">配置</span>
+      </div>
+
+      <div class="quiz-box">
+        <svg class="quiz-logo-mark" viewBox="0 0 200 100" fill="currentColor"><use href="#brand-star"></use></svg>
+        <div id="q-cat">READY</div>
+        <div id="q-text">等待开始...</div>
+      </div>
+
+      <div class="canvas-area">
+        <div class="grid-bg"></div>
+        <div class="canvas-logo-mark">
+          <svg viewBox="0 0 200 100" fill="currentColor"><use href="#brand-star"></use></svg>
+        </div>
+        <div id="ghost-hint"></div>
+        <div id="intense-timer"></div>
+        <canvas id="board"></canvas>
+      </div>
+
+      <div class="kbd-hints">
+        <span><span class="kbd">Space</span> 核对</span>
+        <span><span class="kbd">Y</span> 正确</span>
+        <span><span class="kbd">N</span> 错误</span>
+        <span><span class="kbd">→</span> 跳过</span>
+      </div>
+
+      <div class="learn-footer">
+        <button onclick="clearBoard()">清空</button>
+        <button onclick="undoDraw()">撤销</button>
+        <button id="eraser-btn" onclick="toggleEraser()">画笔</button>
+        <button class="btn-main" onclick="showAns(true)">核对答案</button>
+        <button onclick="skipQ()">跳过</button>
+      </div>
+    </div>
+
+    <div id="ans-pop">
+      <span style="font-size:11px; color:var(--sub-light); display:block; margin-bottom:10px;">核对结果</span>
+      <div id="ans-text">--</div>
+      <div id="item-sr-stats"></div>
+      <div class="ans-btn-group">
+        <button class="judge-btn btn-no" onclick="mark(false)">记错</button>
+        <button class="judge-btn btn-yes" onclick="mark(true)">正确</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="side-panel" id="resource-center">
+    <div class="panel-header">
+      <h2>共享资源中心</h2>
+      <button class="close-btn" onclick="closeAllPanels()">×</button>
+    </div>
+    <button class="btn btn-primary" onclick="openPanel('upload-modal')" style="width:100%; margin-bottom:16px;">分享我的题库</button>
+    <div id="rc-list" class="rc-grid"></div>
+  </div>
+
+  <div class="side-panel" id="upload-modal" style="z-index:2500;">
+    <div class="panel-header">
+      <h2>分享题库</h2>
+      <button class="close-btn" onclick="openPanel('resource-center')">×</button>
+    </div>
+    <label class="set-label">题库标题</label>
+    <input type="text" id="rc-up-title" placeholder="例如：人教版九年级语文下册">
+    <label class="set-label">简介描述</label>
+    <textarea id="rc-up-desc" rows="2" placeholder="简单介绍一下..."></textarea>
+    <label class="set-label">封面图片</label>
+    <div class="file-upload-wrapper">
+      <input type="file" id="rc-up-file" accept="image/*" onchange="handleLocalImage(event)">
+      <div class="file-upload-btn" id="rc-up-file-label">点击选取图片</div>
+    </div>
+    <input type="hidden" id="rc-up-cover-base64">
+    <label class="set-label">JSON 数据</label>
+    <textarea id="rc-up-json" rows="4" placeholder="粘贴 JSON 数组..."></textarea>
+    <button class="btn btn-primary" onclick="submitResource()" style="width:100%; margin-top:8px;">确认发布</button>
+  </div>
+
+  <div class="side-panel" id="settings">
+    <div class="panel-header">
+      <h2>系统设定</h2>
+      <button class="close-btn" onclick="closeAllPanels()">×</button>
+    </div>
+
+    <div id="admin-panel">
+      <h4 style="margin:0 0 12px 0; color:var(--brand); font-weight:500;">邀请码管理</h4>
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <button onclick="generateInviteCodeToDB()" class="btn btn-primary" style="flex:1; padding:9px; font-size:13px;">生成 1 个</button>
+        <button onclick="fetchInviteCodesAdmin()" class="btn btn-outline" style="padding:9px; font-size:13px;">刷新</button>
+      </div>
+      <div id="admin-codes" style="font-size:12px; max-height:180px; overflow-y:auto;"></div>
+    </div>
+
+    <div style="text-align:center; padding-bottom:18px; border-bottom:1px solid var(--border); margin-bottom:18px;">
+      <span id="user-info-text" style="font-size:13px; color:var(--sub); display:block; margin-bottom:12px;">未登录</span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline" onclick="logoutAccount()" style="flex:1; padding:11px; font-size:13px;">退出登录</button>
+        <button class="btn btn-outline" onclick="deleteAccount()" style="flex:1; padding:11px; font-size:13px; color:var(--color-red); border-color:var(--color-red);">注销账号</button>
+      </div>
+    </div>
+
+    <button id="fullscreen-btn" class="btn btn-outline" onclick="toggleFullScreen()" style="width:100%; margin-bottom:20px;">开启全屏模式</button>
+
+    <label class="set-label">界面语言</label>
+    <div class="lang-selector" style="margin-bottom:20px; justify-content:flex-start;">
+      <button class="lang-btn active" id="settings-lang-zh" onclick="setLang('zh-CN')">简体中文</button>
+      <button class="lang-btn" id="settings-lang-en" onclick="setLang('en')">English</button>
+      <button class="lang-btn" id="settings-lang-ja" onclick="setLang('ja')">日本語</button>
+      <button class="lang-btn" id="settings-lang-ko" onclick="setLang('ko')">한국어</button>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <span style="font-size:14px; font-weight:500;">背景音乐</span>
+      <label class="switch"><input type="checkbox" id="bgm-toggle" onchange="toggleBGM()"><span class="slider"></span></label>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <span style="font-size:14px; font-weight:500;">双击清空画板</span>
+      <label class="switch"><input type="checkbox" id="dblclick-toggle" onchange="toggleDblClick()"><span class="slider"></span></label>
+    </div>
+
+    <label class="set-label">激烈模式限时</label>
+    <div class="custom-select-wrapper" id="cw-time">
+      <div class="custom-select-display" onclick="toggleCustomSelect('cs-time')">每题 8 秒</div>
+      <div class="custom-select-dropdown" id="cs-time">
+        <div class="custom-option" onclick="selectOption('cw-time','5','每题 5 秒',changeIntenseTime)">每题 5 秒</div>
+        <div class="custom-option selected" onclick="selectOption('cw-time','8','每题 8 秒',changeIntenseTime)">每题 8 秒</div>
+        <div class="custom-option" onclick="selectOption('cw-time','12','每题 12 秒',changeIntenseTime)">每题 12 秒</div>
+      </div>
+      <input type="hidden" id="time-val" value="8">
+    </div>
+
+    <div class="divider"></div>
+    <div id="settings-anchor"></div>
+  </div>
+  <script src="js/01-i18n.js"></script>
+  <script src="js/02-config.js"></script>
+  <script src="js/03-state.js"></script>
+  <script src="js/04-ui.js"></script>
+  <script src="js/05-memory.js"></script>
+  <script src="js/06-stats.js"></script>
+  <script src="js/07-audio-canvas.js"></script>
+  <script src="js/08-auth.js"></script>
+  <script src="js/09-learning.js"></script>
+  <script src="js/10-resources.js"></script>
+  <script src="js/11-settings.js"></script>
+  <script src="js/12-app.js"></script>
+</body>
+</html>
