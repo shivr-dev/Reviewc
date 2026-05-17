@@ -22,7 +22,7 @@
       const listDiv = document.getElementById('rc-list'); if (!listDiv) return;
       listDiv.innerHTML = '<p style="color:var(--sub);font-size:14px;grid-column:1/-1;text-align:center;">读取中...</p>';
       try {
-        const { data, error } = await supabase.from('resource_center').select('*').order('created_at', { ascending: false });
+        const { data, error } = await db().from('resource_center').select('*').order('created_at', { ascending: false });
         if (error) throw error;
         resourceData = data || [];
         renderResources();
@@ -53,7 +53,7 @@
       let jsonData = []; try { jsonData = JSON.parse(jsonText); if (!Array.isArray(jsonData)) throw new Error("JSON 必须是数组格式"); } catch (e) { return showToast("JSON 格式有误: " + e.message); }
       showLoading("上传中...");
       try {
-        const { error } = await supabase.from('resource_center').insert({ title, description: desc, cover_url: cover, json_data: jsonData, uploader_id: currentUser.id, uploader_email: currentUser.email });
+        const { error } = await db().from('resource_center').insert({ title, description: desc, cover_url: cover, json_data: jsonData, uploader_id: currentUser.id, uploader_email: currentUser.email });
         if (error) throw error;
         showToast("发布成功", "success");
         titEl.value = ''; if (desEl) desEl.value = ''; jsnEl.value = '';
@@ -67,7 +67,7 @@
       showLoading("合并中...");
       try {
         const dataToInsert = res.json_data.map(item => { const ci = { ...item, group_name: groupName, user_id: currentUser.id }; delete ci.id; delete ci.created_at; return ci; });
-        const { error } = await supabase.from('dictation_items').insert(dataToInsert);
+        const { error } = await db().from('dictation_items').insert(dataToInsert);
         if (error) throw error;
         showToast(`成功导入 ${dataToInsert.length} 个词条！`, "success");
         await sync(); renderResources();
@@ -78,7 +78,7 @@
       if (!confirm("确定要删除这个分享吗？")) return;
       showLoading("删除中...");
       try {
-        const { error } = await supabase.from('resource_center').delete().eq('id', id);
+        const { error } = await db().from('resource_center').delete().eq('id', id);
         if (error) throw error;
         fetchResources();
       } catch (e) { showToast("删除失败: " + e.message); }
@@ -94,10 +94,10 @@
         const data = JSON.parse(input).map(item => ({ ...item, group_name: groupName, user_id: currentUser.id }));
         if (mode === 'cover') {
           if (!confirm("确定清空云端该分组所有词条并覆盖？")) return;
-          await supabase.from('dictation_items').delete().eq('user_id', currentUser.id).eq('group_name', groupName);
+          await db().from('dictation_items').delete().eq('user_id', currentUser.id).eq('group_name', groupName);
         }
         showLoading("数据写入中...");
-        await supabase.from('dictation_items').insert(data);
+        await db().from('dictation_items').insert(data);
         showToast("同步成功", "success");
         jip.value = ''; closeAllPanels(); sync();
       } catch (e) {

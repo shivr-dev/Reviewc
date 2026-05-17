@@ -27,9 +27,9 @@
       showLoading("身份核实中...");
       if (account.toLowerCase() === 'admin') {
         account = 'admin@yanye.com'; authType = 'email';
-        const { data, error } = await supabase.auth.signInWithPassword({ email: account, password: pwd });
+        const { data, error } = await db().auth.signInWithPassword({ email: account, password: pwd });
         if (error) {
-          const regRes = await supabase.auth.signUp({ email: account, password: pwd });
+          const regRes = await db().auth.signUp({ email: account, password: pwd });
           if (regRes.data?.session === null) { hideLoading(); showToast("检测到创建 admin，请去后台关闭 Confirm email"); return; }
           loginSuccess(regRes.data?.user); return;
         }
@@ -44,13 +44,13 @@
         if (isRegisterMode) {
           if (authType === 'username') {
             if (!inviteCode) throw new Error("邀请码为必填项");
-            const { data: codeData, error: codeErr } = await supabase.from('invitation_codes').select('*').eq('code', inviteCode).single();
+            const { data: codeData, error: codeErr } = await db().from('invitation_codes').select('*').eq('code', inviteCode).single();
             if (codeErr || !codeData || codeData.is_used) throw new Error("邀请码无效或已被使用");
           }
-          const { data, error } = await supabase.auth.signUp({ email: finalEmail, password: pwd });
+          const { data, error } = await db().auth.signUp({ email: finalEmail, password: pwd });
           if (error) throw error;
           if (authType === 'username') {
-            await supabase.from('invitation_codes').update({ is_used: true, used_by: account }).eq('code', inviteCode);
+            await db().from('invitation_codes').update({ is_used: true, used_by: account }).eq('code', inviteCode);
             loginSuccess(data.user);
           } else if (data.session === null) {
             hideLoading(); pendingAuthEmail = finalEmail;
@@ -58,7 +58,7 @@
             document.getElementById('otp-auth-card').style.display = 'block';
           } else loginSuccess(data.user);
         } else {
-          const { data, error } = await supabase.auth.signInWithPassword({ email: finalEmail, password: pwd });
+          const { data, error } = await db().auth.signInWithPassword({ email: finalEmail, password: pwd });
           if (error) throw error;
           loginSuccess(data.user);
         }
@@ -73,7 +73,7 @@
       if (!token || token.length < 5) return showToast("请输入完整的验证码");
       showLoading("核验代码...");
       try {
-        const { data, error } = await supabase.auth.verifyOtp({ email: pendingAuthEmail, token, type: 'signup' });
+        const { data, error } = await db().auth.verifyOtp({ email: pendingAuthEmail, token, type: 'signup' });
         if (error) throw error;
         loginSuccess(data.user);
       } catch (e) {
@@ -113,7 +113,7 @@
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       let code = ''; for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
       try {
-        const { error } = await supabase.from('invitation_codes').insert({ code, created_by: currentUser.id });
+        const { error } = await db().from('invitation_codes').insert({ code, created_by: currentUser.id });
         if (error) throw error;
         fetchInviteCodesAdmin();
       } catch (e) { showToast("生成失败: " + e.message); }
@@ -123,7 +123,7 @@
       const div = document.getElementById('admin-codes'); if (!div) return;
       div.innerHTML = "读取中...";
       try {
-        const { data, error } = await supabase.from('invitation_codes').select('*').order('created_at', { ascending: false });
+        const { data, error } = await db().from('invitation_codes').select('*').order('created_at', { ascending: false });
         if (error) throw error;
         div.innerHTML = data.map(c => `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 4px;border-bottom:1px dashed var(--border);"><div><strong style="color:${c.is_used ? 'var(--sub)' : 'var(--color-green)'};letter-spacing:1px;font-size:13px;">${c.code}</strong><div style="font-size:11px;margin-top:3px;color:var(--sub);">${c.is_used ? ('已用: ' + c.used_by) : '全新可用'}</div></div><button onclick="invalidateInviteCode('${c.code}','${c.used_by || ''}')" style="background:transparent;border:1px solid var(--color-red);color:var(--color-red);border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;">作废</button></div>`).join('');
       } catch (e) { div.innerHTML = "读取失败: " + e.message; }
@@ -132,7 +132,7 @@
       if (!confirm(`确定要作废该邀请码并处理关联用户吗？`)) return;
       showLoading("处理中...");
       try {
-        const { error } = await supabase.rpc('admin_delete_invite_and_user', { target_code: code, target_username: usedBy });
+        const { error } = await db().rpc('admin_delete_invite_and_user', { target_code: code, target_username: usedBy });
         if (error) throw error;
         showToast("执行成功", "success");
         fetchInviteCodesAdmin();
@@ -142,7 +142,7 @@
     async function logoutAccount() {
       showLoading("切断...");
       try {
-        await supabase.auth.signOut();
+        await db().auth.signOut();
         for (let key in localStorage) if (key.startsWith('sb-')) localStorage.removeItem(key);
         window.location.reload();
       } catch { window.location.reload(); }
@@ -152,7 +152,7 @@
       if (prompt("输入【确认注销】：") !== "确认注销") return showToast("已中止。");
       showLoading("销毁中...");
       try {
-        const { error } = await supabase.rpc('delete_user');
+        const { error } = await db().rpc('delete_user');
         if (error) throw error;
         showToast("数据已抹除", "success");
         await logoutAccount();
@@ -164,7 +164,7 @@
 
     async function syncAndGoHome() {
       showLoading("同步词库数据...");
-      const { data } = await supabase.from('dictation_items').select('*');
+      const { data } = await db().from('dictation_items').select('*');
       all = data || [];
       updateGroupSelect(); hideLoading();
       document.getElementById('learning-view').style.display = 'none';
@@ -175,7 +175,7 @@
     }
     async function sync() {
       showLoading("更新数据...");
-      const { data } = await supabase.from('dictation_items').select('*');
+      const { data } = await db().from('dictation_items').select('*');
       all = data || [];
       updateGroupSelect();
       updateHomeStats();

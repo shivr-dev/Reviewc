@@ -68,7 +68,7 @@
       if (!confirm(`确定要彻底删除以下 ${selected.length} 个词库吗？`)) return;
       showLoading("清理中...");
       try {
-        const { error } = await supabase.from('dictation_items').delete().eq('user_id', currentUser.id).in('group_name', selected);
+        const { error } = await db().from('dictation_items').delete().eq('user_id', currentUser.id).in('group_name', selected);
         if (error) throw error;
         sync();
       } catch (e) { showToast("删除失败：" + e.message); }

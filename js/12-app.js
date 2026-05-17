@@ -1,6 +1,13 @@
     window.onload = async () => {
       setLang(currentLang);
-      const { data: { session } } = await supabase.auth.getSession();
+      const sb = initSupabase();
+      if (!sb) {
+        hideLoading();
+        document.getElementById('auth-view').style.display = 'flex';
+        showToast('数据库 SDK 加载失败，请刷新或检查网络');
+        return;
+      }
+      const { data: { session } } = await sb.auth.getSession();
       if (session && session.user) loginSuccess(session.user);
       else { hideLoading(); document.getElementById('auth-view').style.display = 'flex'; }
 
